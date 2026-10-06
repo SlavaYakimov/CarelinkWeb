@@ -17,6 +17,8 @@ export type GatewayRequestContext = {
   idempotencyKey?: string;
   userRefreshHeader?: boolean;
   deviceSessionHeader?: boolean;
+  /** Pre-session device verify (sign-in complete before Redis session exists). */
+  deviceSession?: string;
 };
 
 export type GatewayRequestInit = {
@@ -166,8 +168,10 @@ export async function gatewayFetch<T = unknown>(
     if (ctx.userRefreshHeader && session?.userRefresh) {
       headers['X-User-Refresh'] = session.userRefresh;
     }
-    if (ctx.deviceSessionHeader && session?.deviceSession) {
-      headers['X-Device-Session'] = session.deviceSession;
+    const deviceSession =
+      ctx.deviceSession ?? (ctx.deviceSessionHeader ? session?.deviceSession : undefined);
+    if (deviceSession) {
+      headers['X-Device-Session'] = deviceSession;
     }
     if (ctx.deviceId) headers['X-Device-Id'] = ctx.deviceId;
     if (ctx.idempotencyKey) headers['Idempotency-Key'] = ctx.idempotencyKey;

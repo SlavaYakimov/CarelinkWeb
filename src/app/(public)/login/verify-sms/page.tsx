@@ -1,12 +1,25 @@
+import { VerifySmsForm } from '@/components/carelink/VerifySmsForm';
+import { maskRuPhoneE164 } from '@/lib/phone';
 import { requireSignInFlow } from '@/server/flows/signin-flow';
+import { sanitizeNextParam } from '@/server/security/next-param';
 
-/** Placeholder shell for W-05 — ensures flow cookie is valid before SMS step. */
-export default async function VerifySmsPlaceholderPage() {
-  await requireSignInFlow('verify-sms');
+type PageProps = {
+  searchParams: Promise<{ next?: string }>;
+};
+
+export default async function VerifySmsPage({ searchParams }: PageProps) {
+  const { flow } = await requireSignInFlow('verify-sms');
+  const params = await searchParams;
+  const nextPath = sanitizeNextParam(params.next);
+
+  const initialPhoneMasked = flow.phoneE164 ? maskRuPhoneE164(flow.phoneE164) : undefined;
+  const smsAlreadySent = Boolean(flow.smsSentAt && flow.phoneE164);
 
   return (
-    <div className="mx-auto w-full max-w-[440px] rounded-xl border border-dashed border-border bg-card p-6 text-center text-sm text-muted-foreground shadow-card">
-      Подтверждение устройства по SMS (экран 07) — задача W-05.
-    </div>
+    <VerifySmsForm
+      nextPath={nextPath}
+      initialPhoneMasked={initialPhoneMasked}
+      smsAlreadySent={smsAlreadySent}
+    />
   );
 }
