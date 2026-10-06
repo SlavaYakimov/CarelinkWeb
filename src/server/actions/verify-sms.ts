@@ -7,11 +7,7 @@ import { maskRuPhoneE164, normalizeRuPhone } from '@/lib/phone';
 import { GatewayError } from '@/server/gateway/errors';
 import { workspaceSignInRequestSms, workspaceSignInVerifySms } from '@/server/gateway/auth';
 import { finishSignInAfterDeviceVerified } from '@/server/flows/finish-sign-in';
-import {
-  pendingPasswordFromFlow,
-  persistSignInFlow,
-  requireSignInFlow,
-} from '@/server/flows/signin-flow';
+import { persistSignInFlow, requireSignInFlow } from '@/server/flows/signin-flow';
 import { gatewayActionContext } from '@/server/actions/request-context';
 
 const phoneSchema = z.object({
@@ -114,10 +110,6 @@ export async function confirmSignInSmsAction(
   if (!challengeId || !phoneE164) {
     return { error: 'Сначала укажите номер и запросите SMS.' };
   }
-  if (!pendingPasswordFromFlow(flow)) {
-    redirect('/login');
-  }
-
   try {
     const verified = await workspaceSignInVerifySms(
       { challengeId, deviceId, phone: phoneE164, code: parsed.data.code },

@@ -7,12 +7,7 @@ import { isPasswordStrongEnough } from '@/lib/password-rules';
 import { GatewayError } from '@/server/gateway/errors';
 import { workspaceChangePassword } from '@/server/gateway/auth';
 import { gatewayActionContext } from '@/server/actions/request-context';
-import {
-  clearSignInFlow,
-  pendingPasswordFromFlow,
-  requireSignInFlow,
-} from '@/server/flows/signin-flow';
-import { eraseFlowPassword } from '@/server/flows/finish-sign-in';
+import { clearSignInFlow, requireSignInFlow } from '@/server/flows/signin-flow';
 import { sanitizeNextParam } from '@/server/security/next-param';
 import { setSessionCookie } from '@/server/session/cookies';
 import { bindNewSession } from '@/server/session/get-session';
@@ -20,6 +15,7 @@ import { sessionRecordFromAuthResponse } from '@/server/session/from-auth-sessio
 
 const schema = z
   .object({
+    oldPassword: z.string().min(8, 'Не короче 8 символов'),
     newPassword: z.string().min(8, 'Не короче 8 символов'),
     confirmPassword: z.string().min(8),
     next: z.string().optional(),
@@ -34,7 +30,7 @@ const schema = z
   });
 
 export type ChangePasswordState = {
-  fieldErrors?: { newPassword?: string; confirmPassword?: string };
+  fieldErrors?: { oldPassword?: string; newPassword?: string; confirmPassword?: string };
   formError?: string;
 };
 
@@ -43,10 +39,10 @@ export async function changePasswordAction(
   formData: FormData,
 ): Promise<ChangePasswordState> {
   const { fid, flow } = await requireSignInFlow('change-password');
-  const oldPassword = pendingPasswordFromFlow(flow);
-  if (!oldPassword) redirect('/login');
+  if (!flow.challengeId) redirect('/login');
 
   const parsed = schema.safeParse({
+    oldPassword: formData.get('oldPassword'),
     newPassword: formData.get('newPassword'),
     confirmPassword: formData.get('confirmPassword'),
     next: formData.get('next')?.toString(),
@@ -56,35 +52,40 @@ export async function changePasswordAction(
     const flat = parsed.error.flatten().fieldErrors;
     return {
       fieldErrors: {
+        oldPassword: flat.oldPassword?.[0],
         newPassword: flat.newPassword?.[0],
         confirmPassword: flat.confirmPassword?.[0],
       },
     };
   }
 
-  if (parsed.data.newPassword === oldPassword) {
-    return { fieldErrors: { newPassword: 'Не совпадает с временным' } };
+  const { oldPassword, newPassword } = parsed.data;
+  if (newPassword === oldPassword) {
+    return { fieldErrors: { newPassword: 'Новый пароль должен отличаться от временного' } };
   }
 
   const { clientIp, deviceId } = await gatewayActionContext();
   const next = sanitizeNextParam(parsed.data.next);
+
+  if (!flow.deviceSession) {
+    redirect('/login/verify-sms?reason=device-not-verified');
+  }
 
   try {
     const session = await workspaceChangePassword(
       {
         challengeId: flow.challengeId,
         oldPassword,
-        newPassword: parsed.data.newPassword,
+        newPassword,
         deviceId,
       },
       { clientIp, deviceId, deviceSession: flow.deviceSession },
     );
 
-    await eraseFlowPassword(fid, flow);
     const guestMode = flow.trustDevice === false;
     const { sid } = await bindNewSession(
       sessionRecordFromAuthResponse(session, {
-        deviceSession: flow.deviceSession ?? '',
+        deviceSession: flow.deviceSession,
         guestMode,
       }),
       { guestMode },
@@ -99,6 +100,9 @@ export async function changePasswordAction(
       }
       if (err.code === 'TEMP_PASSWORD_EXPIRED') {
         redirect('/login/temp-expired');
+      }
+      if (err.code === 'DEVICE_NOT_VERIFIED') {
+        redirect('/login/verify-sms?reason=device-not-verified');
       }
       return { formError: getErrorMessage(err.code) };
     }

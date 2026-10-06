@@ -1,7 +1,7 @@
 import 'server-only';
 import { redirect } from 'next/navigation';
 import { clearFlowCookie, readFlowCookie, setFlowCookie } from '@/server/session/cookies';
-import { decryptFlowSecret, deleteFlow, loadFlow, saveFlow } from '@/server/session/store';
+import { deleteFlow, loadFlow, saveFlow } from '@/server/session/store';
 import type { FlowRecord } from '@/server/session/types';
 
 export async function readSignInFlow(): Promise<{ fid: string; flow: FlowRecord } | null> {
@@ -28,9 +28,4 @@ export async function clearSignInFlow(fid?: string): Promise<void> {
   const id = fid ?? (await readFlowCookie());
   if (id) await deleteFlow(id);
   await clearFlowCookie();
-}
-
-export function pendingPasswordFromFlow(flow: FlowRecord): string | undefined {
-  if (!flow.pendingPasswordEnc) return undefined;
-  return decryptFlowSecret(flow.pendingPasswordEnc);
 }

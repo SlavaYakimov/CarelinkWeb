@@ -275,9 +275,19 @@ paths:
       tags: [workspace-auth]
       operationId: workspaceSignInRequestDelegatePush
       summary: Ask family keeper to approve device for sign-in
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkspaceDelegatePushRequest'
       responses:
         '200':
           description: Push dispatched to keeper
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeviceVerifySentResponse'
         '403':
           description: DELEGATE_NOT_ALLOWED
 
@@ -345,8 +355,10 @@ paths:
                 $ref: '#/components/schemas/WorkspaceDelegateApproveResponse'
         '401':
           description: UNAUTHORIZED
+        '403':
+          description: DELEGATE_NOT_ALLOWED (authenticated user is not keeper of this family)
         '404':
-          description: NOT_FOUND (wrong keeper or unknown request)
+          description: NOT_FOUND (unknown or expired delegate request)
         '409':
           description: CONFLICT (token already used)
 
@@ -369,6 +381,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkspaceDelegateRejectResponse'
+        '401':
+          description: UNAUTHORIZED
+        '403':
+          description: DELEGATE_NOT_ALLOWED
 
   /auth/workspace/sign-in/delegate-status:
     get:
@@ -605,6 +621,15 @@ paths:
     post:
       tags: [workspace-auth]
       operationId: workspaceChangePassword
+      description: |
+        With `challengeId` (temp password flow), requires prior device verification via SMS/push
+        and header `X-Device-Session` when device gate is enabled.
+      parameters:
+        - in: header
+          name: X-Device-Session
+          schema:
+            type: string
+          description: Opaque device session from verify-sms / verify-link (required for challengeId when DEVICE_GATE_SKIP=false)
       requestBody:
         required: true
         content:
@@ -618,6 +643,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthSessionResponse'
+        '403':
+          description: Device not verified (missing or invalid X-Device-Session)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
 
   /auth/onboarding/email/request:
     post:
@@ -1182,7 +1213,12 @@ components:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
     RateLimit:
-      description: Rate limited
+      description: Rate limited. Response includes `Retry-After` header (seconds until window reset; fallback 60).
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds until the rate-limit window resets
       content:
         application/json:
           schema:
@@ -1233,7 +1269,7 @@ components:
           type: string
         deviceId:
           type: string
-    DelegatePushRequest:
+    WorkspaceDelegatePushRequest:
       type: object
       required: [challengeId, deviceId]
       properties:
@@ -1241,21 +1277,9 @@ components:
           type: string
         deviceId:
           type: string
-    ApproveDelegateRequest:
-      type: object
-      required: [token]
-      properties:
-        token:
+        platform:
           type: string
-    ApproveDelegateResponse:
-      type: object
-      properties:
-        approved:
-          type: boolean
-        challengeId:
-          type: string
-        deviceSession:
-          type: string
+          description: Client platform (web, ios, android, …) shown to keeper
     PairPhoneRequestOTPRequest:
       type: object
       required: [phone]
@@ -1585,12 +1609,13 @@ components:
 
     WorkspaceSignInCompleteRequest:
       type: object
-      required: [challengeId, password, deviceId]
+      required: [challengeId, deviceId]
       properties:
         challengeId:
           type: string
         password:
           type: string
+          description: Optional when the same device already passed workspace sign-in (password verified on challenge).
         deviceId:
           type: string
 
@@ -1618,6 +1643,9 @@ components:
           type: string
         familyName:
           type: string
+        platform:
+          type: string
+          description: Client platform reported at request-delegate-push (e.g. web, ios, android)
         clientDeviceId:
           type: string
         requestedAt:

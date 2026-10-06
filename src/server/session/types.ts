@@ -20,19 +20,20 @@ export type SessionRecord = {
   csrfToken?: string;
 };
 
-export type FlowKind = 'signin' | 'onboarding' | 'join' | 'recovery' | 'invite';
+export type FlowKind = 'signin' | 'onboarding' | 'join' | 'recovery' | 'invite' | 'delegate';
 
 export type FlowRecord = {
   kind: FlowKind;
   step?: string;
   workspaceEmail?: string;
-  verificationChannel?: 'push' | 'sms';
+  verificationChannel?: 'push' | 'sms' | 'delegate';
   displayName?: string;
   phoneE164?: string;
   deviceSession?: string;
   /** From login checkbox — false = guest / «чужой компьютер» (Q6). */
   trustDevice?: boolean;
   smsSentAt?: string;
+  delegatePushSentAt?: string;
   challengeId?: string;
   onboardingChallengeId?: string;
   userId?: string;
@@ -42,7 +43,7 @@ export type FlowRecord = {
   requestId?: string;
   approvalSecret?: string;
   inviteCode?: string;
-  /** Encrypted at rest (AES-GCM blob), max FLOW_TTL — Q5 */
-  pendingPasswordEnc?: string;
+  /** Encrypted delegate-link token for keeper review (kind=delegate). */
+  delegateTokenEnc?: string;
   createdAt: string;
 };
