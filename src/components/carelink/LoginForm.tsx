@@ -113,15 +113,6 @@ export function LoginForm({ nextPath, defaultEmail = '' }: LoginFormProps) {
             <LinkStub>Забыли пароль? Восстановить через семью</LinkStub>
           </p>
 
-          <div className="relative py-2 text-center text-xs text-muted-foreground">
-            <span className="bg-card px-2 uppercase tracking-wide">или</span>
-            <div className="absolute inset-x-0 top-1/2 -z-10 border-t border-border" aria-hidden />
-          </div>
-
-          <Button type="button" variant="secondary" className="w-full" disabled>
-            У меня есть код приглашения
-          </Button>
-
           <p className="text-center text-sm text-muted-foreground">
             <LinkStub>+ Создать новую семью</LinkStub>
           </p>

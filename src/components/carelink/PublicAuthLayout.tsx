@@ -56,8 +56,8 @@ export function PublicAuthLayout({
               Забота, которой можно доверить близких
             </h1>
             <p className="text-sm text-muted-foreground md:text-base">
-              Единое защищённое пространство для связи, напоминаний и поддержки старших
-              родственников — только для вашей семьи.
+              Единое пространство для связи, напоминаний и поддержки старших родственников — только
+              для вашей семьи.
             </p>
           </div>
 
@@ -85,11 +85,6 @@ export function PublicAuthLayout({
               text="Закрытый контур только для ваших родных — без рекламы и сторонних трекеров"
             />
           </ul>
-
-          <p className="mt-auto flex items-center gap-2 text-xs text-muted-foreground">
-            <Shield className="size-3.5 shrink-0" aria-hidden />
-            Шифрование при передаче и хранении · Серверы под контролем команды Carelink
-          </p>
         </aside>
 
         <section className="flex flex-col">
