@@ -1,9 +1,9 @@
 import { redirect } from 'next/navigation';
 import { DelegateApprovalCard } from '@/components/carelink/DelegateApprovalCard';
-import { ErrorScreen } from '@/components/carelink/ErrorScreen';
+import { delegateUnavailablePath } from '@/lib/delegate-errors';
 import { loadDelegateDetailsForKeeper } from '@/server/actions/delegate-approval';
 import { requireDelegateToken, stashDelegateToken } from '@/server/flows/delegate-flow';
-import { GatewayError } from '@/server/gateway/errors';
+import { handleDelegateGatewayError } from '@/server/flows/delegate-errors';
 import { getSession } from '@/server/session/get-session';
 
 type PageProps = {
@@ -12,8 +12,12 @@ type PageProps = {
 
 export default async function DelegatePage({ searchParams }: PageProps) {
   const params = await searchParams;
-  if (params.token) {
-    await stashDelegateToken(params.token);
+  if (params.token !== undefined) {
+    const trimmed = params.token.trim();
+    if (!trimmed) {
+      redirect(delegateUnavailablePath('bad-request'));
+    }
+    await stashDelegateToken(trimmed);
     redirect('/delegate');
   }
 
@@ -37,20 +41,6 @@ export default async function DelegatePage({ searchParams }: PageProps) {
       />
     );
   } catch (err) {
-    if (err instanceof GatewayError) {
-      if (err.code === 'DELEGATE_NOT_ALLOWED' || err.code === 'FORBIDDEN') {
-        redirect('/forbidden');
-      }
-      if (err.status === 410 || err.code === 'DELEGATE_EXPIRED') {
-        return (
-          <ErrorScreen
-            title="Запрос больше не действует"
-            description="Ссылка истекла или уже использована. Попросите участника запросить вход снова."
-            code="RECOVERY_GONE"
-          />
-        );
-      }
-    }
-    throw err;
+    handleDelegateGatewayError(err);
   }
 }
