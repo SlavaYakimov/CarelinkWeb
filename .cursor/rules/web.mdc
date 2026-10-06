@@ -1,0 +1,13 @@
+---
+description: Carelink Web BFF — токены, gateway, безопасность
+alwaysApply: true
+---
+
+# Carelink Web
+
+- Токены, `deviceSession`, `userRefresh` не уходят в клиент и в props client components.
+- Backend URL и вызовы gateway — только `src/server/gateway/*`.
+- Не использовать `/v2/auth/personal/*`.
+- Не логировать тела запросов, пароли, коды, телефоны, cookie, authorization.
+- Endpoint'ы не придумывать — сверяться с CarelinkAuth; иначе «нужен BE-xx» в PR.
+- План: `docs/PLAN.md`.

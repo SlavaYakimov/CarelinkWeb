@@ -1,0 +1,63 @@
+name: web-check
+
+on:
+  push:
+    branches: [main, 'cursor/**']
+  pull_request:
+
+jobs:
+  web-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Prepare CI session encryption key
+        run: |
+          echo "SESSION_ENC_KEY=$(node -e "console.log(Buffer.alloc(32, 9).toString('base64'))")" >> "$GITHUB_ENV"
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Unit tests
+        run: pnpm test
+        env:
+          APP_ENV: development
+          APP_ORIGIN: http://localhost:3000
+          GATEWAY_URL: http://127.0.0.1:8088
+          REDIS_URL: redis://127.0.0.1:6379
+
+      - name: Build
+        run: pnpm build
+        env:
+          APP_ENV: development
+          APP_ORIGIN: http://localhost:3000
+          GATEWAY_URL: http://127.0.0.1:8088
+          REDIS_URL: redis://127.0.0.1:6379
+          COOKIE_SECURE: 'false'
+          COOKIE_PREFIX: ''
+
+      - name: Contract types up to date
+        run: pnpm contracts:check
+
+  gitleaks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
