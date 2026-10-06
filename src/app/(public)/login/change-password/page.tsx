@@ -1,12 +1,16 @@
+import { ChangePasswordForm } from '@/components/carelink/ChangePasswordForm';
 import { requireSignInFlow } from '@/server/flows/signin-flow';
+import { sanitizeNextParam } from '@/server/security/next-param';
 
-/** Placeholder shell for W-06 — change-password step after sign-in. */
-export default async function ChangePasswordPlaceholderPage() {
-  await requireSignInFlow('change-password');
+type PageProps = {
+  searchParams: Promise<{ next?: string }>;
+};
 
-  return (
-    <div className="mx-auto w-full max-w-[440px] rounded-xl border border-dashed border-border bg-card p-6 text-center text-sm text-muted-foreground shadow-card">
-      Смена временного пароля (экран 05) — задача W-06.
-    </div>
-  );
+export default async function ChangePasswordPage({ searchParams }: PageProps) {
+  const { flow } = await requireSignInFlow('change-password');
+  const params = await searchParams;
+  const nextPath = sanitizeNextParam(params.next);
+  const workspaceEmail = flow.workspaceEmail ?? '';
+
+  return <ChangePasswordForm workspaceEmail={workspaceEmail} nextPath={nextPath} />;
 }

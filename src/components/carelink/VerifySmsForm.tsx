@@ -32,7 +32,7 @@ export function VerifySmsForm({
   const [phoneState, sendSms, sending] = useActionState(sendSignInSmsAction, phoneInitial);
   const [otpState, confirmOtp, confirming] = useActionState(confirmSignInSmsAction, otpInitial);
   const [, resendSms, resending] = useActionState(
-    async (prev: VerifySmsPhoneState) => resendSignInSmsAction(),
+    async () => resendSignInSmsAction(),
     phoneInitial,
   );
   const [phoneDisplay, setPhoneDisplay] = React.useState('');

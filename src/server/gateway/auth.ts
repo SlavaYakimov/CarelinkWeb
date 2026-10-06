@@ -13,6 +13,8 @@ type DeviceVerifySmsConfirmRequest = components['schemas']['DeviceVerifySmsConfi
 type DeviceVerifySessionResponse = components['schemas']['DeviceVerifySessionResponse'];
 type WorkspaceSignInCompleteRequest = components['schemas']['WorkspaceSignInCompleteRequest'];
 type WorkspaceSignInCompleteResponse = components['schemas']['WorkspaceSignInCompleteResponse'];
+type WorkspaceChangePasswordRequest = components['schemas']['WorkspaceChangePasswordRequest'];
+type AuthSessionResponse = components['schemas']['AuthSessionResponse'];
 
 export async function workspaceSignIn(
   body: WorkspaceSignInRequest,
@@ -50,6 +52,21 @@ export async function workspaceSignInComplete(
 ): Promise<WorkspaceSignInCompleteResponse> {
   return gatewayFetch(
     { method: 'POST', path: `${V2_AUTH}/workspace/sign-in/complete`, body },
+    {
+      clientIp: ctx.clientIp,
+      deviceId: ctx.deviceId,
+      traceId: ctx.traceId,
+      deviceSession: ctx.deviceSession,
+    },
+  );
+}
+
+export async function workspaceChangePassword(
+  body: WorkspaceChangePasswordRequest,
+  ctx: GatewayCtx,
+): Promise<AuthSessionResponse> {
+  return gatewayFetch(
+    { method: 'POST', path: `${V2_AUTH}/workspace/password/change`, body },
     {
       clientIp: ctx.clientIp,
       deviceId: ctx.deviceId,
