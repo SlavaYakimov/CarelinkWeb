@@ -13,6 +13,14 @@ export function normalizeRuPhone(raw: string): string | null {
   return null;
 }
 
+export function maskRuPhoneE164(e164: string): string {
+  const digits = e164.replace(/\D/g, '');
+  if (digits.length < 11) return e164;
+  const last2 = digits.slice(-2);
+  const mid = digits.slice(1, 4);
+  return `+7 ${mid} ***-**-${last2}`;
+}
+
 export function formatRuPhoneDisplay(raw: string): string {
   const digits = raw.replace(/\D/g, '').slice(0, 11);
   let d = digits;

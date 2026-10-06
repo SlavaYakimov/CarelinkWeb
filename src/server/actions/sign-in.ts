@@ -98,6 +98,7 @@ export async function signInAction(
           step: 'change-password',
           challengeId: response.challengeId,
           workspaceEmail,
+          trustDevice: !guestMode,
           pendingPasswordEnc: encryptFlowSecret(password),
           createdAt: new Date().toISOString(),
         };
@@ -122,6 +123,7 @@ export async function signInAction(
         challengeId: response.challengeId,
         workspaceEmail,
         verificationChannel: channel,
+        trustDevice: !guestMode,
         pendingPasswordEnc: encryptFlowSecret(password),
         createdAt: new Date().toISOString(),
       };

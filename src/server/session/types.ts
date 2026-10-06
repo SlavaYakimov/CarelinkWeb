@@ -28,6 +28,11 @@ export type FlowRecord = {
   workspaceEmail?: string;
   verificationChannel?: 'push' | 'sms';
   displayName?: string;
+  phoneE164?: string;
+  deviceSession?: string;
+  /** From login checkbox — false = guest / «чужой компьютер» (Q6). */
+  trustDevice?: boolean;
+  smsSentAt?: string;
   challengeId?: string;
   onboardingChallengeId?: string;
   userId?: string;
