@@ -10,6 +10,7 @@ import {
 } from '@/server/gateway/auth';
 import { gatewayActionContext } from '@/server/actions/request-context';
 import { clearDelegateFlow, requireDelegateToken } from '@/server/flows/delegate-flow';
+import { handleDelegateGatewayError } from '@/server/flows/delegate-errors';
 import { getSession } from '@/server/session/get-session';
 
 export type DelegateApprovalState = {
@@ -18,8 +19,14 @@ export type DelegateApprovalState = {
 };
 
 export async function loadDelegateDetailsForKeeper(token: string) {
+  const trimmed = token.trim();
+  if (!trimmed) {
+    handleDelegateGatewayError(
+      new GatewayError({ code: 'BAD_REQUEST', status: 400, message: 'BAD_REQUEST' }),
+    );
+  }
   const { clientIp, deviceId } = await gatewayActionContext();
-  return workspaceSignInDelegateDetails(token, { clientIp, deviceId });
+  return workspaceSignInDelegateDetails(trimmed, { clientIp, deviceId });
 }
 
 export async function approveDelegateAction(): Promise<DelegateApprovalState> {
@@ -40,16 +47,7 @@ export async function approveDelegateAction(): Promise<DelegateApprovalState> {
     await clearDelegateFlow(fid);
     return { done: 'approved' };
   } catch (err) {
-    if (err instanceof GatewayError) {
-      if (err.code === 'DELEGATE_NOT_ALLOWED' || err.code === 'FORBIDDEN') {
-        redirect('/forbidden');
-      }
-      if (err.code === 'UNAUTHORIZED') {
-        redirect('/login?next=/delegate');
-      }
-      return { formError: getErrorMessage(err.code) };
-    }
-    throw err;
+    handleDelegateGatewayError(err);
   }
 }
 
@@ -71,15 +69,6 @@ export async function rejectDelegateAction(): Promise<DelegateApprovalState> {
     await clearDelegateFlow(fid);
     return { done: 'rejected' };
   } catch (err) {
-    if (err instanceof GatewayError) {
-      if (err.code === 'DELEGATE_NOT_ALLOWED' || err.code === 'FORBIDDEN') {
-        redirect('/forbidden');
-      }
-      if (err.code === 'UNAUTHORIZED') {
-        redirect('/login?next=/delegate');
-      }
-      return { formError: getErrorMessage(err.code) };
-    }
-    throw err;
+    handleDelegateGatewayError(err);
   }
 }
