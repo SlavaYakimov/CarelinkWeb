@@ -11,6 +11,7 @@ const ACTION_FILES = [
   'keeper-wait.ts',
   'delegate-approval.ts',
   'logout.ts',
+  'create-family.ts',
 ];
 
 const ROUTE_HANDLERS: Array<{ path: string; exempt?: boolean }> = [
