@@ -19,6 +19,7 @@ import { bindNewSession } from '@/server/session/get-session';
 import { sessionRecordFromAuthResponse } from '@/server/session/from-auth-session';
 import { deleteSession, loadSession, newFlowId } from '@/server/session/store';
 import type { FlowRecord } from '@/server/session/types';
+import { withServerAction } from '@/server/session/with-session-handler';
 
 const signInSchema = z.object({
   workspaceEmail: z
@@ -42,7 +43,7 @@ function credentialMessage(): string {
   return 'Неверный логин или пароль';
 }
 
-export async function signInAction(
+async function signInActionImpl(
   _prev: SignInFormState,
   formData: FormData,
 ): Promise<SignInFormState> {
@@ -175,7 +176,7 @@ export async function signInAction(
 }
 
 /** Clears server session and sends user to login (used from session-ended). */
-export async function clearSessionAndRedirectToLogin(): Promise<void> {
+async function clearSessionAndRedirectToLoginImpl(): Promise<void> {
   const sid = await readSessionCookie();
   if (sid) {
     const loaded = await loadSession(sid);
@@ -185,3 +186,6 @@ export async function clearSessionAndRedirectToLogin(): Promise<void> {
   await clearSignInFlow();
   redirect('/login');
 }
+
+export const signInAction = withServerAction(signInActionImpl);
+export const clearSessionAndRedirectToLogin = withServerAction(clearSessionAndRedirectToLoginImpl);

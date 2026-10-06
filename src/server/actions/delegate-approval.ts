@@ -12,13 +12,14 @@ import { gatewayActionContext } from '@/server/actions/request-context';
 import { clearDelegateFlow, requireDelegateToken } from '@/server/flows/delegate-flow';
 import { handleDelegateGatewayError } from '@/server/flows/delegate-errors';
 import { getSession } from '@/server/session/get-session';
+import { withServerAction, withSessionTask } from '@/server/session/with-session-handler';
 
 export type DelegateApprovalState = {
   formError?: string;
   done?: 'approved' | 'rejected';
 };
 
-export async function loadDelegateDetailsForKeeper(token: string) {
+async function loadDelegateDetailsForKeeperImpl(token: string) {
   const trimmed = token.trim();
   if (!trimmed) {
     handleDelegateGatewayError(
@@ -29,7 +30,7 @@ export async function loadDelegateDetailsForKeeper(token: string) {
   return workspaceSignInDelegateDetails(trimmed, { clientIp, deviceId });
 }
 
-export async function approveDelegateAction(): Promise<DelegateApprovalState> {
+async function approveDelegateActionImpl(): Promise<DelegateApprovalState> {
   const sessionCtx = await getSession();
   if (!sessionCtx) {
     redirect('/login?next=/delegate');
@@ -51,7 +52,7 @@ export async function approveDelegateAction(): Promise<DelegateApprovalState> {
   }
 }
 
-export async function rejectDelegateAction(): Promise<DelegateApprovalState> {
+async function rejectDelegateActionImpl(): Promise<DelegateApprovalState> {
   const sessionCtx = await getSession();
   if (!sessionCtx) {
     redirect('/login?next=/delegate');
@@ -72,3 +73,7 @@ export async function rejectDelegateAction(): Promise<DelegateApprovalState> {
     handleDelegateGatewayError(err);
   }
 }
+
+export const loadDelegateDetailsForKeeper = withSessionTask(loadDelegateDetailsForKeeperImpl);
+export const approveDelegateAction = withServerAction(approveDelegateActionImpl);
+export const rejectDelegateAction = withServerAction(rejectDelegateActionImpl);

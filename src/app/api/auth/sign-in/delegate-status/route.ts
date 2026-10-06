@@ -5,9 +5,10 @@ import { interpretDelegateStatus, nextDelegatePollDelayMs } from '@/server/flows
 import { persistSignInFlow, readSignInFlow } from '@/server/flows/signin-flow';
 import { ensureDeviceCookie } from '@/server/session/cookies';
 import { resolveClientIp } from '@/server/security/client-ip';
+import { withRouteHandler } from '@/server/session/with-session-handler';
 import { headers } from 'next/headers';
 
-export async function GET(request: Request) {
+async function getDelegateStatus(request: Request) {
   const url = new URL(request.url);
   const attempt = Math.max(0, Number(url.searchParams.get('attempt') ?? '0') || 0);
 
@@ -63,3 +64,5 @@ export async function GET(request: Request) {
     throw err;
   }
 }
+
+export const GET = withRouteHandler(getDelegateStatus);

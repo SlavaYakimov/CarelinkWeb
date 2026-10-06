@@ -162,7 +162,10 @@ export async function gatewayFetch<T = unknown>(
   try {
     return await gatewayFetchInner<T>(init, ctx);
   } catch (err) {
-    rethrowOrRedirectSessionEnded(err);
+    if (err instanceof SessionEndedError) {
+      await rethrowOrRedirectSessionEnded(err);
+    }
+    throw err;
   }
 }
 

@@ -6,9 +6,10 @@ import { workspaceSignInRequestDelegatePush } from '@/server/gateway/auth';
 import { finishSignInAfterDeviceVerified } from '@/server/flows/finish-sign-in';
 import { persistSignInFlow, requireSignInFlow } from '@/server/flows/signin-flow';
 import { gatewayActionContext } from '@/server/actions/request-context';
+import { withServerAction } from '@/server/session/with-session-handler';
 
 /** Dispatches delegate push to keeper (platform=web). Idempotent per page load. */
-export async function requestKeeperDelegatePushAction(): Promise<{ ok: true } | { error: string }> {
+async function requestKeeperDelegatePushActionImpl(): Promise<{ ok: true } | { error: string }> {
   const { fid, flow } = await requireSignInFlow('keeper-wait');
   const challengeId = flow.challengeId;
   if (!challengeId) redirect('/login');
@@ -36,7 +37,7 @@ export async function requestKeeperDelegatePushAction(): Promise<{ ok: true } | 
   }
 }
 
-export async function completeSignInAfterDelegateAction(next?: string): Promise<void> {
+async function completeSignInAfterDelegateActionImpl(next?: string): Promise<void> {
   const { fid, flow } = await requireSignInFlow('keeper-wait');
   if (!flow.deviceSession) redirect('/login/keeper');
   await finishSignInAfterDeviceVerified(fid, flow, {
@@ -44,3 +45,10 @@ export async function completeSignInAfterDelegateAction(next?: string): Promise<
     next,
   });
 }
+
+export const requestKeeperDelegatePushAction = withServerAction(
+  requestKeeperDelegatePushActionImpl,
+);
+export const completeSignInAfterDelegateAction = withServerAction(
+  completeSignInAfterDelegateActionImpl,
+);
