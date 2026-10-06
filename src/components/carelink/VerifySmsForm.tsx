@@ -31,10 +31,7 @@ export function VerifySmsForm({
 }: VerifySmsFormProps) {
   const [phoneState, sendSms, sending] = useActionState(sendSignInSmsAction, phoneInitial);
   const [otpState, confirmOtp, confirming] = useActionState(confirmSignInSmsAction, otpInitial);
-  const [, resendSms, resending] = useActionState(
-    async (prev: VerifySmsPhoneState) => resendSignInSmsAction(),
-    phoneInitial,
-  );
+  const [, resendSms, resending] = useActionState(async () => resendSignInSmsAction(), phoneInitial);
   const [phoneDisplay, setPhoneDisplay] = React.useState('');
   const [phoneE164, setPhoneE164] = React.useState('');
   const [code, setCode] = React.useState('');
