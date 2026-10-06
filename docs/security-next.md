@@ -11,13 +11,13 @@
 
 ## Релевантные GHSA для Next 16 (контекст)
 
-| Advisory | Риск | Затрагивает Carelink Web? |
-| -------- | ---- | ------------------------- |
-| [GHSA-3x4c-7xq6-9pq8](https://github.com/vercel/next.js/security/advisories/GHSA-3x4c-7xq6-9pq8) — неограниченный disk cache `/_next/image` | DoS (диск) | **Низкий:** в `src/` нет `next/image`; remote/local patterns не настроены. Эндпоинт `/_next/image` существует в рантайме Next, но без вызовов оптимизации нагрузка минимальна. |
-| [GHSA-9g9p-9gw9-jx7f](https://github.com/vercel/next.js/security/advisories/GHSA-9g9p-9gw9-jx7f) — DoS через `remotePatterns` | DoS (память) | **Нет:** `images.remotePatterns` не заданы в `next.config.ts`. |
-| [GHSA-h64f-5h5j-jqjh](https://github.com/vercel/next.js/security/advisories/GHSA-h64f-5h5j-jqjh) — DoS local images | DoS (память) | **Низкий:** нет `next/image` для локальных ассетов через optimizer. |
-| [GHSA-q8wf-6r8g-63ch](https://github.com/vercel/next.js/security/advisories/GHSA-q8wf-6r8g-63ch) — DoS SVG в optimizer | DoS (CPU) | **Нет:** remote patterns не включены. |
-| [GHSA-2xp9-vwfh-vxw4](https://github.com/vercel/next.js/security/advisories/GHSA-2xp9-vwfh-vxw4) — RCE AVIF в optimizer | Critical | **Нет:** AVIF через `/_next/image` не используется. |
+| Advisory                                                                                                                                    | Риск         | Затрагивает Carelink Web?                                                                                                                                                      |
+| ------------------------------------------------------------------------------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [GHSA-3x4c-7xq6-9pq8](https://github.com/vercel/next.js/security/advisories/GHSA-3x4c-7xq6-9pq8) — неограниченный disk cache `/_next/image` | DoS (диск)   | **Низкий:** в `src/` нет `next/image`; remote/local patterns не настроены. Эндпоинт `/_next/image` существует в рантайме Next, но без вызовов оптимизации нагрузка минимальна. |
+| [GHSA-9g9p-9gw9-jx7f](https://github.com/vercel/next.js/security/advisories/GHSA-9g9p-9gw9-jx7f) — DoS через `remotePatterns`               | DoS (память) | **Нет:** `images.remotePatterns` не заданы в `next.config.ts`.                                                                                                                 |
+| [GHSA-h64f-5h5j-jqjh](https://github.com/vercel/next.js/security/advisories/GHSA-h64f-5h5j-jqjh) — DoS local images                         | DoS (память) | **Низкий:** нет `next/image` для локальных ассетов через optimizer.                                                                                                            |
+| [GHSA-q8wf-6r8g-63ch](https://github.com/vercel/next.js/security/advisories/GHSA-q8wf-6r8g-63ch) — DoS SVG в optimizer                      | DoS (CPU)    | **Нет:** remote patterns не включены.                                                                                                                                          |
+| [GHSA-2xp9-vwfh-vxw4](https://github.com/vercel/next.js/security/advisories/GHSA-2xp9-vwfh-vxw4) — RCE AVIF в optimizer                     | Critical     | **Нет:** AVIF через `/_next/image` не используется.                                                                                                                            |
 
 ## ISR, `use cache`, Cache Components
 
