@@ -16,12 +16,8 @@ export default function SessionEndedPage() {
       <CardContent className="space-y-4">
         <p className="text-center text-sm text-muted-foreground">
           Время входа истекло или сессия была отозвана (например, выход на всех устройствах).
-          Войдите снова — так мы защищаем данные семьи.
+          Войдите снова.
         </p>
-        <div className="rounded-lg bg-muted p-3 text-sm text-muted-foreground">
-          Это стандартная мера безопасности. Если вы не выходили сами, проверьте активные устройства
-          в профиле после входа.
-        </div>
         <Link href="/login" className={cn(buttonVariants(), 'w-full')}>
           Войти снова
         </Link>
