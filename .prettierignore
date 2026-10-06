@@ -3,3 +3,4 @@ node_modules
 tmp
 pnpm-lock.yaml
 src/server/gateway/types.gen.ts
+docs/stitch-ref

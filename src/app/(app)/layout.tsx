@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { AppHeader } from '@/components/carelink/AppHeader';
+import { AppShell } from '@/components/carelink/AppShell';
 import { getSession } from '@/server/session/get-session';
 
 export default async function AppSectionLayout({ children }: { children: React.ReactNode }) {
@@ -7,10 +7,5 @@ export default async function AppSectionLayout({ children }: { children: React.R
   if (!ctx) {
     redirect('/session-ended');
   }
-  return (
-    <>
-      <AppHeader />
-      {children}
-    </>
-  );
+  return <AppShell>{children}</AppShell>;
 }
