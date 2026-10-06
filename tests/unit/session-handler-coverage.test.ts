@@ -12,6 +12,7 @@ const ACTION_FILES = [
   'delegate-approval.ts',
   'logout.ts',
   'create-family.ts',
+  'recovery.ts',
 ];
 
 const ROUTE_HANDLERS: Array<{ path: string; exempt?: boolean }> = [

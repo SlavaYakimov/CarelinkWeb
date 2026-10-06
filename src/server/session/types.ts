@@ -43,6 +43,8 @@ export type FlowRecord = {
   requestId?: string;
   approvalSecret?: string;
   inviteCode?: string;
+  /** Recovery request: workspace slug (family address). */
+  familySlug?: string;
   /** Encrypted delegate-link token for keeper review (kind=delegate). */
   delegateTokenEnc?: string;
   createdAt: string;

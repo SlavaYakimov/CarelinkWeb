@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { useActionState } from 'react';
+import Link from 'next/link';
 import { Building2, ArrowRight } from 'lucide-react';
 import { signInAction, type SignInFormState } from '@/server/actions/sign-in';
 import { PasswordField } from '@/components/carelink/PasswordField';
@@ -110,7 +111,9 @@ export function LoginForm({ nextPath, defaultEmail = '' }: LoginFormProps) {
           </Button>
 
           <p className="text-center text-sm">
-            <LinkStub>Забыли пароль? Восстановить через семью</LinkStub>
+            <Link href="/login/recovery" className="text-primary hover:underline">
+              Забыли пароль? Восстановить через семью
+            </Link>
           </p>
 
           <p className="text-center text-sm text-muted-foreground">
