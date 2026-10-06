@@ -114,19 +114,35 @@ export async function signInAction(
     }
 
     if (response.flow === 'full' && response.challengeId) {
-      const channel = response.verificationChannel === 'push' ? 'push' : 'sms';
+      const rawChannel = response.verificationChannel as string | undefined;
       const fid = newFlowId();
+      let step: string;
+      let redirectTo: string;
+      let verificationChannel: FlowRecord['verificationChannel'];
+      if (rawChannel === 'push') {
+        step = 'verify-push';
+        redirectTo = '/login/verify-push';
+        verificationChannel = 'push';
+      } else if (rawChannel === 'delegate') {
+        step = 'keeper-wait';
+        redirectTo = '/login/keeper';
+        verificationChannel = 'delegate';
+      } else {
+        step = 'verify-sms';
+        redirectTo = '/login/verify-sms';
+        verificationChannel = 'sms';
+      }
       const flow: FlowRecord = {
         kind: 'signin',
-        step: channel === 'sms' ? 'verify-sms' : 'verify-push',
+        step,
         challengeId: response.challengeId,
         workspaceEmail,
-        verificationChannel: channel,
+        verificationChannel,
         trustDevice: !guestMode,
         createdAt: new Date().toISOString(),
       };
       await persistSignInFlow(fid, flow);
-      redirect(channel === 'sms' ? '/login/verify-sms' : '/login/verify-push');
+      redirect(redirectTo);
     }
 
     return {

@@ -16,6 +16,12 @@ type WorkspaceSignInCompleteRequest = components['schemas']['WorkspaceSignInComp
 type WorkspaceSignInCompleteResponse = components['schemas']['WorkspaceSignInCompleteResponse'];
 type WorkspaceChangePasswordRequest = components['schemas']['WorkspaceChangePasswordRequest'];
 type AuthSessionResponse = components['schemas']['AuthSessionResponse'];
+type WorkspaceDelegatePushRequest = components['schemas']['WorkspaceDelegatePushRequest'];
+type WorkspaceDelegateStatusResponse = components['schemas']['WorkspaceDelegateStatusResponse'];
+type WorkspaceDelegateDetailsResponse = components['schemas']['WorkspaceDelegateDetailsResponse'];
+type WorkspaceDelegateTokenRequest = components['schemas']['WorkspaceDelegateTokenRequest'];
+type WorkspaceDelegateApproveResponse = components['schemas']['WorkspaceDelegateApproveResponse'];
+type WorkspaceDelegateRejectResponse = components['schemas']['WorkspaceDelegateRejectResponse'];
 
 export async function workspaceSignIn(
   body: WorkspaceSignInRequest,
@@ -73,6 +79,68 @@ export async function workspaceChangePassword(
       deviceId: ctx.deviceId,
       traceId: ctx.traceId,
       deviceSession: ctx.deviceSession,
+    },
+  );
+}
+
+export async function workspaceSignInRequestDelegatePush(
+  body: WorkspaceDelegatePushRequest,
+  ctx: GatewayCtx,
+): Promise<{ sent?: boolean }> {
+  return gatewayFetch(
+    { method: 'POST', path: `${V2_AUTH}/workspace/sign-in/request-delegate-push`, body },
+    { clientIp: ctx.clientIp, deviceId: ctx.deviceId, traceId: ctx.traceId },
+  );
+}
+
+export async function workspaceSignInDelegateStatus(
+  query: { challengeId: string; deviceId: string },
+  ctx: GatewayCtx,
+): Promise<WorkspaceDelegateStatusResponse> {
+  const q = new URLSearchParams(query);
+  return gatewayFetch(
+    { method: 'GET', path: `${V2_AUTH}/workspace/sign-in/delegate-status?${q.toString()}` },
+    { clientIp: ctx.clientIp, deviceId: ctx.deviceId, traceId: ctx.traceId },
+  );
+}
+
+export async function workspaceSignInDelegateDetails(
+  token: string,
+  ctx: GatewayCtx,
+): Promise<WorkspaceDelegateDetailsResponse> {
+  const q = new URLSearchParams({ token });
+  return gatewayFetch(
+    { method: 'GET', path: `${V2_AUTH}/workspace/sign-in/delegate-details?${q.toString()}` },
+    { clientIp: ctx.clientIp, deviceId: ctx.deviceId, traceId: ctx.traceId },
+  );
+}
+
+export async function workspaceSignInApproveDelegate(
+  body: WorkspaceDelegateTokenRequest,
+  ctx: GatewayCtx & { accessToken: string },
+): Promise<WorkspaceDelegateApproveResponse> {
+  return gatewayFetch(
+    { method: 'POST', path: `${V2_AUTH}/workspace/sign-in/approve-delegate`, body },
+    {
+      clientIp: ctx.clientIp,
+      deviceId: ctx.deviceId,
+      traceId: ctx.traceId,
+      accessToken: ctx.accessToken,
+    },
+  );
+}
+
+export async function workspaceSignInRejectDelegate(
+  body: WorkspaceDelegateTokenRequest,
+  ctx: GatewayCtx & { accessToken: string },
+): Promise<WorkspaceDelegateRejectResponse> {
+  return gatewayFetch(
+    { method: 'POST', path: `${V2_AUTH}/workspace/sign-in/reject-delegate`, body },
+    {
+      clientIp: ctx.clientIp,
+      deviceId: ctx.deviceId,
+      traceId: ctx.traceId,
+      accessToken: ctx.accessToken,
     },
   );
 }

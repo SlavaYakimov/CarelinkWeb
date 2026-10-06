@@ -20,7 +20,7 @@ export type SessionRecord = {
   csrfToken?: string;
 };
 
-export type FlowKind = 'signin' | 'onboarding' | 'join' | 'recovery' | 'invite';
+export type FlowKind = 'signin' | 'onboarding' | 'join' | 'recovery' | 'invite' | 'delegate';
 
 export type FlowRecord = {
   kind: FlowKind;
@@ -33,6 +33,7 @@ export type FlowRecord = {
   /** From login checkbox — false = guest / «чужой компьютер» (Q6). */
   trustDevice?: boolean;
   smsSentAt?: string;
+  delegatePushSentAt?: string;
   challengeId?: string;
   onboardingChallengeId?: string;
   userId?: string;
@@ -42,5 +43,7 @@ export type FlowRecord = {
   requestId?: string;
   approvalSecret?: string;
   inviteCode?: string;
+  /** Encrypted delegate-link token for keeper review (kind=delegate). */
+  delegateTokenEnc?: string;
   createdAt: string;
 };
