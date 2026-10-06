@@ -25,6 +25,9 @@ export type FlowKind = 'signin' | 'onboarding' | 'join' | 'recovery' | 'invite';
 export type FlowRecord = {
   kind: FlowKind;
   step?: string;
+  workspaceEmail?: string;
+  verificationChannel?: 'push' | 'sms';
+  displayName?: string;
   challengeId?: string;
   onboardingChallengeId?: string;
   userId?: string;
