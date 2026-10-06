@@ -19,6 +19,8 @@ export type GatewayRequestContext = {
   deviceSessionHeader?: boolean;
   /** Pre-session device verify (sign-in complete before Redis session exists). */
   deviceSession?: string;
+  /** Bearer token when no Redis session is loaded (e.g. logout). */
+  accessToken?: string;
 };
 
 export type GatewayRequestInit = {
@@ -161,7 +163,9 @@ export async function gatewayFetch<T = unknown>(
       'X-Real-IP': ctx.clientIp,
       ...init.headers,
     };
-    if (session && familyId) {
+    if (ctx.accessToken) {
+      headers.Authorization = `Bearer ${ctx.accessToken}`;
+    } else if (session && familyId) {
       const access = pickAccessToken(session, familyId);
       if (access) headers.Authorization = `Bearer ${access}`;
     }

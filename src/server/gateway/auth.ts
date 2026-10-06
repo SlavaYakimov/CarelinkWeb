@@ -3,6 +3,7 @@ import { gatewayFetch } from '@/server/gateway/client';
 import type { components } from '@/server/gateway/types.gen';
 
 const V2_AUTH = '/v2/auth';
+const V1_AUTH = '/v1/auth';
 
 type GatewayCtx = { clientIp: string; deviceId: string; traceId?: string; deviceSession?: string };
 
@@ -72,6 +73,25 @@ export async function workspaceChangePassword(
       deviceId: ctx.deviceId,
       traceId: ctx.traceId,
       deviceSession: ctx.deviceSession,
+    },
+  );
+}
+
+export async function authLogout(
+  body: { refresh: string; allDevices?: boolean },
+  ctx: GatewayCtx & { accessToken: string },
+): Promise<{ ok: true }> {
+  return gatewayFetch(
+    {
+      method: 'POST',
+      path: `${V1_AUTH}/logout`,
+      body: { refresh: body.refresh, allDevices: body.allDevices ?? false },
+    },
+    {
+      clientIp: ctx.clientIp,
+      deviceId: ctx.deviceId,
+      traceId: ctx.traceId,
+      accessToken: ctx.accessToken,
     },
   );
 }

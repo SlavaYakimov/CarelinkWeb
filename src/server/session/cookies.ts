@@ -8,17 +8,16 @@ const DEVICE_COOKIE_MAX_AGE = 400 * 24 * 3600;
 
 export type CookieWriteOptions = {
   guestMode?: boolean;
-  sessionMaxAgeSeconds?: number;
 };
 
+/** Q6: trusted device — cookie max-age matches idle TTL; guest — session cookie (12h in Redis). */
 export async function setSessionCookie(sid: string, opts: CookieWriteOptions = {}): Promise<void> {
   const env = getEnv();
   const store = await cookies();
   const name = cookieName('cl_sid');
   const secure = env.COOKIE_SECURE;
   const guest = opts.guestMode ?? false;
-  const maxAge =
-    guest || opts.sessionMaxAgeSeconds === undefined ? undefined : opts.sessionMaxAgeSeconds;
+  const maxAge = guest ? undefined : parseDurationToSeconds(env.SESSION_IDLE_TTL);
 
   store.set(name, sid, {
     httpOnly: true,
