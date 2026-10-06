@@ -20,6 +20,10 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
   let response: NextResponse;
 
+  if (pathname.startsWith('/dev') && process.env.NODE_ENV === 'production') {
+    return new NextResponse('Not Found', { status: 404 });
+  }
+
   if (isProtectedPath(pathname)) {
     const sidCookie = request.cookies.get(sessionCookieName());
     if (!sidCookie?.value) {

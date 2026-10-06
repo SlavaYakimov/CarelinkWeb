@@ -1,4 +1,5 @@
 node_modules
 .next
+tmp
 pnpm-lock.yaml
 src/server/gateway/types.gen.ts

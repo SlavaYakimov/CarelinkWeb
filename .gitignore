@@ -37,3 +37,4 @@ yarn-error.log*
 
 # vitest
 vitest.config.ts.timestamp-*
+tmp/
