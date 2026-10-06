@@ -22,6 +22,43 @@ type WorkspaceDelegateDetailsResponse = components['schemas']['WorkspaceDelegate
 type WorkspaceDelegateTokenRequest = components['schemas']['WorkspaceDelegateTokenRequest'];
 type WorkspaceDelegateApproveResponse = components['schemas']['WorkspaceDelegateApproveResponse'];
 type WorkspaceDelegateRejectResponse = components['schemas']['WorkspaceDelegateRejectResponse'];
+type WorkspaceSignInStartRequest = components['schemas']['WorkspaceSignInStartRequest'];
+type WorkspaceSignInStartResponse = components['schemas']['WorkspaceSignInStartResponse'];
+type WorkspaceSignInRequestOtpRequest = components['schemas']['WorkspaceSignInRequestOtpRequest'];
+type WorkspaceSignInRequestOtpResponse = components['schemas']['WorkspaceSignInRequestOtpResponse'];
+type WorkspaceSignInVerifyPhoneRequest = components['schemas']['WorkspaceSignInVerifyPhoneRequest'];
+type WorkspaceSignInVerifyPhoneResponse =
+  components['schemas']['WorkspaceSignInVerifyPhoneResponse'];
+
+export async function workspaceSignInStart(
+  body: WorkspaceSignInStartRequest,
+  ctx: GatewayCtx,
+): Promise<WorkspaceSignInStartResponse> {
+  return gatewayFetch(
+    { method: 'POST', path: `${V2_AUTH}/workspace/sign-in/start`, body },
+    { clientIp: ctx.clientIp, deviceId: ctx.deviceId, traceId: ctx.traceId },
+  );
+}
+
+export async function workspaceSignInRequestOtp(
+  body: WorkspaceSignInRequestOtpRequest,
+  ctx: GatewayCtx,
+): Promise<WorkspaceSignInRequestOtpResponse> {
+  return gatewayFetch(
+    { method: 'POST', path: `${V2_AUTH}/workspace/sign-in/request-otp`, body },
+    { clientIp: ctx.clientIp, deviceId: ctx.deviceId, traceId: ctx.traceId },
+  );
+}
+
+export async function workspaceSignInVerifyPhone(
+  body: WorkspaceSignInVerifyPhoneRequest,
+  ctx: GatewayCtx,
+): Promise<WorkspaceSignInVerifyPhoneResponse> {
+  return gatewayFetch(
+    { method: 'POST', path: `${V2_AUTH}/workspace/sign-in/verify-phone`, body },
+    { clientIp: ctx.clientIp, deviceId: ctx.deviceId, traceId: ctx.traceId },
+  );
+}
 
 export async function workspaceSignIn(
   body: WorkspaceSignInRequest,

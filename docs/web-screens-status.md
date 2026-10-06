@@ -17,7 +17,7 @@
 | 05  | Смена временного пароля                | `/login/change-password`    | ✅      | POST `…/password/change`              | ✅                                                          |
 | 06  | Подтверждение устройства — push        | `/login/verify-push`        | 🟡      | request/resend push-verify            | ✅                                                          |
 | 07  | SMS-код устройства                     | `/login/verify-sms`         | ✅      | request-sms / verify-sms / complete   | ✅                                                          |
-| 08  | Подтверждение телефона (sign-in/start) | `/login/verify-phone`       | ⬜ → PR | start, request-otp, verify-phone      | ✅                                                          |
+| 08  | Подтверждение телефона (sign-in/start) | `/login/verify-phone`       | ✅      | start, request-otp, verify-phone      | ✅                                                          |
 | 09  | Вход через хранителя — ожидание        | `/login/keeper`             | ✅      | delegate-push, polling                | ✅                                                          |
 | 10  | Хранитель: подтвердить вход            | `/delegate`                 | ✅      | delegate-details, approve/reject      | ✅                                                          |
 | 11  | Онбординг — почта                      | `/onboarding/email`         | ⬜ → PR | onboarding email request/verify       | ✅                                                          |

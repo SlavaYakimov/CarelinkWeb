@@ -116,11 +116,21 @@ async function signInActionImpl(
 
     if (response.flow === 'full' && response.challengeId) {
       const rawChannel = response.verificationChannel as string | undefined;
+      const phoneFirst = Boolean(
+        (response as { phoneVerificationRequired?: boolean }).phoneVerificationRequired ||
+        (response as { requiresPhoneVerification?: boolean }).requiresPhoneVerification ||
+        rawChannel === 'phone',
+      );
       const fid = newFlowId();
       let step: string;
       let redirectTo: string;
       let verificationChannel: FlowRecord['verificationChannel'];
-      if (rawChannel === 'push') {
+      if (phoneFirst) {
+        step = 'verify-phone';
+        redirectTo = '/login/verify-phone';
+        verificationChannel =
+          rawChannel === 'push' ? 'push' : rawChannel === 'delegate' ? 'delegate' : 'sms';
+      } else if (rawChannel === 'push') {
         step = 'verify-push';
         redirectTo = '/login/verify-push';
         verificationChannel = 'push';
