@@ -1,0 +1,13 @@
+title = "CarelinkWeb gitleaks"
+
+[extend]
+useDefault = true
+
+# False positive: CI test vector for SESSION_ENC_KEY (32 zero-ish bytes, not production).
+[[rules]]
+id = "generic-api-key"
+
+[rules.allowlists]
+description = "SESSION_ENC_KEY in web-check workflow (CI env only)"
+paths = ['''\.github/workflows/web-check\.yml$''']
+regexes = ['''SESSION_ENC_KEY''']
