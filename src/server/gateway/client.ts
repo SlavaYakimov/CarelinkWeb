@@ -1,9 +1,15 @@
 import 'server-only';
 import { randomUUID } from 'node:crypto';
 import { getEnv } from '@/env';
+import { rethrowOrRedirectSessionEnded } from '@/server/gateway/handle-session-ended';
 import { GatewayError, normalizeGatewayError } from '@/server/gateway/errors';
 import { accessNeedsRefresh, withRefreshLock, type RefreshFn } from '@/server/gateway/refresh';
 import { getLogger } from '@/server/log/logger';
+import {
+  destroyLocalSession,
+  isRefreshRejection,
+  SessionEndedError,
+} from '@/server/session/session-ended';
 import { loadSession, saveSession } from '@/server/session/store';
 import type { SessionRecord } from '@/server/session/types';
 
@@ -75,7 +81,12 @@ async function defaultRefresh(args: {
     json = {};
   }
   if (!res.ok) {
-    throw normalizeGatewayError(res.status, json, res.headers, traceId);
+    const err = normalizeGatewayError(res.status, json, res.headers, traceId);
+    if (isRefreshRejection(res.status)) {
+      await destroyLocalSession(args.sid, args.session.userId);
+      throw new SessionEndedError(args.sid);
+    }
+    throw err;
   }
   const payload = json as {
     familyId: string;
@@ -121,7 +132,10 @@ async function refreshFamilyTokens(
     familyId,
     async () => {
       const latest = await loadSession(sid);
-      const currentSession = latest?.record ?? session;
+      if (!latest) {
+        throw new SessionEndedError(sid);
+      }
+      const currentSession = latest.record;
       const current = currentSession.families[familyId];
       if (!current) return currentSession;
       if (!accessNeedsRefresh(current.expiresAt)) return currentSession;
@@ -133,12 +147,26 @@ async function refreshFamilyTokens(
     },
     async () => {
       const latest = await loadSession(sid);
-      return latest?.record ?? session;
+      if (!latest) {
+        throw new SessionEndedError(sid);
+      }
+      return latest.record;
     },
   );
 }
 
 export async function gatewayFetch<T = unknown>(
+  init: GatewayRequestInit,
+  ctx: GatewayRequestContext,
+): Promise<T> {
+  try {
+    return await gatewayFetchInner<T>(init, ctx);
+  } catch (err) {
+    rethrowOrRedirectSessionEnded(err);
+  }
+}
+
+async function gatewayFetchInner<T = unknown>(
   init: GatewayRequestInit,
   ctx: GatewayRequestContext,
 ): Promise<T> {
@@ -202,7 +230,12 @@ export async function gatewayFetch<T = unknown>(
     }
     const err = normalizeGatewayError(res.status, errJson, res.headers, traceId);
     if (err.code === 'TOKEN_EXPIRED' || err.code === 'UNAUTHORIZED') {
-      session = await refreshFamilyTokens(ctx.sid, familyId, session);
+      try {
+        session = await refreshFamilyTokens(ctx.sid, familyId, session);
+      } catch (refreshErr) {
+        if (refreshErr instanceof SessionEndedError) throw refreshErr;
+        throw refreshErr;
+      }
       res = await doFetch();
     }
   }
@@ -234,4 +267,4 @@ export async function gatewayFetch<T = unknown>(
   return json as T;
 }
 
-export { GatewayError };
+export { GatewayError, SessionEndedError };

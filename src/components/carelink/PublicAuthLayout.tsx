@@ -42,7 +42,7 @@ export function PublicAuthLayout({
       ) : null}
 
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-12 lg:px-8 lg:py-10">
-        <aside className="flex flex-col gap-6">
+        <aside className="hidden flex-col gap-6 lg:flex">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <BrandMark />
             <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
@@ -61,15 +61,17 @@ export function PublicAuthLayout({
             </p>
           </div>
 
-          <div
-            className="relative aspect-[4/3] overflow-hidden rounded-xl bg-gradient-to-br from-accent via-muted to-background shadow-card"
-            aria-hidden
-          >
-            <div className="absolute inset-0 flex items-end justify-center p-6">
-              <p className="rounded-lg bg-card/90 px-3 py-2 text-xs text-muted-foreground shadow-sm">
-                Иллюстрация семьи — см. макет Stitch
-              </p>
-            </div>
+          <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-muted shadow-card">
+            {/* eslint-disable-next-line @next/next/no-img-element -- intentional: no next/image (docs/security-next.md) */}
+            <img
+              src="/images/auth/login-illustration.jpg"
+              alt="Семейная гармония: уютный вечер нескольких поколений в гостиной"
+              width={1200}
+              height={896}
+              decoding="async"
+              loading="eager"
+              className="size-full object-cover"
+            />
           </div>
 
           <ul className="grid gap-3 sm:grid-cols-1">
