@@ -22,6 +22,8 @@ export type GatewayRequestContext = {
   traceId?: string;
   idempotencyKey?: string;
   userRefreshHeader?: boolean;
+  /** Pre-session onboarding password/setup (no Redis session yet). */
+  userRefresh?: string;
   deviceSessionHeader?: boolean;
   /** Pre-session device verify (sign-in complete before Redis session exists). */
   deviceSession?: string;
@@ -200,8 +202,10 @@ async function gatewayFetchInner<T = unknown>(
       const access = pickAccessToken(session, familyId);
       if (access) headers.Authorization = `Bearer ${access}`;
     }
-    if (ctx.userRefreshHeader && session?.userRefresh) {
-      headers['X-User-Refresh'] = session.userRefresh;
+    const userRefresh =
+      ctx.userRefresh ?? (ctx.userRefreshHeader ? session?.userRefresh : undefined);
+    if (userRefresh) {
+      headers['X-User-Refresh'] = userRefresh;
     }
     const deviceSession =
       ctx.deviceSession ?? (ctx.deviceSessionHeader ? session?.deviceSession : undefined);

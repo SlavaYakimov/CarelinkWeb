@@ -117,7 +117,9 @@ export function LoginForm({ nextPath, defaultEmail = '' }: LoginFormProps) {
           </p>
 
           <p className="text-center text-sm text-muted-foreground">
-            <LinkStub>+ Создать новую семью</LinkStub>
+            <Link href="/onboarding/email" className="text-primary hover:underline">
+              + Создать новую семью
+            </Link>
           </p>
 
           <div className="rounded-lg bg-muted/80 p-3 text-xs text-muted-foreground">
@@ -126,13 +128,5 @@ export function LoginForm({ nextPath, defaultEmail = '' }: LoginFormProps) {
         </form>
       </CardContent>
     </Card>
-  );
-}
-
-function LinkStub({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="cursor-not-allowed text-primary/70" title="Будет доступно в следующих этапах">
-      {children}
-    </span>
   );
 }
