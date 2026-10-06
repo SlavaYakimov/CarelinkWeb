@@ -531,6 +531,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /**
+         * @description With `challengeId` (temp password flow), requires prior device verification via SMS/push
+         *     and header `X-Device-Session` when device gate is enabled.
+         */
         post: operations["workspaceChangePassword"];
         delete?: never;
         options?: never;
@@ -959,17 +963,11 @@ export interface components {
             phone: string;
             deviceId: string;
         };
-        DelegatePushRequest: {
+        WorkspaceDelegatePushRequest: {
             challengeId: string;
             deviceId: string;
-        };
-        ApproveDelegateRequest: {
-            token: string;
-        };
-        ApproveDelegateResponse: {
-            approved?: boolean;
-            challengeId?: string;
-            deviceSession?: string;
+            /** @description Client platform (web, ios, android, …) shown to keeper */
+            platform?: string;
         };
         PairPhoneRequestOTPRequest: {
             phone: string;
@@ -1115,7 +1113,8 @@ export interface components {
         };
         WorkspaceSignInCompleteRequest: {
             challengeId: string;
-            password: string;
+            /** @description Optional when the same device already passed workspace sign-in (password verified on challenge). */
+            password?: string;
             deviceId: string;
         };
         WorkspaceSignInCompleteResponse: {
@@ -1128,6 +1127,8 @@ export interface components {
         WorkspaceDelegateDetailsResponse: {
             memberDisplayName: string;
             familyName: string;
+            /** @description Client platform reported at request-delegate-push (e.g. web, ios, android) */
+            platform?: string;
             clientDeviceId: string;
             /** Format: date-time */
             requestedAt: string;
@@ -1386,9 +1387,11 @@ export interface components {
                 "application/json": components["schemas"]["ErrorResponse"];
             };
         };
-        /** @description Rate limited */
+        /** @description Rate limited. Response includes `Retry-After` header (seconds until window reset; fallback 60). */
         RateLimit: {
             headers: {
+                /** @description Seconds until the rate-limit window resets */
+                "Retry-After"?: number;
                 [name: string]: unknown;
             };
             content: {
@@ -1730,14 +1733,20 @@ export interface operations {
             path?: never;
             cookie?: never;
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkspaceDelegatePushRequest"];
+            };
+        };
         responses: {
             /** @description Push dispatched to keeper */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["DeviceVerifySentResponse"];
+                };
             };
             /** @description DELEGATE_NOT_ALLOWED */
             403: {
@@ -1835,7 +1844,14 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description NOT_FOUND (wrong keeper or unknown request) */
+            /** @description DELEGATE_NOT_ALLOWED (authenticated user is not keeper of this family) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description NOT_FOUND (unknown or expired delegate request) */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -1872,6 +1888,20 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["WorkspaceDelegateRejectResponse"];
                 };
+            };
+            /** @description UNAUTHORIZED */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description DELEGATE_NOT_ALLOWED */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };
@@ -2200,7 +2230,10 @@ export interface operations {
     workspaceChangePassword: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Opaque device session from verify-sms / verify-link (required for challengeId when DEVICE_GATE_SKIP=false) */
+                "X-Device-Session"?: string;
+            };
             path?: never;
             cookie?: never;
         };
@@ -2217,6 +2250,15 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AuthSessionResponse"];
+                };
+            };
+            /** @description Device not verified (missing or invalid X-Device-Session) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
         };

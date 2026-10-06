@@ -5,6 +5,7 @@ describe('getErrorMessage', () => {
   it('returns Russian text for known codes', () => {
     expect(getErrorMessage('RATE_LIMIT')).toContain('Слишком много');
     expect(getErrorMessage('INVALID_CREDENTIALS')).toContain('Неверный');
+    expect(getErrorMessage('DEVICE_NOT_VERIFIED')).toContain('SMS');
   });
 
   it('falls back to UNKNOWN', () => {

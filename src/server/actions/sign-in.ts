@@ -17,7 +17,7 @@ import {
 } from '@/server/session/cookies';
 import { bindNewSession } from '@/server/session/get-session';
 import { sessionRecordFromAuthResponse } from '@/server/session/from-auth-session';
-import { deleteSession, encryptFlowSecret, loadSession, newFlowId } from '@/server/session/store';
+import { deleteSession, loadSession, newFlowId } from '@/server/session/store';
 import type { FlowRecord } from '@/server/session/types';
 
 const signInSchema = z.object({
@@ -99,7 +99,6 @@ export async function signInAction(
           challengeId: response.challengeId,
           workspaceEmail,
           trustDevice: !guestMode,
-          pendingPasswordEnc: encryptFlowSecret(password),
           createdAt: new Date().toISOString(),
         };
         await persistSignInFlow(fid, flow);
@@ -124,7 +123,6 @@ export async function signInAction(
         workspaceEmail,
         verificationChannel: channel,
         trustDevice: !guestMode,
-        pendingPasswordEnc: encryptFlowSecret(password),
         createdAt: new Date().toISOString(),
       };
       await persistSignInFlow(fid, flow);

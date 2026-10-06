@@ -2,26 +2,14 @@ import 'server-only';
 import { redirect } from 'next/navigation';
 import { GatewayError } from '@/server/gateway/errors';
 import { workspaceSignInComplete } from '@/server/gateway/auth';
-import {
-  clearSignInFlow,
-  pendingPasswordFromFlow,
-  persistSignInFlow,
-} from '@/server/flows/signin-flow';
+import { clearSignInFlow, persistSignInFlow } from '@/server/flows/signin-flow';
 import { sanitizeNextParam } from '@/server/security/next-param';
 import { setSessionCookie } from '@/server/session/cookies';
 import { bindNewSession } from '@/server/session/get-session';
 import { sessionRecordFromAuthResponse } from '@/server/session/from-auth-session';
-import { saveFlow } from '@/server/session/store';
 import type { FlowRecord } from '@/server/session/types';
 
-function scrubPasswordFromFlow(flow: FlowRecord): FlowRecord {
-  if (!flow.pendingPasswordEnc) return flow;
-  const next = { ...flow };
-  delete next.pendingPasswordEnc;
-  return next;
-}
-
-/** After device SMS verified — complete sign-in and route to app or password change (Q4). */
+/** After device verified (SMS) or delegate approved — complete sign-in (BE-06: no password). */
 export async function finishSignInAfterDeviceVerified(
   fid: string,
   flow: FlowRecord,
@@ -30,25 +18,21 @@ export async function finishSignInAfterDeviceVerified(
   const next = sanitizeNextParam(ctx.next);
   const challengeId = flow.challengeId;
   const deviceSession = flow.deviceSession;
-  const password = pendingPasswordFromFlow(flow);
 
-  if (!challengeId || !deviceSession || !password) {
+  if (!challengeId || !deviceSession) {
     redirect('/login');
   }
 
   try {
     const complete = await workspaceSignInComplete(
-      { challengeId, password, deviceId: ctx.deviceId },
+      { challengeId, deviceId: ctx.deviceId },
       { clientIp: ctx.clientIp, deviceId: ctx.deviceId, deviceSession },
     );
 
-    const withoutPassword = scrubPasswordFromFlow(flow);
-
     if (complete.requiresPasswordChange) {
       const updated: FlowRecord = {
-        ...withoutPassword,
+        ...flow,
         step: 'change-password',
-        pendingPasswordEnc: flow.pendingPasswordEnc,
         deviceSession,
       };
       await persistSignInFlow(fid, updated);
@@ -81,11 +65,4 @@ export async function finishSignInAfterDeviceVerified(
     }
     throw err;
   }
-}
-
-/** Wipes encrypted password blob from flow after password change succeeds. */
-export async function eraseFlowPassword(fid: string, flow: FlowRecord): Promise<void> {
-  if (!flow.pendingPasswordEnc) return;
-  const updated = scrubPasswordFromFlow(flow);
-  await saveFlow(fid, updated);
 }

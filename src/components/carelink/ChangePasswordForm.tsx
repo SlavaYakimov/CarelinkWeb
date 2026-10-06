@@ -19,6 +19,7 @@ export type ChangePasswordFormProps = {
 
 export function ChangePasswordForm({ workspaceEmail, nextPath }: ChangePasswordFormProps) {
   const [state, action, pending] = useActionState(changePasswordAction, initial);
+  const [oldPassword, setOldPassword] = React.useState('');
   const [newPassword, setNewPassword] = React.useState('');
   const [confirmPassword, setConfirmPassword] = React.useState('');
 
@@ -37,6 +38,7 @@ export function ChangePasswordForm({ workspaceEmail, nextPath }: ChangePasswordF
       <CardContent>
         <form action={action} className="space-y-4">
           <input type="hidden" name="next" value={nextPath} />
+          <input type="hidden" name="oldPassword" value={oldPassword} />
           <input type="hidden" name="newPassword" value={newPassword} />
           <input type="hidden" name="confirmPassword" value={confirmPassword} />
 
@@ -56,6 +58,17 @@ export function ChangePasswordForm({ workspaceEmail, nextPath }: ChangePasswordF
               {state.formError}
             </p>
           ) : null}
+
+          <PasswordField
+            id="oldPassword"
+            label="Временный пароль из приглашения"
+            value={oldPassword}
+            onChange={setOldPassword}
+            autoComplete="current-password"
+            error={state.fieldErrors?.oldPassword}
+            disabled={pending}
+            showRequirements={false}
+          />
 
           <PasswordField
             id="newPassword"
@@ -83,7 +96,7 @@ export function ChangePasswordForm({ workspaceEmail, nextPath }: ChangePasswordF
             <ArrowRight className="size-4" aria-hidden />
           </Button>
           <p className="text-center text-xs text-muted-foreground">
-            После смены пароля подтвердим ваше устройство
+            Для смены пароля нужно подтверждённое устройство — пройдите SMS, если ещё не делали
           </p>
         </form>
       </CardContent>

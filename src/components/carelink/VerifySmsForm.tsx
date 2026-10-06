@@ -22,12 +22,14 @@ export type VerifySmsFormProps = {
   nextPath: string;
   initialPhoneMasked?: string;
   smsAlreadySent?: boolean;
+  bannerMessage?: string;
 };
 
 export function VerifySmsForm({
   nextPath,
   initialPhoneMasked,
   smsAlreadySent = false,
+  bannerMessage,
 }: VerifySmsFormProps) {
   const [phoneState, sendSms, sending] = useActionState(sendSignInSmsAction, phoneInitial);
   const [otpState, confirmOtp, confirming] = useActionState(confirmSignInSmsAction, otpInitial);
@@ -64,6 +66,11 @@ export function VerifySmsForm({
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
+        {bannerMessage ? (
+          <p className="rounded-lg border border-border bg-muted/60 px-3 py-2 text-sm text-foreground">
+            {bannerMessage}
+          </p>
+        ) : null}
         {!smsSent ? (
           <form action={sendSms} className="space-y-4">
             <PhoneInput

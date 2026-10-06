@@ -89,19 +89,13 @@ sess:{sid} = {
 flow:{fid} = { kind: "signin"|"onboarding"|"join"|"recovery"|"invite",
                challengeId?, onboardingChallengeId?, userId?, userRefresh?,
                deviceRegistrationToken?, sessionId?, requestId?, approvalSecret?,
-               inviteCode?, pendingPassword?, step }  // TTL 15–30 мин
+               inviteCode?, step }  // TTL 15–30 мин
 dv:{challengeId} = { deviceSession }                 // для push-ссылки, открытой в другой вкладке/на телефоне (этап 6)
 lock:refresh:{sid}:{familyId}                         // single-flight refresh (§1.6)
 rl:{bucket}:{key}                                     // собственный rate limit BFF
 ```
 
-`pendingPassword` — временная мера. `/v2/auth/workspace/sign-in/complete` повторно требует пароль (`CompleteSignInInput.Password`), а между sign-in и complete стоит SMS-шаг. Варианты:
-
-- (а) держать пароль зашифрованным в `flow` до complete (максимум 15 мин — это `challengeTTL`) и сразу стирать;
-- (б) просить ввести пароль ещё раз;
-- (в) правильный — BE-06: backend помечает challenge как «пароль проверен», и complete работает без пароля.
-
-Рекомендация: (а) до BE-06 (см. вопрос Q5).
+BE-06 (смёржен): после `sign-in` с тем же `deviceId` challenge помечен «пароль проверен» — `POST …/sign-in/complete` принимает только `{challengeId, deviceId}` и заголовок `X-Device-Session` после SMS/делегирования. Временный пароль при смене (`password/change`) вводится на форме, не хранится в `flow`.
 
 ### 1.5 Как BFF вызывает gateway
 

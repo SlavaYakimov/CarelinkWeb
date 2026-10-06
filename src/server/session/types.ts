@@ -26,7 +26,7 @@ export type FlowRecord = {
   kind: FlowKind;
   step?: string;
   workspaceEmail?: string;
-  verificationChannel?: 'push' | 'sms';
+  verificationChannel?: 'push' | 'sms' | 'delegate';
   displayName?: string;
   phoneE164?: string;
   deviceSession?: string;
@@ -42,7 +42,5 @@ export type FlowRecord = {
   requestId?: string;
   approvalSecret?: string;
   inviteCode?: string;
-  /** Encrypted at rest (AES-GCM blob), max FLOW_TTL — Q5 */
-  pendingPasswordEnc?: string;
   createdAt: string;
 };
