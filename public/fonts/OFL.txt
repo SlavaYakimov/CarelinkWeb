@@ -1,0 +1,2 @@
+Inter and Manrope font files are distributed under the SIL Open Font License 1.1.
+Source: Fontsource / Google Fonts project files bundled in-repo for self-hosting (no CDN at runtime).

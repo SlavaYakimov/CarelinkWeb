@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import { Toaster } from '@/components/ui/sonner';
+import { inter, manrope } from '@/lib/fonts';
 import '@/styles/globals.css';
 
 export const metadata: Metadata = {
@@ -13,7 +15,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru">
-      <body>{children}</body>
+      <body className={`${inter.variable} ${manrope.variable} min-h-screen font-sans antialiased`}>
+        {children}
+        <Toaster />
+      </body>
     </html>
   );
 }
