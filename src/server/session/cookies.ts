@@ -56,6 +56,11 @@ export async function readFlowCookie(): Promise<string | undefined> {
   return store.get(cookieName('cl_flow'))?.value;
 }
 
+export async function clearFlowCookie(): Promise<void> {
+  const store = await cookies();
+  store.delete(cookieName('cl_flow'));
+}
+
 export async function ensureDeviceCookie(): Promise<string> {
   const env = getEnv();
   const store = await cookies();
