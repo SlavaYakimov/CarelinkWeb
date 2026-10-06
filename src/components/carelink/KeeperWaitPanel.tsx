@@ -7,6 +7,7 @@ import {
   completeSignInAfterDelegateAction,
   requestKeeperDelegatePushAction,
 } from '@/server/actions/keeper-wait';
+import { isSessionEndedResponse, navigateToSessionEnded } from '@/lib/session-ended-fetch';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -54,6 +55,10 @@ export function KeeperWaitPanel({
       const res = await fetch(`/api/auth/sign-in/delegate-status?attempt=${attemptRef.current}`, {
         cache: 'no-store',
       });
+      if (await isSessionEndedResponse(res)) {
+        navigateToSessionEnded();
+        return;
+      }
       if (res.status === 429) {
         const body = (await res.json()) as PollBody;
         const retry =

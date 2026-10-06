@@ -6,8 +6,9 @@ import { gatewayActionContext } from '@/server/actions/request-context';
 import { getSession } from '@/server/session/get-session';
 import { clearFlowCookie, clearSessionCookie } from '@/server/session/cookies';
 import { deleteSession } from '@/server/session/store';
+import { withServerAction } from '@/server/session/with-session-handler';
 
-export async function logoutAction(): Promise<void> {
+async function logoutActionImpl(): Promise<void> {
   const ctx = await getSession();
   const { clientIp, deviceId } = await gatewayActionContext();
 
@@ -31,3 +32,5 @@ export async function logoutAction(): Promise<void> {
   await clearFlowCookie();
   redirect('/login');
 }
+
+export const logoutAction = withServerAction(logoutActionImpl);

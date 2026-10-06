@@ -12,6 +12,7 @@ import { sanitizeNextParam } from '@/server/security/next-param';
 import { setSessionCookie } from '@/server/session/cookies';
 import { bindNewSession } from '@/server/session/get-session';
 import { sessionRecordFromAuthResponse } from '@/server/session/from-auth-session';
+import { withServerAction } from '@/server/session/with-session-handler';
 
 const schema = z
   .object({
@@ -34,7 +35,7 @@ export type ChangePasswordState = {
   formError?: string;
 };
 
-export async function changePasswordAction(
+async function changePasswordActionImpl(
   _prev: ChangePasswordState,
   formData: FormData,
 ): Promise<ChangePasswordState> {
@@ -109,3 +110,5 @@ export async function changePasswordAction(
     throw err;
   }
 }
+
+export const changePasswordAction = withServerAction(changePasswordActionImpl);

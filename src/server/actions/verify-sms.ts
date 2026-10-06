@@ -9,6 +9,7 @@ import { workspaceSignInRequestSms, workspaceSignInVerifySms } from '@/server/ga
 import { finishSignInAfterDeviceVerified } from '@/server/flows/finish-sign-in';
 import { persistSignInFlow, requireSignInFlow } from '@/server/flows/signin-flow';
 import { gatewayActionContext } from '@/server/actions/request-context';
+import { withServerAction } from '@/server/session/with-session-handler';
 
 const phoneSchema = z.object({
   phone: z.string().min(1, 'Укажите номер телефона'),
@@ -29,7 +30,7 @@ export type VerifySmsOtpState = {
   attemptsHint?: string;
 };
 
-export async function sendSignInSmsAction(
+async function sendSignInSmsActionImpl(
   _prev: VerifySmsPhoneState,
   formData: FormData,
 ): Promise<VerifySmsPhoneState> {
@@ -71,7 +72,7 @@ export async function sendSignInSmsAction(
   }
 }
 
-export async function resendSignInSmsAction(): Promise<VerifySmsPhoneState> {
+async function resendSignInSmsActionImpl(): Promise<VerifySmsPhoneState> {
   const { fid, flow } = await requireSignInFlow('verify-sms');
   const phoneE164 = flow.phoneE164;
   const challengeId = flow.challengeId;
@@ -94,7 +95,7 @@ export async function resendSignInSmsAction(): Promise<VerifySmsPhoneState> {
   }
 }
 
-export async function confirmSignInSmsAction(
+async function confirmSignInSmsActionImpl(
   _prev: VerifySmsOtpState,
   formData: FormData,
 ): Promise<VerifySmsOtpState> {
@@ -147,3 +148,7 @@ export async function confirmSignInSmsAction(
     throw err;
   }
 }
+
+export const sendSignInSmsAction = withServerAction(sendSignInSmsActionImpl);
+export const resendSignInSmsAction = withServerAction(resendSignInSmsActionImpl);
+export const confirmSignInSmsAction = withServerAction(confirmSignInSmsActionImpl);
