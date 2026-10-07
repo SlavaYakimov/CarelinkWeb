@@ -7,7 +7,7 @@ Next.js BFF для семейного приложения Carelink. Брауз�
 ## Требования
 
 - Node.js 22+
-- pnpm 9+
+- pnpm 9+ (**только pnpm** — не используйте `npm install`, иначе возможны конфликты с `pnpm-lock.yaml`)
 - Redis (для полного функционала W-03+)
 
 ## Локальный запуск
@@ -16,9 +16,16 @@ Next.js BFF для семейного приложения Carelink. Брауз�
 cp .env.example .env.local
 # заполните SESSION_ENC_KEY (32 байта base64) и остальное
 
-pnpm install
+pnpm install --frozen-lockfile
 pnpm dev
 ```
+
+## Troubleshooting (dev)
+
+1. Redis на `127.0.0.1:6379`, переменные в `.env.local` как в [`.env.example`](.env.example).
+2. На порту **3000** — один процесс: не запускайте `pnpm dev` и `pnpm start` одновременно.
+3. Ошибки webpack / `mini-css-extract-plugin` / `next/font`: `pnpm dev:reset` или `rm -rf .next node_modules && pnpm install --frozen-lockfile`.
+4. `/api/health` с кодом **503** без локального gateway — нормально (status `degraded`); для входа и онбординга нужен gateway или staging URL в `GATEWAY_URL`.
 
 Health: [http://localhost:3000/api/health](http://localhost:3000/api/health)
 
@@ -46,7 +53,29 @@ pnpm test:e2e:flows          # Cypress (start-server-and-test)
 pnpm test:e2e:all            # оба
 ```
 
-CI: job `web-e2e` (Redis + Playwright + Cypress). Полные happy-path (SMS OTP, онбординг) — **TODO** compose CarelinkAuth BE-21 / `cypress/e2e/_compose/`.
+CI: job `web-e2e` (Redis + Playwright + Cypress). Полные happy-path (SMS OTP, онбординг) — compose CarelinkAuth **BE-21**; specs в `cypress/e2e/_compose/` по умолчанию **skipped**.
+
+### Integration: onboarding
+
+Playwright проверяет только роутинг онбординга (`tests/e2e/onboarding-routing.spec.ts`). Полный сценарий «создание семьи» (экраны 11–16) — Cypress:
+
+- Spec: `cypress/e2e/_compose/onboarding-create-family.cy.ts`
+- Включение: `CYPRESS_E2E_COMPOSE=1` (без переменной spec в `describe.skip`)
+- Нужны: Redis, BFF с `GATEWAY_URL` на compose/staging gateway, CarelinkAuth compose (BE-21)
+- OTP: `cy.task('fetchOnboardingOtp')` → [`scripts/e2e/fetch-onboarding-otp.mjs`](scripts/e2e/fetch-onboarding-otp.mjs) (polling + парсинг как `CarelinkAuth/e2e/otp.py`). По умолчанию читает логи `notification-service` из соседнего клона `../CarelinkAuth` (BE-21 compose); override: `E2E_CARELINK_AUTH_ROOT` или `E2E_NOTIFICATION_LOG_CMD`.
+
+```bash
+# 1) Backend (sibling repo)
+git clone https://github.com/SlavaYakimov/CarelinkAuth.git ../CarelinkAuth
+cd ../CarelinkAuth && make compose-web-e2e-up
+
+# 2) Redis + .env.local (GATEWAY_URL=http://127.0.0.1:8088, SESSION_ENC_KEY, REDIS_URL)
+
+pnpm build
+pnpm test:e2e:compose:onboarding
+```
+
+Ручной OTP из логов: `node scripts/e2e/fetch-onboarding-otp.mjs email 'you@example.com'`
 
 ## Docker
 
