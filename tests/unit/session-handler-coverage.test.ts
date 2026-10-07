@@ -13,6 +13,8 @@ const ACTION_FILES = [
   'logout.ts',
   'create-family.ts',
   'recovery.ts',
+  'onboarding.ts',
+  'verify-phone.ts',
 ];
 
 const ROUTE_HANDLERS: Array<{ path: string; exempt?: boolean }> = [

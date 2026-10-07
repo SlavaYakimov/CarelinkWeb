@@ -45,6 +45,19 @@ export type FlowRecord = {
   inviteCode?: string;
   /** Recovery request: workspace slug (family address). */
   familySlug?: string;
+  /** Onboarding: personal email (step 11). */
+  personalEmail?: string;
+  /** Onboarding: keeper display name (step 12). */
+  keeperDisplayName?: string;
+  /** Onboarding: draft slug before finalize (step 15). */
+  workspaceSlug?: string;
+  /** Onboarding: provisional workspace email after email verify. */
+  provisionalWorkspaceEmail?: string;
+  /** Onboarding done screen (step 16). */
+  finalizedWorkspaceEmail?: string;
+  finalizedWorkspaceSlug?: string;
+  finalizedDisplayName?: string;
+  phoneVerified?: boolean;
   /** Encrypted delegate-link token for keeper review (kind=delegate). */
   delegateTokenEnc?: string;
   createdAt: string;

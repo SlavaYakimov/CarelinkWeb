@@ -17,15 +17,15 @@
 | 05  | Смена временного пароля                | `/login/change-password`    | ✅      | POST `…/password/change`              | ✅                                                          |
 | 06  | Подтверждение устройства — push        | `/login/verify-push`        | 🟡      | request/resend push-verify            | ✅                                                          |
 | 07  | SMS-код устройства                     | `/login/verify-sms`         | ✅      | request-sms / verify-sms / complete   | ✅                                                          |
-| 08  | Подтверждение телефона (sign-in/start) | —                           | ⬜      | start, request-otp, verify-phone      | ✅                                                          |
+| 08  | Подтверждение телефона (sign-in/start) | `/login/verify-phone`       | ⬜ → PR | start, request-otp, verify-phone      | ✅                                                          |
 | 09  | Вход через хранителя — ожидание        | `/login/keeper`             | ✅      | delegate-push, polling                | ✅                                                          |
 | 10  | Хранитель: подтвердить вход            | `/delegate`                 | ✅      | delegate-details, approve/reject      | ✅                                                          |
-| 11  | Онбординг — почта                      | `/onboarding/email`         | ⬜      | onboarding email request/verify       | ✅                                                          |
-| 12  | Онбординг — телефон                    | `/onboarding/phone`         | ⬜      | onboarding phone OTP                  | ✅                                                          |
-| 13  | Онбординг — устройство                 | `/onboarding/device`        | ⬜      | device register + onboarding verify   | ✅ (web platform — см. BE)                                  |
-| 14  | Онбординг — пароль                     | `/onboarding/password`      | ⬜      | password/setup                        | ✅                                                          |
-| 15  | Онбординг — адрес семьи                | `/onboarding/workspace`     | ⬜      | workspace/finalize                    | ✅                                                          |
-| 16  | Семья создана                          | `/onboarding/done`          | ⬜      | — (данные finalize)                   | —                                                           |
+| 11  | Онбординг — почта                      | `/onboarding/email`         | ⬜ → PR | onboarding email request/verify       | ✅                                                          |
+| 12  | Онбординг — телефон                    | `/onboarding/phone`         | ⬜ → PR | onboarding phone OTP                  | ✅                                                          |
+| 13  | Онбординг — устройство                 | `/onboarding/device`        | ⬜ → PR | device register + onboarding verify   | ✅ (web platform — см. BE)                                  |
+| 14  | Онбординг — пароль                     | `/onboarding/password`      | ⬜ → PR | password/setup                        | ✅                                                          |
+| 15  | Онбординг — адрес семьи                | `/onboarding/workspace`     | ⬜ → PR | workspace/finalize                    | ✅                                                          |
+| 16  | Семья создана                          | `/onboarding/done`          | ⬜ → PR | — (данные finalize)                   | —                                                           |
 | 17  | Пригласить участника                   | `/families/.../invites/new` | ⬜      | member-invites + lookup + avatar      | ❌                                                          |
 | 18  | Приглашение отправлено (новый)         | —                           | ⬜      | member-invites 201                    | ❌                                                          |
 | 19  | Приглашение отправлено (existing)      | —                           | ⬜      | member-invites                        | ❌                                                          |
