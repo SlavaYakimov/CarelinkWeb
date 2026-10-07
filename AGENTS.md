@@ -13,7 +13,7 @@
 ## Код
 
 - Серверные модули: `import 'server-only'`.
-- Формы (этап 1+): zod + Server Action + тест; экраны — e2e из §6 плана.
+- Формы (этап 1+): zod + Server Action + тест; экраны — e2e из §6 плана. **Playwright** — page/routing specs в `tests/e2e/`; **Cypress** — multi-step user flow в `cypress/e2e/`.
 - Тексты UI — через `messages/ru.json` (когда появится i18n).
 - PR до ~400 строк (без lockfile и сгенерированных типов).
 

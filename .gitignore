@@ -12,6 +12,9 @@
 /coverage
 /playwright-report
 /test-results
+/cypress/videos
+/cypress/screenshots
+/cypress/downloads
 
 # next.js
 /.next/

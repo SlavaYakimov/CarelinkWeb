@@ -32,15 +32,21 @@ pnpm build
 pnpm contracts:check
 ```
 
-E2E (smoke):
+E2E:
+
+- **Playwright** (`tests/e2e/`) — страницы: роутинг, shell экранов, security smoke.
+- **Cypress** (`cypress/e2e/`) — пользовательские flow (multi-step).
 
 ```bash
-pnpm build && pnpm start   # в другом терминале
+cp .env.example .env.local   # SESSION_ENC_KEY + Redis
+pnpm build
 pnpm exec playwright install chromium
-pnpm test:e2e
+pnpm test:e2e                # Playwright (поднимает pnpm start через webServer)
+pnpm test:e2e:flows          # Cypress (start-server-and-test)
+pnpm test:e2e:all            # оба
 ```
 
-**TODO:** job `web-e2e` против полного docker-compose CarelinkAuth (приватный репо, нужен `GITHUB_TOKEN` / compose overlay BE-21).
+CI: job `web-e2e` (Redis + Playwright + Cypress). Полные happy-path (SMS OTP, онбординг) — **TODO** compose CarelinkAuth BE-21 / `cypress/e2e/_compose/`.
 
 ## Docker
 

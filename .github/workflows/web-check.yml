@@ -5,6 +5,14 @@ on:
     branches: [main, 'cursor/**']
   pull_request:
 
+env:
+  APP_ENV: development
+  APP_ORIGIN: http://127.0.0.1:3000
+  GATEWAY_URL: http://127.0.0.1:8088
+  REDIS_URL: redis://127.0.0.1:6379
+  COOKIE_SECURE: 'false'
+  COOKIE_PREFIX: ''
+
 jobs:
   web-check:
     runs-on: ubuntu-latest
@@ -33,24 +41,63 @@ jobs:
 
       - name: Unit tests
         run: pnpm test
-        env:
-          APP_ENV: development
-          APP_ORIGIN: http://localhost:3000
-          GATEWAY_URL: http://127.0.0.1:8088
-          REDIS_URL: redis://127.0.0.1:6379
 
       - name: Build
         run: pnpm build
-        env:
-          APP_ENV: development
-          APP_ORIGIN: http://localhost:3000
-          GATEWAY_URL: http://127.0.0.1:8088
-          REDIS_URL: redis://127.0.0.1:6379
-          COOKIE_SECURE: 'false'
-          COOKIE_PREFIX: ''
 
       - name: Contract types up to date
         run: pnpm contracts:check
+
+  web-e2e:
+    runs-on: ubuntu-latest
+    needs: web-check
+    env:
+      GATEWAY_URL: https://gateway-staging-0a47.up.railway.app
+    services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Prepare CI session encryption key
+        run: |
+          echo "SESSION_ENC_KEY=$(node -e "console.log(Buffer.alloc(32, 9).toString('base64'))")" >> "$GITHUB_ENV"
+
+      - name: Install Playwright browser
+        run: pnpm exec playwright install chromium --with-deps
+
+      - name: Build
+        run: pnpm build
+
+      - name: Playwright (pages)
+        run: pnpm test:e2e
+        env:
+          CI: 'true'
+
+      - name: Cypress (flows)
+        run: pnpm test:e2e:flows
+        env:
+          CI: 'true'
+
+      - name: Upload Cypress screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+          if-no-files-found: ignore
 
   gitleaks:
     runs-on: ubuntu-latest

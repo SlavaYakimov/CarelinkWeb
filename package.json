@@ -12,6 +12,10 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
+    "test:e2e:flows": "start-server-and-test \"pnpm start\" http://127.0.0.1:3000/login \"pnpm cypress:run\"",
+    "test:e2e:all": "pnpm test:e2e && pnpm test:e2e:flows",
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
     "contracts:generate": "openapi-typescript contracts/auth.openapi.yaml -o src/server/gateway/types.gen.ts",
     "contracts:check": "pnpm contracts:generate && git diff --exit-code src/server/gateway/types.gen.ts",
     "contracts:sync": "node scripts/contracts-sync.mjs"
@@ -37,6 +41,8 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
     "@playwright/test": "^1.55.0",
+    "cypress": "^13.17.0",
+    "start-server-and-test": "^2.0.12",
     "@tailwindcss/postcss": "^4.1.13",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
