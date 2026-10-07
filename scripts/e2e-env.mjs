@@ -2,6 +2,10 @@
 /**
  * Validates required env before E2E (local or CI). Exits 1 if misconfigured.
  */
+import { loadEnvLocal } from './e2e/load-env-local.mjs';
+
+loadEnvLocal();
+
 const required = ['APP_ENV', 'APP_ORIGIN', 'GATEWAY_URL', 'REDIS_URL', 'SESSION_ENC_KEY'];
 
 const missing = required.filter((key) => !process.env[key]?.trim());

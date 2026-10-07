@@ -15,9 +15,9 @@ export function jsonLogPayload(line) {
     return null;
   }
   const pipeIdx = line.indexOf('|');
-  if (pipeIdx === -1) return null;
+  const jsonText = pipeIdx === -1 ? line.trim() : line.slice(pipeIdx + 1).trim();
   try {
-    const payload = JSON.parse(line.slice(pipeIdx + 1).trim());
+    const payload = JSON.parse(jsonText);
     return typeof payload === 'object' && payload !== null ? payload : null;
   } catch {
     return null;
@@ -107,12 +107,60 @@ export function smsNeedles(to) {
  * @param {string} to
  * @returns {boolean}
  */
+/**
+ * CarelinkAuth mock logs SMS with phone_mask (+79******844), not full E.164.
+ */
+function normalizeRuMobileDigits(digits) {
+  if (digits.length === 10 && digits.startsWith('9')) return `7${digits}`;
+  if (digits.length === 11 && digits.startsWith('8')) return `7${digits.slice(1)}`;
+  return digits;
+}
+
+function maskMatchesPhoneDigits(phoneMask, toDigits) {
+  if (!phoneMask || !toDigits) return false;
+  const normalized = normalizeRuMobileDigits(toDigits.replace(/\D/g, ''));
+  const suffixMatch = phoneMask.match(/(\d+)$/);
+  const prefixMatch = phoneMask.match(/^\+?(\d+)/);
+  if (!suffixMatch || !prefixMatch) return false;
+  const suffix = suffixMatch[1];
+  const prefix = prefixMatch[1];
+  return normalized.endsWith(suffix) && normalized.startsWith(prefix);
+}
+
+function maskMatchesEmail(emailMask, to) {
+  const at = emailMask.indexOf('@');
+  if (at === -1) return false;
+  const maskLocal = emailMask.slice(0, at);
+  const maskDomain = emailMask.slice(at + 1).toLowerCase();
+  const toLower = to.toLowerCase();
+  const toAt = toLower.indexOf('@');
+  if (toAt === -1) return false;
+  const toLocal = toLower.slice(0, toAt);
+  const toDomain = toLower.slice(toAt + 1);
+  if (maskDomain !== toDomain) return false;
+  const visiblePrefix = maskLocal.replace(/\*/g, '');
+  if (!visiblePrefix) return false;
+  return toLocal.startsWith(visiblePrefix);
+}
+
 export function lineMatchesRecipient(line, channel, to) {
   const lower = line.toLowerCase();
   if (channel === 'email') {
-    return lower.includes(to.toLowerCase());
+    if (lower.includes(to.toLowerCase())) return true;
+    const payload = jsonLogPayload(line);
+    if (payload && typeof payload.email_mask === 'string') {
+      return maskMatchesEmail(payload.email_mask, to);
+    }
+    return false;
   }
-  return smsNeedles(to).some((n) => lower.includes(n));
+  const toDigits = to.replace(/\D/g, '');
+  if (smsNeedles(to).some((n) => lower.includes(n))) return true;
+
+  const payload = jsonLogPayload(line);
+  if (payload && typeof payload.phone_mask === 'string') {
+    return maskMatchesPhoneDigits(payload.phone_mask, toDigits);
+  }
+  return false;
 }
 
 /**
@@ -121,7 +169,7 @@ export function lineMatchesRecipient(line, channel, to) {
  * @returns {string | null}
  */
 export function findOtpInLogs(logs, opts) {
-  const { channel, to, skipPriorMatches = 0 } = opts;
+  const { channel, to, skipPriorMatches = 0, minRecipientMatches = 1, excludeCode } = opts;
   const lines = logs.split('\n').filter(Boolean);
   const matches = [];
 
@@ -139,8 +187,11 @@ export function findOtpInLogs(logs, opts) {
   }
 
   const withRecipient = matches.filter((m) => m.prefersRecipient);
-  const pool = withRecipient.length > 0 ? withRecipient : matches;
-  if (pool.length === 0) return null;
+  let pool = withRecipient.length > 0 ? withRecipient : matches;
+  if (excludeCode) {
+    pool = pool.filter((m) => m.code !== excludeCode);
+  }
+  if (pool.length === 0 || withRecipient.length < minRecipientMatches) return null;
 
   const pick = pool[skipPriorMatches];
   if (!pick) return null;

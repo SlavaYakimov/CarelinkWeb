@@ -44,7 +44,7 @@ async function fetchNotificationLogs() {
  * @returns {Promise<string>} 6-digit code
  */
 export async function fetchOnboardingOtp(args) {
-  const { channel, to, skipPriorMatches = 0 } = args;
+  const { channel, to, skipPriorMatches = 0, minRecipientMatches = 1, excludeCode } = args;
   if (!channel || !to) {
     throw new Error('fetchOnboardingOtp requires { channel, to }');
   }
@@ -54,7 +54,13 @@ export async function fetchOnboardingOtp(args) {
   for (let attempt = 0; attempt < POLL_RETRIES; attempt += 1) {
     try {
       const logs = await fetchNotificationLogs();
-      const code = findOtpInLogs(logs, { channel, to, skipPriorMatches });
+      const code = findOtpInLogs(logs, {
+        channel,
+        to,
+        skipPriorMatches,
+        minRecipientMatches,
+        excludeCode,
+      });
       if (code) return code;
       lastError = new Error(
         `No ${channel} OTP in logs for recipient (attempt ${attempt + 1}/${POLL_RETRIES})`,
@@ -81,16 +87,39 @@ export async function fetchOnboardingOtp(args) {
   );
 }
 
+function parseFetchCliArgs(argv) {
+  let skipPriorMatches = 0;
+  let minRecipientMatches = 1;
+  let excludeCode;
+  const positional = [];
+  for (let i = 2; i < argv.length; i += 1) {
+    const arg = argv[i];
+    if (arg === '--min-recipient-matches') {
+      const n = Number.parseInt(argv[i + 1] ?? '', 10);
+      if (!Number.isNaN(n)) minRecipientMatches = n;
+      i += 1;
+      continue;
+    }
+    if (arg === '--exclude-code') {
+      excludeCode = argv[i + 1];
+      i += 1;
+      continue;
+    }
+    positional.push(arg);
+  }
+  const skip = positional[2] ? Number.parseInt(positional[2], 10) : 0;
+  return {
+    channel: positional[0],
+    to: positional[1],
+    skipPriorMatches: Number.isNaN(skip) ? 0 : skip,
+    minRecipientMatches,
+    excludeCode,
+  };
+}
+
 const isMain = process.argv[1]?.endsWith('fetch-onboarding-otp.mjs');
 if (isMain) {
-  const channel = process.argv[2];
-  const to = process.argv[3];
-  const skip = process.argv[4] ? Number.parseInt(process.argv[4], 10) : 0;
-  fetchOnboardingOtp({
-    channel,
-    to,
-    skipPriorMatches: Number.isNaN(skip) ? 0 : skip,
-  })
+  fetchOnboardingOtp(parseFetchCliArgs(process.argv))
     .then((code) => {
       process.stdout.write(code);
     })

@@ -5,8 +5,11 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { assertCarelinkAuthRoot, resolveCarelinkAuthRoot } from './e2e/carelink-auth-compose.mjs';
+import { loadEnvLocal } from './e2e/load-env-local.mjs';
 
 const exec = promisify(execFile);
+
+loadEnvLocal();
 
 const required = ['APP_ENV', 'APP_ORIGIN', 'GATEWAY_URL', 'REDIS_URL', 'SESSION_ENC_KEY'];
 const missing = required.filter((key) => !process.env[key]?.trim());

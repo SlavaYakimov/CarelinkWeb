@@ -1,6 +1,4 @@
 import { describe, it, expect } from 'vitest';
-/* eslint-disable @typescript-eslint/ban-ts-comment -- scripts/e2e .mjs helper */
-// @ts-ignore
 import {
   extractEmailCode,
   extractSmsCode,
