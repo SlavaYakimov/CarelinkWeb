@@ -33,6 +33,8 @@ export type FlowRecord = {
   /** From login checkbox — false = guest / «чужой компьютер» (Q6). */
   trustDevice?: boolean;
   smsSentAt?: string;
+  /** Onboarding device step: SMS for trusting browser (separate from phone OTP). */
+  deviceSmsSentAt?: string;
   delegatePushSentAt?: string;
   challengeId?: string;
   onboardingChallengeId?: string;

@@ -3,7 +3,7 @@ import { requireOnboardingFlow } from '@/server/flows/onboarding-flow';
 
 export default async function OnboardingDevicePage() {
   const { flow } = await requireOnboardingFlow('device');
-  const smsAlreadySent = Boolean(flow.smsSentAt);
+  const smsAlreadySent = Boolean(flow.deviceSmsSentAt);
 
   return <OnboardingDeviceForm smsAlreadySent={smsAlreadySent} />;
 }

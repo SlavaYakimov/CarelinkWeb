@@ -12,6 +12,7 @@ import {
   normalizeWorkspaceSlug,
 } from '@/lib/workspace-slug';
 import { GatewayError } from '@/server/gateway/errors';
+import { gatewayRegisterDevice } from '@/server/gateway/devices';
 import {
   onboardingCheckWorkspaceSlug,
   onboardingConfirmDevice,
@@ -36,6 +37,26 @@ import { bindNewSession, getSession } from '@/server/session/get-session';
 import { sessionRecordFromAuthResponse } from '@/server/session/from-auth-session';
 import { newFlowId } from '@/server/session/store';
 import type { FlowRecord } from '@/server/session/types';
+
+type OnboardingPhoneVerifyResult = Awaited<ReturnType<typeof onboardingVerifyPhone>> & {
+  deviceRegistrationToken?: string;
+};
+
+async function ensureOnboardingDeviceRegistered(
+  flow: FlowRecord,
+  ctx: { clientIp: string; deviceId: string },
+): Promise<void> {
+  const token = flow.deviceRegistrationToken?.trim();
+  if (!token) return;
+  await gatewayRegisterDevice(
+    {
+      platform: 'ios',
+      device_id: ctx.deviceId,
+      token: 'web-onboarding-device-stub',
+    },
+    { clientIp: ctx.clientIp, deviceId: ctx.deviceId, accessToken: token },
+  );
+}
 import { withServerAction } from '@/server/session/with-session-handler';
 
 const emailSchema = z.object({
@@ -297,7 +318,7 @@ async function confirmOnboardingPhoneOtpActionImpl(
   const { clientIp, deviceId } = await gatewayActionContext();
 
   try {
-    const verified = await onboardingVerifyPhone(
+    const verified = (await onboardingVerifyPhone(
       {
         onboardingChallengeId,
         phone: phoneE164,
@@ -305,7 +326,7 @@ async function confirmOnboardingPhoneOtpActionImpl(
         displayName,
       },
       { clientIp, deviceId },
-    );
+    )) as OnboardingPhoneVerifyResult;
 
     if (verified.existingUser) {
       await clearOnboardingFlow(fid);
@@ -317,6 +338,7 @@ async function confirmOnboardingPhoneOtpActionImpl(
       step: 'device',
       userId: verified.userId,
       onboardingChallengeId: verified.onboardingChallengeId,
+      deviceRegistrationToken: verified.deviceRegistrationToken,
     };
     await persistOnboardingFlow(fid, updated);
     redirect('/onboarding/device');
@@ -355,11 +377,12 @@ async function sendOnboardingDeviceSmsActionImpl(
   const { clientIp, deviceId } = await gatewayActionContext();
 
   try {
+    await ensureOnboardingDeviceRegistered(flow, { clientIp, deviceId });
     await onboardingDeviceVerifyRequestSms(
       { onboardingChallengeId, userId, deviceId, phone: phoneE164 },
       { clientIp, deviceId },
     );
-    await persistOnboardingFlow(fid, { ...flow, smsSentAt: new Date().toISOString() });
+    await persistOnboardingFlow(fid, { ...flow, deviceSmsSentAt: new Date().toISOString() });
     return { smsSent: true };
   } catch (err) {
     if (err instanceof GatewayError) {
@@ -586,6 +609,9 @@ async function finalizeOnboardingWorkspaceActionImpl(
 
   const sessionCtx = await getSession();
   if (!sessionCtx || !flow.deviceSession) {
+    if (flow.step !== 'password') {
+      await persistOnboardingFlow(fid, { ...flow, step: 'password' });
+    }
     redirect('/onboarding/password');
   }
 
