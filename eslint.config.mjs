@@ -1,22 +1,18 @@
-import { dirname } from 'node:path';
-import { fileURLToPath } from 'node:url';
-import { FlatCompat } from '@eslint/eslintrc';
+import coreWebVitals from 'eslint-config-next/core-web-vitals';
+import nextTypescript from 'eslint-config-next/typescript';
 import security from 'eslint-plugin-security';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
 const eslintConfig = [
-  ...compat.extends('next/core-web-vitals', 'next/typescript'),
+  ...coreWebVitals,
+  ...nextTypescript,
   {
     plugins: { security },
     rules: {
       ...security.configs.recommended.rules,
       'security/detect-object-injection': 'off',
+      // eslint-config-next 16 / react-hooks v7 — stricter than pre-15 baseline; revisit in UI pass
+      'react-hooks/error-boundaries': 'off',
+      'react-hooks/set-state-in-effect': 'off',
     },
   },
   {
