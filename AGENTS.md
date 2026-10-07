@@ -17,6 +17,10 @@
 - Тексты UI — через `messages/ru.json` (когда появится i18n).
 - PR до ~400 строк (без lockfile и сгенерированных типов).
 
+## Коммиты
+
+Subject — conventional commits на английском (`type(scope): …`). Тело — секции **Задача / Зачем / Что сделано** на русском. Подробности: [`.cursor/rules/commits.mdc`](.cursor/rules/commits.mdc).
+
 ## Проверка
 
 ```bash

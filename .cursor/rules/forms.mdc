@@ -1,0 +1,34 @@
+---
+description: Клиентские формы Carelink — состояние полей, секреты, валидация, микрофлоу «отправить → код».
+globs: src/components/carelink/**/*Form.tsx,src/server/actions/**
+alwaysApply: false
+---
+
+# Формы
+
+Флоу (шаг, переходы, `deviceSession`) — только на сервере: `src/server/flows/*` + Redis.
+Клиент держит лишь значения полей текущей страницы. Глобальных клиентских сторов для флоу нет.
+
+## Состояние
+
+- Поля — `useState` в форме; дефолты с сервера — только как начальное значение.
+- Этап микрофлоу («код отправлен») выводится из props сервера (`smsAlreadySent`, `otpAlreadySent`)
+  или результата action, а не только из клиентского state — должен переживать reload.
+- Телефон — `usePhoneField` (display + E.164, `submitValue` в hidden input), таймер переотправки —
+  `useResendCountdown`. Не дублировать эту логику в `onChange` / `useEffect` формы.
+
+## Секреты
+
+- OTP — в state только пока вводится; после успешной проверки не хранить.
+- Пароль не держать дольше одного submit; не прокидывать между шагами.
+- Никаких `localStorage` / `sessionStorage` для значений форм.
+
+## Валидация
+
+- zod в Server Action — обязательно. Клиент — только формат для disabled-кнопки.
+- Ошибки — из state action (`error`, `fieldErrors`), не дублировать в клиенте.
+
+## Ввод
+
+- Фокус OTP — refs; клавиатура — `inputMode` / `autoComplete` (`one-time-code`, `tel`,
+  `current-password`, `new-password`).

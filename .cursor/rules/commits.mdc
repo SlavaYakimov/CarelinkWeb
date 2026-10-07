@@ -1,0 +1,56 @@
+---
+description: Epic-коммиты — conventional subject (EN) и тело Задача / Зачем / Что сделано (RU)
+alwaysApply: true
+---
+
+# Epic commit (Задача / Зачем / Что сделано)
+
+## Когда
+
+- Пользователь просит закоммитить, разбить `git status` на эпики или переписать сообщения.
+- Любой коммит в **carelinkweb**, если не указан другой формат.
+
+## Жёсткие правила
+
+1. Коммитить **только** по явному запросу (или «разбей status на эпики»).
+2. **Не** добавлять `Co-authored-by: Cursor` и прочие co-author trailer'ы.
+3. **Не** менять git config; без `git rebase -i` / `git add -i`; без force-push, пока не попросили.
+4. Несколько эпик-коммитов лучше одного «свалки», если в дереве разные задачи.
+5. Сообщение — через HEREDOC (`git commit -m "$(cat <<'EOF' ... EOF)"`).
+
+Процесс (`git status`, `diff`, `log`) — как в user rules; **тело** — только шаблон ниже.
+
+## Шаблон сообщения
+
+Subject: `type(scope): short summary` — English, imperative, ≤72 символов.
+
+Тело — **ровно** три секции по-русски:
+
+```text
+type(scope): short summary
+
+Задача:
+<1–3 строки — цель>
+
+Зачем:
+<1–3 строки — мотивация, баг, риск>
+
+Что сделано:
+- <файл / поведение>
+- …
+```
+
+Типы: `feat` · `fix` · `refactor` · `test` · `chore` · `docs` · `style` · `perf`
+
+Scope (примеры для Carelink): `e2e`, `onboarding`, `auth`, `forms`, `gateway`, `app`, `chore`, `cursor`, `env`
+
+## Разбивка на эпики
+
+1. Параллельно: `git status`, `git diff --stat`, `git log --oneline -10`.
+2. Группы: locale → lib/hooks → server/api → UI; не смешивать без нужды.
+3. Коммиты по порядку зависимостей; в конце `git status` и таблица hash · subject · files.
+4. **Не пушить**, пока не попросили.
+
+## Переписывание истории
+
+Только незапушенные или по явному согласию на force-with-lease. Без интерактивного rebase; предпочитать `reset --soft` + пересборку наборов файлов или `filter-branch --msg-filter`.
