@@ -3,14 +3,14 @@
 import * as React from 'react';
 import { useActionState } from 'react';
 import Link from 'next/link';
-import { Building2, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { signInAction, type SignInFormState } from '@/server/actions/sign-in';
+import { parseWorkspaceSlugFromLogin } from '@/lib/workspace-slug';
 import { PasswordField } from '@/components/carelink/PasswordField';
+import { WorkspaceSlugField } from '@/components/carelink/WorkspaceSlugField';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 
 const initialState: SignInFormState = {};
 
@@ -22,7 +22,10 @@ export type LoginFormProps = {
 export function LoginForm({ nextPath, defaultEmail = '' }: LoginFormProps) {
   const [state, formAction, pending] = useActionState(signInAction, initialState);
   const [password, setPassword] = React.useState('');
-  const email = state.workspaceEmail ?? defaultEmail;
+  const defaultSlug =
+    state.workspaceSlug !== undefined
+      ? state.workspaceSlug
+      : parseWorkspaceSlugFromLogin(defaultEmail);
 
   return (
     <Card className="mx-auto w-full max-w-[440px] shadow-card">
@@ -40,40 +43,16 @@ export function LoginForm({ nextPath, defaultEmail = '' }: LoginFormProps) {
             </Alert>
           ) : null}
 
-          <div className="space-y-2">
-            <div className="flex items-center justify-between gap-2">
-              <Label htmlFor="workspaceEmail">Workspace-логин</Label>
-              <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-medium text-accent-foreground">
-                Обязательно
-              </span>
-            </div>
-            <div className="relative">
-              <Building2
-                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
-                aria-hidden
-              />
-              <Input
-                id="workspaceEmail"
-                name="workspaceEmail"
-                type="email"
-                autoComplete="username"
-                className="pl-9"
-                placeholder="ivanovy@workspaces.carelink.app"
-                defaultValue={email}
-                aria-invalid={Boolean(state.fieldErrors?.workspaceEmail)}
-                disabled={pending}
-              />
-            </div>
-            {state.fieldErrors?.workspaceEmail ? (
-              <p className="text-sm text-destructive" role="alert">
-                {state.fieldErrors.workspaceEmail}
-              </p>
-            ) : (
-              <p className="text-xs text-muted-foreground">
-                Логин выдаётся при создании семьи или приходит в письме-приглашении.
-              </p>
-            )}
-          </div>
+          <WorkspaceSlugField
+            id="workspaceSlug"
+            name="workspaceSlug"
+            label="Адрес семьи (латиница)"
+            defaultValue={defaultSlug}
+            error={state.fieldErrors?.workspaceSlug}
+            disabled={pending}
+            required
+            autoComplete="username"
+          />
 
           <PasswordField
             id="password"

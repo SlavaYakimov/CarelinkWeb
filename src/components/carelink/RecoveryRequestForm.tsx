@@ -5,9 +5,8 @@ import { useActionState } from 'react';
 import Link from 'next/link';
 import { recoveryRequestAction, type RecoveryRequestFormState } from '@/server/actions/recovery';
 import { PhoneInput } from '@/components/carelink/PhoneInput';
+import { WorkspaceSlugField } from '@/components/carelink/WorkspaceSlugField';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 
 const initial: RecoveryRequestFormState = {};
 
@@ -23,29 +22,14 @@ export function RecoveryRequestForm() {
         </p>
       ) : null}
 
-      <div className="space-y-2">
-        <Label htmlFor="familySlug">Адрес семьи (латиница)</Label>
-        <div className="flex overflow-hidden rounded-lg border border-input bg-card shadow-card focus-within:ring-[3px] focus-within:ring-ring">
-          <Input
-            id="familySlug"
-            name="familySlug"
-            className="border-0 shadow-none focus-visible:ring-0"
-            placeholder="ivanovy"
-            disabled={pending}
-            aria-invalid={Boolean(state.fieldErrors?.familySlug)}
-          />
-          <span className="flex items-center border-l border-border bg-muted px-3 text-sm text-muted-foreground">
-            @workspaces.carelink.app
-          </span>
-        </div>
-        {state.fieldErrors?.familySlug ? (
-          <p className="text-sm text-destructive" role="alert">
-            {state.fieldErrors.familySlug}
-          </p>
-        ) : (
-          <p className="text-xs text-muted-foreground">Часть workspace-логина до @</p>
-        )}
-      </div>
+      <WorkspaceSlugField
+        id="familySlug"
+        name="familySlug"
+        label="Адрес семьи (латиница)"
+        error={state.fieldErrors?.familySlug}
+        disabled={pending}
+        required
+      />
 
       <input type="hidden" name="phone" value={phone} />
       <PhoneInput

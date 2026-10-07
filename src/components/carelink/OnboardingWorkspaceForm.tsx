@@ -11,6 +11,7 @@ import {
 } from '@/server/actions/onboarding';
 import { formatWorkspaceLogin, isValidWorkspaceSlug } from '@/lib/workspace-slug';
 import { StepShell } from '@/components/carelink/StepShell';
+import { WorkspaceSlugField } from '@/components/carelink/WorkspaceSlugField';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -104,17 +105,17 @@ export function OnboardingWorkspaceForm({
     return () => window.clearTimeout(timer);
   }, [slug, runSlugCheck]);
 
-  const preview =
-    state.slugPreview ??
-    (slugCheck.phase === 'done' &&
-    (slugCheck.result.status === 'available' || slugCheck.result.status === 'taken')
-      ? formatWorkspaceLogin(slugCheck.result.workspaceSlug)
-      : slug
-        ? formatWorkspaceLogin(slug)
-        : '');
-
   const workspaceSlugError = slugFieldError(state.fieldErrors?.workspaceSlug, slugCheck);
   const submitEnabled = canSubmitSlug(slug, slugCheck, pending);
+
+  const slugFooter =
+    slugCheck.phase === 'checking' ? (
+      <p className="text-xs text-muted-foreground">Проверяем, свободен ли адрес…</p>
+    ) : slugCheck.phase === 'done' && slugCheck.result.status === 'available' ? (
+      <p className="text-xs text-muted-foreground">
+        Логин для входа: {formatWorkspaceLogin(slugCheck.result.workspaceSlug)}
+      </p>
+    ) : null;
 
   return (
     <StepShell
@@ -143,30 +144,19 @@ export function OnboardingWorkspaceForm({
             <p className="text-sm text-destructive">{state.fieldErrors.displayName}</p>
           ) : null}
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="workspaceSlug">Адрес семьи</Label>
-          <Input
-            id="workspaceSlug"
-            name="workspaceSlug"
-            value={slug}
-            onChange={(e) => setSlug(e.target.value)}
-            onBlur={() => void runSlugCheck(slug)}
-            placeholder="ivanovy"
-            autoComplete="off"
-            disabled={pending}
-            required
-            aria-invalid={Boolean(workspaceSlugError)}
-          />
-          {workspaceSlugError ? (
-            <p className="text-sm text-destructive">{workspaceSlugError}</p>
-          ) : slugCheck.phase === 'checking' ? (
-            <p className="text-xs text-muted-foreground">Проверяем, свободен ли адрес…</p>
-          ) : (
-            <p className="text-xs text-muted-foreground">
-              Логин для входа: {preview || 'slug@workspaces.carelink.app'}
-            </p>
-          )}
-        </div>
+        <WorkspaceSlugField
+          id="workspaceSlug"
+          name="workspaceSlug"
+          label="Адрес семьи"
+          hint="Часть workspace-логина до @"
+          value={slug}
+          onChange={setSlug}
+          onBlur={() => void runSlugCheck(slug)}
+          error={workspaceSlugError}
+          disabled={pending}
+          required
+          footer={slugFooter}
+        />
         <Button type="submit" className="w-full" disabled={!submitEnabled}>
           Создать семью
           <ArrowRight className="size-4" aria-hidden />

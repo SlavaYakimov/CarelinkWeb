@@ -1,28 +1,22 @@
-import { describe, it, expect } from 'vitest';
-import {
-  formatWorkspaceLogin,
-  isValidWorkspaceSlug,
-  normalizeEmailOtp,
-  normalizeWorkspaceSlug,
-} from '@/lib/workspace-slug';
+import { describe, expect, it } from 'vitest';
+import { formatWorkspaceLogin, parseWorkspaceSlugFromLogin } from '@/lib/workspace-slug';
 
-describe('workspace slug helpers', () => {
-  it('normalizes slug', () => {
-    expect(normalizeWorkspaceSlug('  Ivanovy  ')).toBe('ivanovy');
+describe('parseWorkspaceSlugFromLogin', () => {
+  it('extracts local part from workspace email', () => {
+    expect(parseWorkspaceSlugFromLogin('ivanovy@workspaces.carelink.app')).toBe('ivanovy');
   });
 
-  it('validates slug pattern', () => {
-    expect(isValidWorkspaceSlug('ab')).toBe(false);
-    expect(isValidWorkspaceSlug('ivanovy')).toBe(true);
-    expect(isValidWorkspaceSlug('ivanovy-family')).toBe(true);
-    expect(isValidWorkspaceSlug('-bad')).toBe(false);
+  it('normalizes bare slug', () => {
+    expect(parseWorkspaceSlugFromLogin('  Ivanovy  ')).toBe('ivanovy');
   });
 
-  it('formats workspace login', () => {
+  it('returns slug when domain is not workspace', () => {
+    expect(parseWorkspaceSlugFromLogin('user@example.com')).toBe('user@example.com');
+  });
+});
+
+describe('formatWorkspaceLogin', () => {
+  it('builds full login', () => {
     expect(formatWorkspaceLogin('ivanovy')).toBe('ivanovy@workspaces.carelink.app');
-  });
-
-  it('normalizes email otp', () => {
-    expect(normalizeEmailOtp('123-456')).toBe('123456');
   });
 });

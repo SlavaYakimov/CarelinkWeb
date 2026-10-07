@@ -3,7 +3,12 @@
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
-import { isPlausibleWorkspaceEmail, normalizeWorkspaceEmail } from '@/lib/workspace-email';
+import { normalizeWorkspaceEmail } from '@/lib/workspace-email';
+import {
+  formatWorkspaceLogin,
+  isValidWorkspaceSlug,
+  normalizeWorkspaceSlug,
+} from '@/lib/workspace-slug';
 import { GatewayError } from '@/server/gateway/errors';
 import { workspaceSignIn } from '@/server/gateway/auth';
 import { clearSignInFlow, persistSignInFlow } from '@/server/flows/signin-flow';
@@ -21,11 +26,16 @@ import { deleteSession, loadSession, newFlowId } from '@/server/session/store';
 import type { FlowRecord } from '@/server/session/types';
 import { withServerAction } from '@/server/session/with-session-handler';
 
+const workspaceSlugSchema = z
+  .string()
+  .trim()
+  .min(3, 'Адрес семьи не короче 3 символов')
+  .max(32, 'Слишком длинный адрес')
+  .refine((v) => /^[a-z0-9-]+$/i.test(v), 'Только латиница, цифры и дефис')
+  .refine((v) => isValidWorkspaceSlug(v), 'Только латиница, цифры и дефис, от 3 до 32 символов');
+
 const signInSchema = z.object({
-  workspaceEmail: z
-    .string()
-    .min(1, 'Укажите workspace-логин')
-    .refine(isPlausibleWorkspaceEmail, 'Проверьте формат логина'),
+  workspaceSlug: z.string().min(1, 'Укажите адрес семьи').pipe(workspaceSlugSchema),
   password: z.string().min(8, 'Не короче 8 символов'),
   trustDevice: z
     .union([z.literal('on'), z.literal('true'), z.literal('1'), z.undefined()])
@@ -35,8 +45,8 @@ const signInSchema = z.object({
 
 export type SignInFormState = {
   formError?: string;
-  fieldErrors?: { workspaceEmail?: string; password?: string };
-  workspaceEmail?: string;
+  fieldErrors?: { workspaceSlug?: string; password?: string };
+  workspaceSlug?: string;
 };
 
 function credentialMessage(): string {
@@ -47,8 +57,9 @@ async function signInActionImpl(
   _prev: SignInFormState,
   formData: FormData,
 ): Promise<SignInFormState> {
+  const rawSlug = String(formData.get('workspaceSlug') ?? '');
   const parsed = signInSchema.safeParse({
-    workspaceEmail: formData.get('workspaceEmail'),
+    workspaceSlug: rawSlug,
     password: formData.get('password'),
     trustDevice: formData.get('trustDevice') ?? undefined,
     next: formData.get('next') ?? undefined,
@@ -58,15 +69,16 @@ async function signInActionImpl(
     const flat = parsed.error.flatten().fieldErrors;
     return {
       fieldErrors: {
-        workspaceEmail: flat.workspaceEmail?.[0],
+        workspaceSlug: flat.workspaceSlug?.[0],
         password: flat.password?.[0],
       },
-      workspaceEmail: String(formData.get('workspaceEmail') ?? ''),
+      workspaceSlug: normalizeWorkspaceSlug(rawSlug),
     };
   }
 
   const { password, trustDevice } = parsed.data;
-  const workspaceEmail = normalizeWorkspaceEmail(parsed.data.workspaceEmail);
+  const workspaceSlug = normalizeWorkspaceSlug(parsed.data.workspaceSlug);
+  const workspaceEmail = normalizeWorkspaceEmail(formatWorkspaceLogin(workspaceSlug));
   const next = sanitizeNextParam(parsed.data.next);
   const guestMode = trustDevice !== 'on' && trustDevice !== 'true' && trustDevice !== '1';
 
@@ -158,7 +170,7 @@ async function signInActionImpl(
 
     return {
       formError: 'Сервис вернул неожиданный ответ. Попробуйте позже.',
-      workspaceEmail,
+      workspaceSlug,
     };
   } catch (err) {
     if (err instanceof GatewayError) {
@@ -173,12 +185,12 @@ async function signInActionImpl(
         return {
           fieldErrors: { password: credentialMessage() },
           formError: 'Не удалось войти. Проверьте логин и пароль.',
-          workspaceEmail,
+          workspaceSlug,
         };
       }
       return {
         formError: 'Не удалось войти. Проверьте логин и пароль.',
-        workspaceEmail,
+        workspaceSlug,
       };
     }
     throw err;

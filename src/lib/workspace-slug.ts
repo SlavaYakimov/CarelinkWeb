@@ -1,5 +1,25 @@
+export const WORKSPACE_LOGIN_DOMAIN = 'workspaces.carelink.app';
+
 export function normalizeWorkspaceSlug(raw: string): string {
   return raw.trim().toLowerCase();
+}
+
+/** For login forms: full workspace email or bare slug → slug for the input. */
+export function parseWorkspaceSlugFromLogin(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return '';
+  const at = trimmed.indexOf('@');
+  if (at > 0) {
+    const local = trimmed.slice(0, at).trim();
+    const domain = trimmed
+      .slice(at + 1)
+      .trim()
+      .toLowerCase();
+    if (domain === WORKSPACE_LOGIN_DOMAIN) {
+      return normalizeWorkspaceSlug(local);
+    }
+  }
+  return normalizeWorkspaceSlug(trimmed);
 }
 
 export function isValidWorkspaceSlug(slug: string): boolean {

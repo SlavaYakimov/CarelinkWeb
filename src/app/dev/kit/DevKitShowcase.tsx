@@ -6,6 +6,7 @@ import { OtpInput } from '@/components/carelink/OtpInput';
 import { PasswordField } from '@/components/carelink/PasswordField';
 import { PhoneInput } from '@/components/carelink/PhoneInput';
 import { StepShell } from '@/components/carelink/StepShell';
+import { WorkspaceSlugField } from '@/components/carelink/WorkspaceSlugField';
 import { ErrorScreen } from '@/components/carelink/ErrorScreen';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -19,7 +20,6 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { getErrorMessage } from '@/lib/messages';
 
 export function DevKitShowcase() {
@@ -69,10 +69,11 @@ export function DevKitShowcase() {
 
       <Section title="Input & Label">
         <div className="grid max-w-md gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="demo-input">Workspace-логин</Label>
-            <Input id="demo-input" placeholder="ivanovy@workspaces.carelink.app" />
-          </div>
+          <WorkspaceSlugField
+            id="demo-workspace-slug"
+            name="demoWorkspaceSlug"
+            label="Адрес семьи (латиница)"
+          />
           <Input aria-invalid placeholder="Ошибка" defaultValue="неверное значение" />
           <Input disabled placeholder="Disabled" />
         </div>
