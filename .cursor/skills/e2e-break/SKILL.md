@@ -24,7 +24,13 @@ description: Пишет негативные и граничные Cypress-те�
   "flow": "<slug>",
   "specs": ["cypress/e2e/<slug>.negative.cy.ts"],
   "risks": [
-    { "id": "R-1", "test": "it name | null", "reason": "если test = null", "result": "pass | fail | flaky-under-noise", "bug": "BUG-2 | null" }
+    {
+      "id": "R-1",
+      "test": "it name | null",
+      "reason": "если test = null",
+      "result": "pass | fail | flaky-under-noise",
+      "bug": "BUG-2 | null"
+    }
   ],
   "bugs": [
     {

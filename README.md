@@ -29,6 +29,17 @@ pnpm dev
 
 Health: [http://localhost:3000/api/health](http://localhost:3000/api/health)
 
+## Безопасность зависимостей
+
+`pnpm audit` после обновления Next 16 / Vitest 4 / Cypress 16 может показывать **2** записи без upstream-патча (dev-only):
+
+| Пакет        | Цепочка                                           | Риск                           |
+| ------------ | ------------------------------------------------- | ------------------------------ |
+| `braces`     | `eslint-config-next` → `fast-glob` → `micromatch` | только `pnpm lint` в dev/CI    |
+| `sprintf-js` | `ioredis-mock` → `fengari`                        | только unit-тесты с fake Redis |
+
+Переоценивать при обновлении ESLint-плагинов Next и `ioredis-mock`.
+
 ## Проверки
 
 ```bash
@@ -67,12 +78,15 @@ Playwright проверяет только роутинг онбординга (
 ```bash
 # 1) Backend (sibling repo)
 git clone https://github.com/SlavaYakimov/CarelinkAuth.git ../CarelinkAuth
-cd ../CarelinkAuth && make compose-web-e2e-up
+cd ../CarelinkAuth && make compose-web-e2e-up   # пересобирает auth-service (--build)
 
 # 2) Redis + .env.local (GATEWAY_URL=http://127.0.0.1:8088, SESSION_ENC_KEY, REDIS_URL)
+#    Preflight scripts (test:e2e*, scripts/e2e-env.mjs) подхватывают .env.local автоматически.
+#    Compose negative/happy: cy.task('flushE2eRedis') сбрасывает REDIS_URL и Redis стека CarelinkAuth (лимиты OTP).
 
 pnpm build
 pnpm test:e2e:compose:onboarding
+pnpm test:e2e:compose:onboarding:negative
 ```
 
 Ручной OTP из логов: `node scripts/e2e/fetch-onboarding-otp.mjs email 'you@example.com'`

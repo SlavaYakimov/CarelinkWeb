@@ -19,29 +19,29 @@
 
 ## Последовательность
 
-| # | Skill | Subagent | Вход | Выход | Критерий готовности |
-|---|---|---|---|---|---|
-| 1 | `e2e-recon` | `explore`, thoroughness: very thorough | имя flow | `recon.md` | есть список custom-команд, маршрутов, env-команд; есть результат реальной проверки окружения (compose/backend) выводом команд |
-| 2 | `e2e-flow-map` | `generalPurpose` | `recon.md` + flow от пользователя | `flow.md` | каждый шаг имеет URL, действие, ожидаемый результат, `file:line` компонента/action; есть секции «Расхождения», «Боковые выходы», «Не покрыть сейчас» |
-| — | стоп-точка | — | — | резюме в чат | — |
-| 3 | `e2e-risks` | `generalPurpose` | `flow.md`, `recon.md` | `risks.md` | ≥1 риск на каждую из 8 категорий (таймеры, сессия, валидация, backend-ошибки, повтор, данные, селекторы, утечки) или явное «неприменимо, потому что…» |
-| 4 | `e2e-happy-path` | `generalPurpose` | `flow.md`, `recon.md` | spec + `happy.json` | spec прошёл 2 раза подряд, лог прогона в `happy.json`; либо падение описано как `BUG-n` с `file:line` |
-| 5 | `e2e-break` | `generalPurpose` | `risks.md`, `happy.json`, `flow.md` | spec(ы) + `break.json` | каждый риск из `risks.md` имеет тест или причину, почему теста нет; падающие тесты помечены `BUG-n`, не «подогнаны» |
-| — | стоп-точка | — | — | резюме в чат | — |
-| 6 | `e2e-report` | `generalPurpose` | все артефакты | `report.md` | каждый finding имеет шаги, тест, `file:line`, frontend/backend; есть команды воспроизведения и вывод `pnpm lint && pnpm typecheck` |
+| #   | Skill            | Subagent                               | Вход                                | Выход                  | Критерий готовности                                                                                                                                   |
+| --- | ---------------- | -------------------------------------- | ----------------------------------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | `e2e-recon`      | `explore`, thoroughness: very thorough | имя flow                            | `recon.md`             | есть список custom-команд, маршрутов, env-команд; есть результат реальной проверки окружения (compose/backend) выводом команд                         |
+| 2   | `e2e-flow-map`   | `generalPurpose`                       | `recon.md` + flow от пользователя   | `flow.md`              | каждый шаг имеет URL, действие, ожидаемый результат, `file:line` компонента/action; есть секции «Расхождения», «Боковые выходы», «Не покрыть сейчас»  |
+| —   | стоп-точка       | —                                      | —                                   | резюме в чат           | —                                                                                                                                                     |
+| 3   | `e2e-risks`      | `generalPurpose`                       | `flow.md`, `recon.md`               | `risks.md`             | ≥1 риск на каждую из 8 категорий (таймеры, сессия, валидация, backend-ошибки, повтор, данные, селекторы, утечки) или явное «неприменимо, потому что…» |
+| 4   | `e2e-happy-path` | `generalPurpose`                       | `flow.md`, `recon.md`               | spec + `happy.json`    | spec прошёл 2 раза подряд, лог прогона в `happy.json`; либо падение описано как `BUG-n` с `file:line`                                                 |
+| 5   | `e2e-break`      | `generalPurpose`                       | `risks.md`, `happy.json`, `flow.md` | spec(ы) + `break.json` | каждый риск из `risks.md` имеет тест или причину, почему теста нет; падающие тесты помечены `BUG-n`, не «подогнаны»                                   |
+| —   | стоп-точка       | —                                      | —                                   | резюме в чат           | —                                                                                                                                                     |
+| 6   | `e2e-report`     | `generalPurpose`                       | все артефакты                       | `report.md`            | каждый finding имеет шаги, тест, `file:line`, frontend/backend; есть команды воспроизведения и вывод `pnpm lint && pnpm typecheck`                    |
 
 Опционально после этапа 5: `verifier-unit` на diff спеков — проверить, что тесты не ослаблены (`cy.wait(ms)`, `it.skip` без `BUG-n`, assert'ы на текущее поведение вместо ожидаемого, мок backend в happy path).
 
 ## Контракт артефактов
 
-| Артефакт | Производит | Потребляет | Обязательные поля |
-|---|---|---|---|
-| `recon.md` | recon | flow-map, risks, happy-path | таблицы команд / маршрутов / форм / cookie, env-статус с выводом команд |
-| `flow.md` | flow-map | risks, happy-path, break, report | таблица шагов с `file:line`, «Расхождения», «Боковые выходы», «Не покрыть сейчас», compose: да/нет |
-| `risks.md` | risks | break, report | ID, категория, шаг, воспроизведение, ожидаемое (`file:line`), способ проверки, приоритет |
-| `happy.json` | happy-path | break, report | `runs[2]`, `newCommands`, `bugs[]` |
-| `break.json` | break | report | `risks[]` с `result`, `bugs[]` с `side` |
-| `report.md` | report | пользователь | 7 секций |
+| Артефакт     | Производит | Потребляет                       | Обязательные поля                                                                                  |
+| ------------ | ---------- | -------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `recon.md`   | recon      | flow-map, risks, happy-path      | таблицы команд / маршрутов / форм / cookie, env-статус с выводом команд                            |
+| `flow.md`    | flow-map   | risks, happy-path, break, report | таблица шагов с `file:line`, «Расхождения», «Боковые выходы», «Не покрыть сейчас», compose: да/нет |
+| `risks.md`   | risks      | break, report                    | ID, категория, шаг, воспроизведение, ожидаемое (`file:line`), способ проверки, приоритет           |
+| `happy.json` | happy-path | break, report                    | `runs[2]`, `newCommands`, `bugs[]`                                                                 |
+| `break.json` | break      | report                           | `risks[]` с `result`, `bugs[]` с `side`                                                            |
+| `report.md`  | report     | пользователь                     | 7 секций                                                                                           |
 
 ## Финал
 

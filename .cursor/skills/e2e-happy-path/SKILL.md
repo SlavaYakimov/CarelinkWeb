@@ -31,9 +31,7 @@ description: Реализует Cypress-спек happy path заданного f
     { "n": 2, "passed": true, "durationMs": 0 }
   ],
   "newCommands": ["..."],
-  "bugs": [
-    { "id": "BUG-1", "step": 3, "expected": "...", "actual": "...", "fileLine": "..." }
-  ]
+  "bugs": [{ "id": "BUG-1", "step": 3, "expected": "...", "actual": "...", "fileLine": "..." }]
 }
 ```
 
