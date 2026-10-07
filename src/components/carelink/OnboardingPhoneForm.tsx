@@ -12,6 +12,7 @@ import {
 import { OtpInput } from '@/components/carelink/OtpInput';
 import { PhoneInput } from '@/components/carelink/PhoneInput';
 import { StepShell } from '@/components/carelink/StepShell';
+import { usePhoneField } from '@/components/carelink/use-phone-field';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,8 +37,7 @@ export function OnboardingPhoneForm({
     confirmOnboardingPhoneOtpAction,
     otpInitial,
   );
-  const [phoneDisplay, setPhoneDisplay] = React.useState('');
-  const [phoneE164, setPhoneE164] = React.useState('');
+  const phone = usePhoneField();
   const [code, setCode] = React.useState('');
   const [displayName, setDisplayName] = React.useState(defaultDisplayName);
 
@@ -71,16 +71,13 @@ export function OnboardingPhoneForm({
             />
           </div>
           <PhoneInput
-            value={phoneDisplay}
-            onChange={(display, e164) => {
-              setPhoneDisplay(display);
-              setPhoneE164(e164 ?? '');
-            }}
+            value={phone.display}
+            onChange={phone.onChange}
             disabled={sending}
             error={undefined}
           />
-          <input type="hidden" name="phone" value={phoneE164 || phoneDisplay} />
-          <Button type="submit" className="w-full" disabled={sending || !phoneE164}>
+          <input type="hidden" name="phone" value={phone.submitValue} />
+          <Button type="submit" className="w-full" disabled={sending || !phone.e164}>
             Отправить SMS-код
             <ArrowRight className="size-4" aria-hidden />
           </Button>

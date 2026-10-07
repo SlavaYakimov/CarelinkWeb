@@ -12,6 +12,8 @@ import {
 } from '@/server/actions/verify-sms';
 import { OtpInput } from '@/components/carelink/OtpInput';
 import { PhoneInput } from '@/components/carelink/PhoneInput';
+import { usePhoneField } from '@/components/carelink/use-phone-field';
+import { useResendCountdown } from '@/components/carelink/use-resend-countdown';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -37,23 +39,12 @@ export function VerifySmsForm({
     async () => resendSignInSmsAction(),
     phoneInitial,
   );
-  const [phoneDisplay, setPhoneDisplay] = React.useState('');
-  const [phoneE164, setPhoneE164] = React.useState('');
+  const phone = usePhoneField();
   const [code, setCode] = React.useState('');
-  const [resendIn, setResendIn] = React.useState(smsAlreadySent ? 60 : 0);
+  const resend = useResendCountdown({ startOnMount: smsAlreadySent, trigger: phoneState.smsSent });
 
   const smsSent = smsAlreadySent || phoneState.smsSent;
   const phoneMasked = phoneState.phoneMasked ?? initialPhoneMasked;
-
-  React.useEffect(() => {
-    if (phoneState.smsSent) setResendIn(60);
-  }, [phoneState.smsSent]);
-
-  React.useEffect(() => {
-    if (resendIn <= 0) return;
-    const id = window.setInterval(() => setResendIn((s) => Math.max(0, s - 1)), 1000);
-    return () => window.clearInterval(id);
-  }, [resendIn]);
 
   return (
     <Card className="mx-auto w-full max-w-[440px] shadow-card">
@@ -74,15 +65,12 @@ export function VerifySmsForm({
         {!smsSent ? (
           <form action={sendSms} className="space-y-4">
             <PhoneInput
-              value={phoneDisplay}
-              onChange={(display, e164) => {
-                setPhoneDisplay(display);
-                setPhoneE164(e164 ?? '');
-              }}
+              value={phone.display}
+              onChange={phone.onChange}
               disabled={sending}
               error={phoneState.error}
             />
-            <input type="hidden" name="phone" value={phoneE164 || phoneDisplay} />
+            <input type="hidden" name="phone" value={phone.submitValue} />
             <Button type="submit" className="w-full" disabled={sending}>
               Отправить код
             </Button>
@@ -109,15 +97,15 @@ export function VerifySmsForm({
               ) : null}
             </div>
             <div className="text-center text-sm text-muted-foreground">
-              {resendIn > 0 ? (
-                <span>Отправить код повторно через {formatMmSs(resendIn)}</span>
+              {resend.secondsLeft > 0 ? (
+                <span>Отправить код повторно через {resend.label}</span>
               ) : (
                 <form action={resendSms} className="inline">
                   <button
                     type="submit"
                     className="text-primary underline-offset-2 hover:underline"
                     disabled={resending}
-                    onClick={() => setResendIn(60)}
+                    onClick={resend.restart}
                   >
                     Отправить код повторно
                   </button>
@@ -133,10 +121,4 @@ export function VerifySmsForm({
       </CardContent>
     </Card>
   );
-}
-
-function formatMmSs(total: number): string {
-  const m = Math.floor(total / 60);
-  const s = total % 60;
-  return `${m}:${String(s).padStart(2, '0')}`;
 }

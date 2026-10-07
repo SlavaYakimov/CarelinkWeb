@@ -12,6 +12,8 @@ import {
 } from '@/server/actions/verify-phone';
 import { OtpInput } from '@/components/carelink/OtpInput';
 import { PhoneInput } from '@/components/carelink/PhoneInput';
+import { usePhoneField } from '@/components/carelink/use-phone-field';
+import { useResendCountdown } from '@/components/carelink/use-resend-countdown';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -36,23 +38,12 @@ export function VerifyPhoneForm({
     otpInitial,
   );
   const [, resendOtp, resending] = useActionState(resendSignInPhoneOtpAction, phoneInitial);
-  const [phoneDisplay, setPhoneDisplay] = React.useState('');
-  const [phoneE164, setPhoneE164] = React.useState('');
+  const phone = usePhoneField();
   const [code, setCode] = React.useState('');
-  const [resendIn, setResendIn] = React.useState(otpAlreadySent ? 60 : 0);
+  const resend = useResendCountdown({ startOnMount: otpAlreadySent, trigger: phoneState.otpSent });
 
   const otpSent = otpAlreadySent || phoneState.otpSent;
   const phoneMasked = phoneState.phoneMasked ?? initialPhoneMasked;
-
-  React.useEffect(() => {
-    if (phoneState.otpSent) setResendIn(60);
-  }, [phoneState.otpSent]);
-
-  React.useEffect(() => {
-    if (resendIn <= 0) return;
-    const id = window.setInterval(() => setResendIn((s) => Math.max(0, s - 1)), 1000);
-    return () => window.clearInterval(id);
-  }, [resendIn]);
 
   return (
     <Card className="mx-auto w-full max-w-[440px] shadow-card">
@@ -72,16 +63,9 @@ export function VerifyPhoneForm({
                 <AlertDescription>{phoneState.error}</AlertDescription>
               </Alert>
             ) : null}
-            <PhoneInput
-              value={phoneDisplay}
-              onChange={(display, e164) => {
-                setPhoneDisplay(display);
-                setPhoneE164(e164 ?? '');
-              }}
-              disabled={sending}
-            />
-            <input type="hidden" name="phone" value={phoneE164 || phoneDisplay} />
-            <Button type="submit" className="w-full" disabled={sending || !phoneE164}>
+            <PhoneInput value={phone.display} onChange={phone.onChange} disabled={sending} />
+            <input type="hidden" name="phone" value={phone.submitValue} />
+            <Button type="submit" className="w-full" disabled={sending || !phone.e164}>
               Отправить код
               <ArrowRight className="size-4" aria-hidden />
             </Button>
@@ -116,9 +100,11 @@ export function VerifyPhoneForm({
                 type="submit"
                 variant="ghost"
                 className="w-full"
-                disabled={resending || resendIn > 0}
+                disabled={resending || resend.secondsLeft > 0}
               >
-                {resendIn > 0 ? `Отправить снова через ${resendIn} с` : 'Отправить код повторно'}
+                {resend.secondsLeft > 0
+                  ? `Отправить снова через ${resend.secondsLeft} с`
+                  : 'Отправить код повторно'}
               </Button>
             </form>
           </form>
