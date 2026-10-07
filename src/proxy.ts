@@ -38,9 +38,14 @@ export function proxy(request: NextRequest) {
     response = NextResponse.next({ request: { headers: requestHeaders } });
   }
 
+  const isDev = process.env.NODE_ENV === 'development';
+  const scriptSrc = isDev
+    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-eval'`
+    : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`;
+
   const csp = [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+    scriptSrc,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data:",
     "connect-src 'self'",
