@@ -741,6 +741,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/onboarding/workspace/check-slug": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["onboardingCheckWorkspaceSlug"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/onboarding/workspace/finalize": {
         parameters: {
             query?: never;
@@ -1221,6 +1237,13 @@ export interface components {
         OnboardingSetupPasswordResponse: {
             session: components["schemas"]["AuthSessionResponse"];
             requiresWorkspaceFinalize: boolean;
+        };
+        OnboardingCheckWorkspaceSlugRequest: {
+            workspaceSlug: string;
+        };
+        OnboardingCheckWorkspaceSlugResponse: {
+            available: boolean;
+            workspaceSlug: string;
         };
         OnboardingFinalizeWorkspaceRequest: {
             onboardingChallengeId: string;
@@ -2554,6 +2577,31 @@ export interface operations {
                     "application/json": components["schemas"]["OnboardingSetupPasswordResponse"];
                 };
             };
+        };
+    };
+    onboardingCheckWorkspaceSlug: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OnboardingCheckWorkspaceSlugRequest"];
+            };
+        };
+        responses: {
+            /** @description Slug availability (includes normalized slug) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OnboardingCheckWorkspaceSlugResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
         };
     };
     onboardingFinalizeWorkspace: {

@@ -13,6 +13,7 @@ import {
 } from '@/lib/workspace-slug';
 import { GatewayError } from '@/server/gateway/errors';
 import {
+  onboardingCheckWorkspaceSlug,
   onboardingConfirmDevice,
   onboardingDeviceVerifyRequestSms,
   onboardingDeviceVerifyVerifySms,
@@ -97,6 +98,12 @@ export type OnboardingWorkspaceState = {
   formError?: string;
   slugPreview?: string;
 };
+
+export type CheckOnboardingWorkspaceSlugResult =
+  | { status: 'available'; workspaceSlug: string }
+  | { status: 'taken'; workspaceSlug: string; message: string }
+  | { status: 'invalid'; message: string }
+  | { status: 'error'; message: string };
 
 function baseOnboardingFlow(): FlowRecord {
   return {
@@ -497,6 +504,62 @@ async function setupOnboardingPasswordActionImpl(
   }
 }
 
+async function checkOnboardingWorkspaceSlugImpl(
+  rawSlug: string,
+): Promise<CheckOnboardingWorkspaceSlugResult> {
+  const slugInput = String(rawSlug ?? '');
+  const normalized = normalizeWorkspaceSlug(slugInput);
+  if (!isValidWorkspaceSlug(slugInput)) {
+    return {
+      status: 'invalid',
+      message: 'Только латиница, цифры и дефис, от 3 до 32 символов',
+    };
+  }
+
+  const { flow } = await requireOnboardingFlow('workspace');
+  const sessionCtx = await getSession();
+  if (!sessionCtx || !flow.deviceSession) {
+    return { status: 'error', message: getErrorMessage('PASSWORD_SETUP_REQUIRED') };
+  }
+
+  const { clientIp, deviceId } = await gatewayActionContext();
+
+  try {
+    const result = await onboardingCheckWorkspaceSlug(
+      { workspaceSlug: normalized },
+      {
+        clientIp,
+        deviceId,
+        deviceSession: flow.deviceSession,
+        sid: sessionCtx.sid,
+        session: sessionCtx.session,
+      },
+    );
+    if (!result.available) {
+      return {
+        status: 'taken',
+        workspaceSlug: result.workspaceSlug,
+        message: getErrorMessage('WORKSPACE_SLUG_TAKEN'),
+      };
+    }
+    return { status: 'available', workspaceSlug: result.workspaceSlug };
+  } catch (err) {
+    if (err instanceof GatewayError) {
+      if (err.code === 'RATE_LIMIT') {
+        redirect(`/login/too-many?retryAfter=${err.retryAfter ?? 60}`);
+      }
+      if (err.status === 400 || err.code === 'INVALID_ARGUMENT') {
+        return {
+          status: 'invalid',
+          message: 'Только латиница, цифры и дефис, от 3 до 32 символов',
+        };
+      }
+      return { status: 'error', message: getErrorMessage(err.code) };
+    }
+    throw err;
+  }
+}
+
 async function finalizeOnboardingWorkspaceActionImpl(
   _prev: OnboardingWorkspaceState,
   formData: FormData,
@@ -528,11 +591,30 @@ async function finalizeOnboardingWorkspaceActionImpl(
 
   const { clientIp, deviceId } = await gatewayActionContext();
 
+  const slugCheck = await checkOnboardingWorkspaceSlugImpl(slug);
+  if (slugCheck.status === 'taken') {
+    return {
+      fieldErrors: { workspaceSlug: slugCheck.message },
+      slugPreview: formatWorkspaceLogin(slugCheck.workspaceSlug),
+    };
+  }
+  if (slugCheck.status === 'invalid') {
+    return {
+      fieldErrors: { workspaceSlug: slugCheck.message },
+      slugPreview: formatWorkspaceLogin(slug),
+    };
+  }
+  if (slugCheck.status === 'error') {
+    return { formError: slugCheck.message, slugPreview: formatWorkspaceLogin(slug) };
+  }
+
+  const slugForFinalize = slugCheck.workspaceSlug;
+
   try {
     const finalized = await onboardingFinalizeWorkspace(
       {
         onboardingChallengeId,
-        workspaceSlug: slug,
+        workspaceSlug: slugForFinalize,
         displayName: parsed.data.displayName.trim(),
       },
       {
@@ -564,7 +646,7 @@ async function finalizeOnboardingWorkspaceActionImpl(
       }
       if (err.code === 'WORKSPACE_SLUG_TAKEN') {
         return {
-          formError: 'Этот адрес семьи уже занят. Попробуйте другой вариант.',
+          fieldErrors: { workspaceSlug: getErrorMessage('WORKSPACE_SLUG_TAKEN') },
           slugPreview: formatWorkspaceLogin(slug),
         };
       }
@@ -590,4 +672,7 @@ export const confirmOnboardingDeviceSmsAction = withServerAction(
 export const setupOnboardingPasswordAction = withServerAction(setupOnboardingPasswordActionImpl);
 export const finalizeOnboardingWorkspaceAction = withServerAction(
   finalizeOnboardingWorkspaceActionImpl,
+);
+export const checkOnboardingWorkspaceSlugAction = withServerAction(
+  checkOnboardingWorkspaceSlugImpl,
 );
