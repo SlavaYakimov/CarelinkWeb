@@ -76,3 +76,20 @@ export function composeRedisFlushArgv() {
   args.push('exec', '-T', 'redis', 'redis-cli', 'FLUSHALL');
   return args;
 }
+
+/**
+ * argv for execFile('docker', [...]) — run a command in compose postgres (auth DB).
+ * @param {string[]} psqlArgs e.g. ['psql', '-U', 'carelink', '-d', 'auth', ...]
+ * @returns {string[]}
+ */
+export function composePostgresExecArgv(psqlArgs) {
+  const root = resolveCarelinkAuthRoot();
+  assertCarelinkAuthRoot(root);
+
+  const args = ['compose'];
+  for (const file of COMPOSE_FILES) {
+    args.push('-f', path.join(root, file));
+  }
+  args.push('exec', '-T', 'postgres', ...psqlArgs);
+  return args;
+}

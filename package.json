@@ -17,6 +17,7 @@
     "test:e2e:all": "pnpm test:e2e && pnpm test:e2e:flows",
     "test:e2e:compose:onboarding": "node scripts/e2e-env.mjs && node scripts/e2e-env-compose.mjs && CYPRESS_E2E_COMPOSE=1 start-server-and-test \"pnpm start\" http://127.0.0.1:3000/login \"pnpm cypress run --spec cypress/e2e/_compose/onboarding-create-family.cy.ts\"",
     "test:e2e:compose:onboarding:negative": "node scripts/e2e-env.mjs && node scripts/e2e-env-compose.mjs && CYPRESS_E2E_COMPOSE=1 start-server-and-test \"pnpm start\" http://127.0.0.1:3000/login \"pnpm cypress run --spec cypress/e2e/_compose/onboarding-create-family.negative.cy.ts\"",
+    "test:e2e:compose:recovery": "node scripts/e2e-env.mjs && node scripts/e2e-env-compose.mjs && CYPRESS_E2E_COMPOSE=1 start-server-and-test \"pnpm start\" http://127.0.0.1:3000/login \"pnpm cypress run --spec cypress/e2e/_compose/login-and-forgot-password.cy.ts\"",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
     "contracts:generate": "openapi-typescript contracts/auth.openapi.yaml -o src/server/gateway/types.gen.ts",

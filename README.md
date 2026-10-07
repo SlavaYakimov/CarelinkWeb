@@ -89,6 +89,15 @@ pnpm test:e2e:compose:onboarding
 pnpm test:e2e:compose:onboarding:negative
 ```
 
+### Integration: recovery (compose)
+
+Cypress happy path: login → family recovery → keeper approve (task) → confirm → re-login.
+
+- Spec: `cypress/e2e/_compose/login-and-forgot-password.cy.ts`
+- Run: `pnpm test:e2e:compose:recovery` (`CYPRESS_E2E_COMPOSE=1`)
+- Env: `CYPRESS_RECOVERY_PHONE_DIGITS` (телефон участника); `E2E_RECOVERY_KEEPER_WORKSPACE_EMAIL` + `E2E_RECOVERY_KEEPER_PASSWORD` (хранитель, shortcut workspace sign-in) или `E2E_RECOVERY_KEEPER_ACCESS_TOKEN`
+- Семья и участник должны уже существовать в compose/staging (не создаются онбординг-спекой)
+
 Ручной OTP из логов: `node scripts/e2e/fetch-onboarding-otp.mjs email 'you@example.com'`
 
 ## Docker

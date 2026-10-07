@@ -15,6 +15,11 @@ type FetchOnboardingOtpArgs = {
 
 const otpScriptPath = path.join(__dirname, 'scripts/e2e/fetch-onboarding-otp.mjs');
 const flushRedisScriptPath = path.join(__dirname, 'scripts/e2e/flush-redis.mjs');
+const approveRecoveryScriptPath = path.join(__dirname, 'scripts/e2e/approve-recovery-compose.mjs');
+
+type ApproveRecoveryRequestArgs = {
+  phoneDigits: string;
+};
 
 export default defineConfig({
   e2e: {
@@ -23,11 +28,16 @@ export default defineConfig({
     specPattern: 'cypress/e2e/**/*.cy.ts',
     video: !process.env.CI,
     screenshotOnRunFailure: true,
-    env: {
+    expose: {
       E2E_COMPOSE: process.env.CYPRESS_E2E_COMPOSE ?? '',
+      recoveryWorkspaceEmail:
+        process.env.CYPRESS_RECOVERY_WORKSPACE_EMAIL ?? 'yakimovs@workspaces.carelink.app',
+      recoveryPhoneDigits: process.env.CYPRESS_RECOVERY_PHONE_DIGITS ?? '',
     },
     setupNodeEvents(on, config) {
-      config.env.E2E_COMPOSE = process.env.CYPRESS_E2E_COMPOSE ?? config.env.E2E_COMPOSE ?? '';
+      config.expose ??= {};
+      config.expose.E2E_COMPOSE =
+        process.env.CYPRESS_E2E_COMPOSE ?? config.expose.E2E_COMPOSE ?? '';
       on('task', {
         async flushE2eRedis() {
           await execFileAsync(process.execPath, [flushRedisScriptPath], {
@@ -50,6 +60,15 @@ export default defineConfig({
             env: process.env,
           });
           return stdout.trim();
+        },
+        async approveRecoveryRequest(args: ApproveRecoveryRequestArgs) {
+          const { stdout } = await execFileAsync(
+            process.execPath,
+            [approveRecoveryScriptPath, args.phoneDigits],
+            { env: process.env },
+          );
+          const requestId = stdout.trim();
+          return { requestId };
         },
       });
       return config;
