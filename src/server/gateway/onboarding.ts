@@ -30,6 +30,10 @@ type OnboardingConfirmDeviceRequest = components['schemas']['OnboardingConfirmDe
 type OnboardingConfirmDeviceResponse = components['schemas']['OnboardingConfirmDeviceResponse'];
 type OnboardingSetupPasswordRequest = components['schemas']['OnboardingSetupPasswordRequest'];
 type OnboardingSetupPasswordResponse = components['schemas']['OnboardingSetupPasswordResponse'];
+type OnboardingCheckWorkspaceSlugRequest =
+  components['schemas']['OnboardingCheckWorkspaceSlugRequest'];
+type OnboardingCheckWorkspaceSlugResponse =
+  components['schemas']['OnboardingCheckWorkspaceSlugResponse'];
 type OnboardingFinalizeWorkspaceRequest =
   components['schemas']['OnboardingFinalizeWorkspaceRequest'];
 type OnboardingFinalizeWorkspaceResponse =
@@ -132,6 +136,23 @@ export async function onboardingSetupPassword(
       deviceId: ctx.deviceId,
       traceId: ctx.traceId,
       userRefresh: ctx.userRefresh,
+    },
+  );
+}
+
+export async function onboardingCheckWorkspaceSlug(
+  body: OnboardingCheckWorkspaceSlugRequest,
+  ctx: GatewayCtx,
+): Promise<OnboardingCheckWorkspaceSlugResponse> {
+  return gatewayFetch(
+    { method: 'POST', path: `${V2_AUTH}/onboarding/workspace/check-slug`, body },
+    {
+      clientIp: ctx.clientIp,
+      deviceId: ctx.deviceId,
+      traceId: ctx.traceId,
+      deviceSession: ctx.deviceSession,
+      sid: ctx.sid,
+      session: ctx.session,
     },
   );
 }

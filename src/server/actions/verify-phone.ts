@@ -78,7 +78,9 @@ async function sendSignInPhoneOtpActionImpl(
   }
 }
 
-async function resendSignInPhoneOtpActionImpl(..._args: [VerifyPhoneState, FormData?]): Promise<VerifyPhoneState> {
+async function resendSignInPhoneOtpActionImpl(
+  ..._args: [VerifyPhoneState, FormData?]
+): Promise<VerifyPhoneState> {
   void _args;
   const { fid, flow } = await requireSignInFlow('verify-phone');
   const phoneE164 = flow.phoneE164;
