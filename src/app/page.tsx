@@ -1,8 +1,10 @@
-export default function HomePage() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-8">
-      <h1 className="text-2xl font-semibold">Carelink</h1>
-      <p className="mt-2 text-neutral-600">Веб-клиент (BFF) — этап 0, каркас.</p>
-    </main>
-  );
+import { redirect } from 'next/navigation';
+import { getSession } from '@/server/session/get-session';
+
+export default async function HomePage() {
+  const session = await getSession();
+  if (session) {
+    redirect('/families');
+  }
+  redirect('/login');
 }

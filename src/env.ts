@@ -21,7 +21,10 @@ const envSchema = z.object({
   GATEWAY_TIMEOUT_MS: z.coerce.number().int().positive().default(10_000),
   REDIS_URL: z.string().min(1),
   SESSION_ENC_KEY: base64Key32Schema,
-  SESSION_ENC_KEY_PREVIOUS: base64Key32Schema.optional(),
+  SESSION_ENC_KEY_PREVIOUS: z.preprocess(
+    (v) => (v === '' || v == null ? undefined : v),
+    base64Key32Schema.optional(),
+  ),
   SESSION_IDLE_TTL: durationSchema.default('7d'),
   SESSION_ABSOLUTE_TTL: durationSchema.default('30d'),
   SESSION_GUEST_TTL: durationSchema.default('12h'),

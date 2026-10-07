@@ -18,4 +18,16 @@ describe('getEnv', () => {
     resetEnvCacheForTests();
     expect(() => getEnv()).toThrow(/APP_ORIGIN/);
   });
+
+  it('treats empty SESSION_ENC_KEY_PREVIOUS as unset', () => {
+    process.env.APP_ENV = 'development';
+    process.env.APP_ORIGIN = 'http://localhost:3000';
+    process.env.GATEWAY_URL = 'http://localhost:8088';
+    process.env.REDIS_URL = 'redis://localhost:6379';
+    process.env.SESSION_ENC_KEY = Buffer.alloc(32).toString('base64');
+    process.env.SESSION_ENC_KEY_PREVIOUS = '';
+    resetEnvCacheForTests();
+    const env = getEnv();
+    expect(env.SESSION_ENC_KEY_PREVIOUS).toBeUndefined();
+  });
 });
