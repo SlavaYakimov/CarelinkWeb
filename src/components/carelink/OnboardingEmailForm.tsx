@@ -52,7 +52,7 @@ export function OnboardingEmailForm({ linkInvalid }: OnboardingEmailFormProps) {
       ) : null}
 
       {!sent ? (
-        <form action={requestEmail} className="space-y-4">
+        <form action={requestEmail} className="space-y-4" noValidate>
           {emailState.error ? (
             <Alert variant="destructive">
               <AlertDescription>{emailState.error}</AlertDescription>

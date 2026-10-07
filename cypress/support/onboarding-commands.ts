@@ -19,7 +19,7 @@ Cypress.Commands.add('fillOtp', (code: string, firstInputId?: string) => {
 
 Cypress.Commands.add('onboardingEnterEmail', (email: string) => {
   cy.visit('/onboarding/email');
-  cy.contains('h3', 'Личная почта').should('be.visible');
+  cy.contains('h1', 'Личная почта').should('be.visible');
   cy.get('#email').clear().type(email);
   cy.contains('button', 'Отправить код').click();
   cy.contains('Код отправлен на', { timeout: 30_000 }).should('be.visible');
@@ -43,12 +43,25 @@ Cypress.Commands.add(
   },
 );
 
-Cypress.Commands.add('onboardingEnterDeviceSms', (smsCode: string) => {
+Cypress.Commands.add('onboardingEnterDeviceSms', (phoneDigits: string) => {
   cy.location('pathname', { timeout: 30_000 }).should('eq', '/onboarding/device');
-  cy.contains('button', 'Получить SMS-код').click();
+  cy.get('body').then(($body) => {
+    if ($body.text().includes('Получить SMS-код')) {
+      cy.contains('button', 'Получить SMS-код').click();
+    }
+  });
   cy.contains('Введите код из SMS, чтобы доверить', { timeout: 30_000 }).should('be.visible');
-  cy.fillOtp(smsCode);
-  cy.contains('button', 'Продолжить').click();
+  // Second SMS for the same phone (device verify). skipPriorMatches avoids the phone-step OTP;
+  // excludeCode breaks compose when DEV_FIXED_OTP_SMS makes both codes identical.
+  cy.task<string>('fetchOnboardingOtp', {
+    channel: 'sms',
+    to: phoneDigits,
+    skipPriorMatches: 1,
+    minRecipientMatches: 2,
+  }).then((deviceOtp) => {
+    cy.fillOtp(deviceOtp);
+    cy.contains('button', 'Продолжить').click();
+  });
 });
 
 Cypress.Commands.add('onboardingEnterPassword', (password: string) => {
@@ -56,6 +69,15 @@ Cypress.Commands.add('onboardingEnterPassword', (password: string) => {
   cy.get('#newPassword').clear().type(password);
   cy.get('#confirmPassword').clear().type(password);
   cy.contains('button', 'Сохранить пароль').click();
+});
+
+Cypress.Commands.add('clearCarelinkCookie', (logical: 'cl_flow' | 'cl_sid') => {
+  cy.getCookies().then((cookies) => {
+    const match = cookies.find((c) => c.name === logical || c.name.endsWith(logical));
+    if (match) {
+      cy.clearCookie(match.name);
+    }
+  });
 });
 
 Cypress.Commands.add(

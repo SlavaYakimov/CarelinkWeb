@@ -9,9 +9,12 @@ type FetchOnboardingOtpArgs = {
   channel: 'email' | 'sms';
   to: string;
   skipPriorMatches?: number;
+  minRecipientMatches?: number;
+  excludeCode?: string;
 };
 
 const otpScriptPath = path.join(__dirname, 'scripts/e2e/fetch-onboarding-otp.mjs');
+const flushRedisScriptPath = path.join(__dirname, 'scripts/e2e/flush-redis.mjs');
 
 export default defineConfig({
   e2e: {
@@ -24,11 +27,24 @@ export default defineConfig({
       E2E_COMPOSE: process.env.CYPRESS_E2E_COMPOSE ?? '',
     },
     setupNodeEvents(on, config) {
+      config.env.E2E_COMPOSE = process.env.CYPRESS_E2E_COMPOSE ?? config.env.E2E_COMPOSE ?? '';
       on('task', {
+        async flushE2eRedis() {
+          await execFileAsync(process.execPath, [flushRedisScriptPath], {
+            env: process.env,
+          });
+          return null;
+        },
         async fetchOnboardingOtp(args: FetchOnboardingOtpArgs) {
           const argv = [otpScriptPath, args.channel, args.to];
           if (args.skipPriorMatches != null && args.skipPriorMatches > 0) {
             argv.push(String(args.skipPriorMatches));
+          }
+          if (args.minRecipientMatches != null && args.minRecipientMatches > 1) {
+            argv.push('--min-recipient-matches', String(args.minRecipientMatches));
+          }
+          if (args.excludeCode) {
+            argv.push('--exclude-code', args.excludeCode);
           }
           const { stdout } = await execFileAsync(process.execPath, argv, {
             env: process.env,

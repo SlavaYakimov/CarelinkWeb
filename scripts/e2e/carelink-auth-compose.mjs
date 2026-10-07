@@ -60,3 +60,19 @@ export function notificationLogCmdString() {
   const argv = notificationLogArgv();
   return argv.join(' ');
 }
+
+/**
+ * argv for execFile('docker', [...]) — FLUSHALL on compose Redis (auth OTP rate limits).
+ * @returns {string[]}
+ */
+export function composeRedisFlushArgv() {
+  const root = resolveCarelinkAuthRoot();
+  assertCarelinkAuthRoot(root);
+
+  const args = ['compose'];
+  for (const file of COMPOSE_FILES) {
+    args.push('-f', path.join(root, file));
+  }
+  args.push('exec', '-T', 'redis', 'redis-cli', 'FLUSHALL');
+  return args;
+}
