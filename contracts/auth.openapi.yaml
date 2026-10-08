@@ -309,8 +309,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/WorkspaceDelegateDetailsResponse'
+        '400':
+          description: BAD_REQUEST (missing token)
         '410':
-          description: DELEGATE_EXPIRED
+          description: DELEGATE_EXPIRED (link invalid, expired, or already consumed on read)
 
   /auth/workspace/sign-in/delegate-link:
     get:
@@ -332,6 +334,10 @@ paths:
                 $ref: '#/components/schemas/WorkspaceDelegateDetailsResponse'
         '302':
           description: Redirect to app delegate screen when Accept includes text/html
+        '400':
+          description: BAD_REQUEST (missing token)
+        '410':
+          description: DELEGATE_EXPIRED (link invalid, expired, or already consumed on read)
 
   /auth/workspace/sign-in/approve-delegate:
     post:
@@ -358,9 +364,11 @@ paths:
         '403':
           description: DELEGATE_NOT_ALLOWED (authenticated user is not keeper of this family)
         '404':
-          description: NOT_FOUND (unknown or expired delegate request)
+          description: NOT_FOUND (valid token but delegate sidecar/challenge no longer pending)
         '409':
-          description: CONFLICT (token already used)
+          description: CONFLICT (token already used on approve/reject)
+        '410':
+          description: DELEGATE_EXPIRED (invalid or expired token)
 
   /auth/workspace/sign-in/reject-delegate:
     post:
@@ -385,6 +393,12 @@ paths:
           description: UNAUTHORIZED
         '403':
           description: DELEGATE_NOT_ALLOWED
+        '404':
+          description: NOT_FOUND (valid token but delegate sidecar/challenge no longer pending)
+        '409':
+          description: CONFLICT (token already used on approve/reject)
+        '410':
+          description: DELEGATE_EXPIRED (invalid or expired token)
 
   /auth/workspace/sign-in/delegate-status:
     get:
@@ -754,6 +768,34 @@ paths:
               schema:
                 $ref: '#/components/schemas/OnboardingVerifyPhoneResponse'
 
+  /auth/onboarding/abandon:
+    post:
+      tags: [workspace-onboarding]
+      operationId: onboardingAbandon
+      description: |
+        Cancels an unfinished onboarding after phone verify (BE-27): deletes the workspace shell
+        in family-service, the onboarding credentials and the challenge. Idempotent — an unknown
+        or expired challenge also returns 204. A finalized workspace is never deleted.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OnboardingAbandonRequest'
+      responses:
+        '204':
+          description: Onboarding abandoned (or nothing to abandon)
+        '400':
+          description: |
+            BAD_REQUEST (no challenge id) or ONBOARDING_STEP_ORDER (challenge is before phone verify
+            or the workspace is already finalized)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          $ref: '#/components/responses/RateLimit'
+
   /auth/onboarding/device/verify/request-push:
     post:
       tags: [workspace-onboarding]
@@ -887,21 +929,20 @@ paths:
     post:
       tags: [workspace-onboarding]
       operationId: onboardingCheckWorkspaceSlug
-      security:
-        - bearerAuth: []
+      summary: Check workspace slug availability before finalize
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/OnboardingCheckWorkspaceSlugRequest'
+              $ref: '#/components/schemas/CheckWorkspaceSlugRequest'
       responses:
         '200':
-          description: Slug availability (includes normalized slug)
+          description: Slug availability result
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/OnboardingCheckWorkspaceSlugResponse'
+                $ref: '#/components/schemas/CheckWorkspaceSlugResponse'
         '400':
           $ref: '#/components/responses/Error'
 
@@ -1460,9 +1501,24 @@ components:
           type: string
         requiresPasswordChange:
           type: boolean
+        requiresPhoneVerification:
+          type: boolean
+          description: >
+            When true, the client must complete `POST /auth/workspace/sign-in/request-otp` and
+            `verify-phone` before device verification. Alias field `phoneVerificationRequired`
+            carries the same value for older web clients.
+        phoneVerificationRequired:
+          type: boolean
+          description: Same as `requiresPhoneVerification` (CarelinkWeb Stitch 08).
         verificationChannel:
           type: string
-          enum: [push, sms]
+          enum: [push, sms, phone]
+          description: >
+            Device verification path after password (and phone OTP when required): `push` — registered
+            device, push verify then complete; `sms` — phone OTP, device register, then push/SMS device
+            verify. Value `phone` may be sent by legacy clients; prefer `requiresPhoneVerification` when
+            present. When `requiresPhoneVerification` is true, `verificationChannel` is still `sms` (device
+            path after phone verify).
         session:
           $ref: '#/components/schemas/AuthSessionResponse'
 
@@ -1619,8 +1675,8 @@ components:
           type: string
         code:
           type: string
-          minLength: 4
-          maxLength: 4
+          minLength: 6
+          maxLength: 6
 
     WorkspaceSignInVerifyPhoneResponse:
       type: object
@@ -1793,8 +1849,7 @@ components:
 
     OnboardingVerifyPhoneResponse:
       type: object
-      required:
-        [userId, onboardingChallengeId, existingUser, deviceRegistrationRequired, userCreatedAt]
+      required: [userId, onboardingChallengeId, existingUser, deviceRegistrationRequired, userCreatedAt]
       properties:
         userId:
           type: string
@@ -1809,6 +1864,29 @@ components:
         userCreatedAt:
           type: string
           format: date-time
+        workspaces:
+          type: array
+          description: |
+            Only when existingUser=true (BE-27): finalized families where the user has a workspace
+            password, excluding the current onboarding shell. Omitted when empty.
+          items:
+            $ref: '#/components/schemas/OnboardingLoginWorkspace'
+
+    OnboardingLoginWorkspace:
+      type: object
+      required: [workspaceSlug, displayName]
+      properties:
+        workspaceSlug:
+          type: string
+        displayName:
+          type: string
+
+    OnboardingAbandonRequest:
+      type: object
+      required: [onboardingChallengeId]
+      properties:
+        onboardingChallengeId:
+          type: string
 
     OnboardingConfirmDeviceRequest:
       type: object
@@ -1857,14 +1935,16 @@ components:
         requiresWorkspaceFinalize:
           type: boolean
 
-    OnboardingCheckWorkspaceSlugRequest:
+    CheckWorkspaceSlugRequest:
       type: object
       required: [workspaceSlug]
       properties:
         workspaceSlug:
           type: string
+          minLength: 3
+          maxLength: 32
 
-    OnboardingCheckWorkspaceSlugResponse:
+    CheckWorkspaceSlugResponse:
       type: object
       required: [available, workspaceSlug]
       properties:
@@ -1872,6 +1952,7 @@ components:
           type: boolean
         workspaceSlug:
           type: string
+          description: Normalized slug (lowercase)
 
     OnboardingFinalizeWorkspaceRequest:
       type: object

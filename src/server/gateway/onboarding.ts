@@ -30,10 +30,9 @@ type OnboardingConfirmDeviceRequest = components['schemas']['OnboardingConfirmDe
 type OnboardingConfirmDeviceResponse = components['schemas']['OnboardingConfirmDeviceResponse'];
 type OnboardingSetupPasswordRequest = components['schemas']['OnboardingSetupPasswordRequest'];
 type OnboardingSetupPasswordResponse = components['schemas']['OnboardingSetupPasswordResponse'];
-type OnboardingCheckWorkspaceSlugRequest =
-  components['schemas']['OnboardingCheckWorkspaceSlugRequest'];
-type OnboardingCheckWorkspaceSlugResponse =
-  components['schemas']['OnboardingCheckWorkspaceSlugResponse'];
+type OnboardingCheckWorkspaceSlugRequest = components['schemas']['CheckWorkspaceSlugRequest'];
+type OnboardingCheckWorkspaceSlugResponse = components['schemas']['CheckWorkspaceSlugResponse'];
+type OnboardingAbandonRequest = components['schemas']['OnboardingAbandonRequest'];
 type OnboardingFinalizeWorkspaceRequest =
   components['schemas']['OnboardingFinalizeWorkspaceRequest'];
 type OnboardingFinalizeWorkspaceResponse =
@@ -86,6 +85,17 @@ export async function onboardingVerifyPhone(
 ): Promise<OnboardingVerifyPhoneResponse> {
   return gatewayFetch(
     { method: 'POST', path: `${V2_AUTH}/onboarding/phone/verify`, body },
+    { clientIp: ctx.clientIp, deviceId: ctx.deviceId, traceId: ctx.traceId },
+  );
+}
+
+/** CarelinkAuth `onboardingAbandon` (services/auth/internal/delivery/rest/onboarding_handlers.go), 204. */
+export async function onboardingAbandon(
+  body: OnboardingAbandonRequest,
+  ctx: GatewayCtx,
+): Promise<void> {
+  await gatewayFetch(
+    { method: 'POST', path: `${V2_AUTH}/onboarding/abandon`, body },
     { clientIp: ctx.clientIp, deviceId: ctx.deviceId, traceId: ctx.traceId },
   );
 }

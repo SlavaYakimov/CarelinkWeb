@@ -629,6 +629,27 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/onboarding/abandon": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Cancels an unfinished onboarding after phone verify (BE-27): deletes the workspace shell
+         *     in family-service, the onboarding credentials and the challenge. Idempotent — an unknown
+         *     or expired challenge also returns 204. A finalized workspace is never deleted.
+         */
+        post: operations["onboardingAbandon"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/onboarding/device/verify/request-push": {
         parameters: {
             query?: never;
@@ -750,6 +771,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** Check workspace slug availability before finalize */
         post: operations["onboardingCheckWorkspaceSlug"];
         delete?: never;
         options?: never;
@@ -1054,8 +1076,15 @@ export interface components {
             flow: "shortcut" | "full";
             challengeId?: string;
             requiresPasswordChange?: boolean;
-            /** @enum {string} */
-            verificationChannel?: "push" | "sms";
+            /** @description When true, the client must complete `POST /auth/workspace/sign-in/request-otp` and `verify-phone` before device verification. Alias field `phoneVerificationRequired` carries the same value for older web clients. */
+            requiresPhoneVerification?: boolean;
+            /** @description Same as `requiresPhoneVerification` (CarelinkWeb Stitch 08). */
+            phoneVerificationRequired?: boolean;
+            /**
+             * @description Device verification path after password (and phone OTP when required): `push` — registered device, push verify then complete; `sms` — phone OTP, device register, then push/SMS device verify. Value `phone` may be sent by legacy clients; prefer `requiresPhoneVerification` when present. When `requiresPhoneVerification` is true, `verificationChannel` is still `sms` (device path after phone verify).
+             * @enum {string}
+             */
+            verificationChannel?: "push" | "sms" | "phone";
             session?: components["schemas"]["AuthSessionResponse"];
         };
         DeviceVerifySentResponse: {
@@ -1215,6 +1244,18 @@ export interface components {
             deviceRegistrationRequired: boolean;
             /** Format: date-time */
             userCreatedAt: string;
+            /**
+             * @description Only when existingUser=true (BE-27): finalized families where the user has a workspace
+             *     password, excluding the current onboarding shell. Omitted when empty.
+             */
+            workspaces?: components["schemas"]["OnboardingLoginWorkspace"][];
+        };
+        OnboardingLoginWorkspace: {
+            workspaceSlug: string;
+            displayName: string;
+        };
+        OnboardingAbandonRequest: {
+            onboardingChallengeId: string;
         };
         OnboardingConfirmDeviceRequest: {
             onboardingChallengeId: string;
@@ -1238,11 +1279,12 @@ export interface components {
             session: components["schemas"]["AuthSessionResponse"];
             requiresWorkspaceFinalize: boolean;
         };
-        OnboardingCheckWorkspaceSlugRequest: {
+        CheckWorkspaceSlugRequest: {
             workspaceSlug: string;
         };
-        OnboardingCheckWorkspaceSlugResponse: {
+        CheckWorkspaceSlugResponse: {
             available: boolean;
+            /** @description Normalized slug (lowercase) */
             workspaceSlug: string;
         };
         OnboardingFinalizeWorkspaceRequest: {
@@ -1800,7 +1842,14 @@ export interface operations {
                     "application/json": components["schemas"]["WorkspaceDelegateDetailsResponse"];
                 };
             };
-            /** @description DELEGATE_EXPIRED */
+            /** @description BAD_REQUEST (missing token) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description DELEGATE_EXPIRED (link invalid, expired, or already consumed on read) */
             410: {
                 headers: {
                     [name: string]: unknown;
@@ -1831,6 +1880,20 @@ export interface operations {
             };
             /** @description Redirect to app delegate screen when Accept includes text/html */
             302: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description BAD_REQUEST (missing token) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description DELEGATE_EXPIRED (link invalid, expired, or already consumed on read) */
+            410: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1874,15 +1937,22 @@ export interface operations {
                 };
                 content?: never;
             };
-            /** @description NOT_FOUND (unknown or expired delegate request) */
+            /** @description NOT_FOUND (valid token but delegate sidecar/challenge no longer pending) */
             404: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content?: never;
             };
-            /** @description CONFLICT (token already used) */
+            /** @description CONFLICT (token already used on approve/reject) */
             409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description DELEGATE_EXPIRED (invalid or expired token) */
+            410: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1921,6 +1991,27 @@ export interface operations {
             };
             /** @description DELEGATE_NOT_ALLOWED */
             403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description NOT_FOUND (valid token but delegate sidecar/challenge no longer pending) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description CONFLICT (token already used on approve/reject) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description DELEGATE_EXPIRED (invalid or expired token) */
+            410: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2413,6 +2504,41 @@ export interface operations {
             };
         };
     };
+    onboardingAbandon: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OnboardingAbandonRequest"];
+            };
+        };
+        responses: {
+            /** @description Onboarding abandoned (or nothing to abandon) */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /**
+             * @description BAD_REQUEST (no challenge id) or ONBOARDING_STEP_ORDER (challenge is before phone verify
+             *     or the workspace is already finalized)
+             */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            429: components["responses"]["RateLimit"];
+        };
+    };
     onboardingDeviceVerifyRequestPush: {
         parameters: {
             query?: never;
@@ -2588,17 +2714,17 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["OnboardingCheckWorkspaceSlugRequest"];
+                "application/json": components["schemas"]["CheckWorkspaceSlugRequest"];
             };
         };
         responses: {
-            /** @description Slug availability (includes normalized slug) */
+            /** @description Slug availability result */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["OnboardingCheckWorkspaceSlugResponse"];
+                    "application/json": components["schemas"]["CheckWorkspaceSlugResponse"];
                 };
             };
             400: components["responses"]["Error"];
