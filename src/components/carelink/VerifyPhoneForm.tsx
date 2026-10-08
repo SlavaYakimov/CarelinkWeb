@@ -71,43 +71,50 @@ export function VerifyPhoneForm({
             </Button>
           </form>
         ) : (
-          <form action={confirmOtp} className="space-y-4">
-            {otpState.error ? (
-              <Alert variant="destructive">
-                <AlertDescription>{otpState.error}</AlertDescription>
-              </Alert>
-            ) : null}
-            {otpState.attemptsHint ? (
-              <p className="text-xs text-muted-foreground">{otpState.attemptsHint}</p>
-            ) : null}
-            <p className="text-sm text-muted-foreground">
-              {phoneMasked ? `Код из SMS отправлен на ${phoneMasked}.` : 'Введите 4-значный код.'}
-            </p>
-            <input type="hidden" name="code" value={code} />
-            <OtpInput
-              length={4}
-              value={code}
-              onChange={setCode}
-              disabled={confirming}
-              error={otpState.error}
-            />
-            <Button type="submit" className="w-full" disabled={confirming || code.length < 4}>
-              Продолжить
-              <ArrowRight className="size-4" aria-hidden />
-            </Button>
-            <form action={resendOtp}>
-              <Button
-                type="submit"
-                variant="ghost"
-                className="w-full"
-                disabled={resending || resend.secondsLeft > 0}
-              >
-                {resend.secondsLeft > 0
-                  ? `Отправить снова через ${resend.secondsLeft} с`
-                  : 'Отправить код повторно'}
+          <div className="space-y-4">
+            <form action={confirmOtp} className="space-y-4">
+              {otpState.error ? (
+                <Alert variant="destructive">
+                  <AlertDescription>{otpState.error}</AlertDescription>
+                </Alert>
+              ) : null}
+              {otpState.attemptsHint ? (
+                <p className="text-xs text-muted-foreground">{otpState.attemptsHint}</p>
+              ) : null}
+              <p className="text-sm text-muted-foreground">
+                {phoneMasked ? `Код из SMS отправлен на ${phoneMasked}.` : 'Введите 6-значный код.'}
+              </p>
+              <input type="hidden" name="code" value={code} />
+              <OtpInput
+                length={6}
+                value={code}
+                onChange={setCode}
+                disabled={confirming}
+                error={otpState.error}
+              />
+              <Button type="submit" className="w-full" disabled={confirming || code.length < 6}>
+                Продолжить
+                <ArrowRight className="size-4" aria-hidden />
               </Button>
             </form>
-          </form>
+            {resend.secondsLeft > 0 ? (
+              <p className="text-center text-sm text-muted-foreground">
+                Отправить снова через {resend.secondsLeft} с
+              </p>
+            ) : (
+              <form action={resendOtp}>
+                <Button
+                  type="submit"
+                  variant="ghost"
+                  className="w-full"
+                  disabled={resending}
+                  onClick={resend.restart}
+                >
+                  Отправить код повторно
+                </Button>
+              </form>
+            )}
+          </div>
         )}
       </CardContent>
     </Card>

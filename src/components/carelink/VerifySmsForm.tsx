@@ -76,26 +76,32 @@ export function VerifySmsForm({
             </Button>
           </form>
         ) : (
-          <form action={confirmOtp} className="space-y-4">
-            <input type="hidden" name="next" value={nextPath} />
-            <input type="hidden" name="code" value={code} />
-            <div>
-              <p
-                id="otp-label"
-                className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground"
-              >
-                Код из SMS
-              </p>
-              <OtpInput
-                value={code}
-                onChange={setCode}
-                disabled={confirming}
-                error={otpState.error}
-              />
-              {otpState.attemptsHint ? (
-                <p className="mt-2 text-xs text-muted-foreground">{otpState.attemptsHint}</p>
-              ) : null}
-            </div>
+          <div className="space-y-4">
+            <form action={confirmOtp} className="space-y-4">
+              <input type="hidden" name="next" value={nextPath} />
+              <input type="hidden" name="code" value={code} />
+              <div>
+                <p
+                  id="otp-label"
+                  className="mb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground"
+                >
+                  Код из SMS
+                </p>
+                <OtpInput
+                  value={code}
+                  onChange={setCode}
+                  disabled={confirming}
+                  error={otpState.error}
+                />
+                {otpState.attemptsHint ? (
+                  <p className="mt-2 text-xs text-muted-foreground">{otpState.attemptsHint}</p>
+                ) : null}
+              </div>
+              <Button type="submit" className="w-full" disabled={confirming || code.length < 6}>
+                Подтвердить
+                <ArrowRight className="size-4" aria-hidden />
+              </Button>
+            </form>
             <div className="text-center text-sm text-muted-foreground">
               {resend.secondsLeft > 0 ? (
                 <span>Отправить код повторно через {resend.label}</span>
@@ -112,11 +118,7 @@ export function VerifySmsForm({
                 </form>
               )}
             </div>
-            <Button type="submit" className="w-full" disabled={confirming || code.length < 6}>
-              Подтвердить
-              <ArrowRight className="size-4" aria-hidden />
-            </Button>
-          </form>
+          </div>
         )}
       </CardContent>
     </Card>
