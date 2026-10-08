@@ -5,7 +5,7 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { notificationLogArgv } from './carelink-auth-compose.mjs';
-import { findOtpInLogs } from './otp-parse.mjs';
+import { countRecipientOtpInLogs, findOtpInLogs } from './otp-parse.mjs';
 
 const exec = promisify(execFile);
 
@@ -19,6 +19,23 @@ function sleep(ms) {
 /**
  * @returns {Promise<string>}
  */
+/**
+ * @param {string} phoneDigits
+ * @returns {Promise<number>}
+ */
+/**
+ * @param {string} phoneDigits
+ * @param {{ bodyIncludes?: string }} [filter]
+ */
+export async function countRecipientSmsInLogs(phoneDigits, filter) {
+  const logs = await fetchNotificationLogs();
+  return countRecipientOtpInLogs(logs, {
+    channel: 'sms',
+    to: phoneDigits,
+    bodyIncludes: filter?.bodyIncludes,
+  });
+}
+
 async function fetchNotificationLogs() {
   const logCmd = process.env.E2E_NOTIFICATION_LOG_CMD?.trim();
   if (logCmd) {
@@ -44,7 +61,14 @@ async function fetchNotificationLogs() {
  * @returns {Promise<string>} 6-digit code
  */
 export async function fetchOnboardingOtp(args) {
-  const { channel, to, skipPriorMatches = 0, minRecipientMatches = 1, excludeCode } = args;
+  const {
+    channel,
+    to,
+    skipPriorMatches = 0,
+    minRecipientMatches = 1,
+    excludeCode,
+    bodyIncludes,
+  } = args;
   if (!channel || !to) {
     throw new Error('fetchOnboardingOtp requires { channel, to }');
   }
@@ -60,6 +84,7 @@ export async function fetchOnboardingOtp(args) {
         skipPriorMatches,
         minRecipientMatches,
         excludeCode,
+        bodyIncludes,
       });
       if (code) return code;
       lastError = new Error(

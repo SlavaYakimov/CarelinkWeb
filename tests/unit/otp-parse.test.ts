@@ -25,12 +25,39 @@ describe('otp-parse', () => {
     expect(extractSmsCode(line)).toBe('654321');
   });
 
+  it('findOtpInLogs returns 4-digit sign-in phone OTP without padding to six', () => {
+    const line =
+      'info | mock SMS sent | {"to":"+79001234567","otp_code":"4829","body":"Код 4829"}';
+    const logs = [
+      'mock SMS sent | {"to":"+79001234567","otp_code":"111111"}',
+      line,
+    ].join('\n');
+    expect(findOtpInLogs(logs, { channel: 'sms', to: '9001234567', skipPriorMatches: 0 })).toBe(
+      '4829',
+    );
+    expect(normalizeOtpDigits('4829')).toBe('4829');
+  });
+
   it('findOtpInLogs prefers recipient match', () => {
     const logs = [
       'mock SMS sent | {"to":"+79990001122","otp_code":"111111"}',
       'mock SMS sent | {"to":"+79001234567","otp_code":"222222"}',
     ].join('\n');
     expect(findOtpInLogs(logs, { channel: 'sms', to: '9001234567' })).toBe('222222');
+  });
+
+  it('findOtpInLogs filters recovery SMS by bodyIncludes', () => {
+    const logs = [
+      'mock SMS sent | {"phone_mask":"+79******567","body":"Carelink: код 123456. Никому не сообщайте.","otp_code":"123456"}',
+      'mock SMS sent | {"phone_mask":"+79******567","body":"Carelink: код 987654 для восстановления. Действует 15 мин.","otp_code":"987654"}',
+    ].join('\n');
+    expect(
+      findOtpInLogs(logs, {
+        channel: 'sms',
+        to: '9001234567',
+        bodyIncludes: 'восстановлен',
+      }),
+    ).toBe('987654');
   });
 
   it('findOtpInLogs supports skipPriorMatches for older SMS', () => {

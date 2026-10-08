@@ -8,7 +8,7 @@ import { normalizeRuPhoneE164 } from './phone-e164.mjs';
 import { loadEnvLocal } from './load-env-local.mjs';
 
 /**
- * @param {{ requestId: string; phone: string }} args
+ * @param {{ requestId: string; phone: string; keeper?: { workspaceEmail: string; password: string } }} args
  * @returns {Promise<void>}
  */
 export async function approveRecoveryRequest(args) {
@@ -23,14 +23,19 @@ export async function approveRecoveryRequest(args) {
     throw new Error('approve-recovery-request: invalid phone');
   }
 
-  const token = await getKeeperAccessToken();
+  const phoneDigits = args.phone.replace(/\D/g, '');
+  const token = await getKeeperAccessToken({
+    ...args.keeper,
+    phoneDigits: phoneDigits.length > 10 ? phoneDigits.slice(-10) : phoneDigits,
+  });
   const res = await fetch(`${gatewayUrl}/v1/recovery-requests/${args.requestId}/approve`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ phone: phoneE164 }),
+    // Family handler decodes `Phone` (Go default JSON key) unless `json:"phone"` is set on the struct.
+    body: JSON.stringify({ Phone: phoneE164, phone: phoneE164 }),
   });
 
   if (!res.ok) {

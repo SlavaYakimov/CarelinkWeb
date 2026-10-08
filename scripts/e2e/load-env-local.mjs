@@ -17,11 +17,15 @@ export function loadEnvLocal(filename = '.env.local') {
     if (eq <= 0) continue;
     const key = trimmed.slice(0, eq).trim();
     let value = trimmed.slice(eq + 1).trim();
-    if (
-      (value.startsWith('"') && value.endsWith('"')) ||
-      (value.startsWith("'") && value.endsWith("'"))
-    ) {
-      value = value.slice(1, -1);
+    for (let i = 0; i < 3; i += 1) {
+      if (
+        (value.startsWith('"') && value.endsWith('"')) ||
+        (value.startsWith("'") && value.endsWith("'"))
+      ) {
+        value = value.slice(1, -1).trim();
+      } else {
+        break;
+      }
     }
     if (process.env[key] === undefined || process.env[key] === '') {
       process.env[key] = value;

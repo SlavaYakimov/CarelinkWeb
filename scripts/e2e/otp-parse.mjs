@@ -168,8 +168,40 @@ export function lineMatchesRecipient(line, channel, to) {
  * @param {{ channel: 'email' | 'sms'; to: string; skipPriorMatches?: number }} opts
  * @returns {string | null}
  */
+/**
+ * @param {string} logs
+ * @param {{ channel: 'email' | 'sms'; to: string }} opts
+ */
+function lineMatchesBodyIncludes(line, bodyIncludes) {
+  if (!bodyIncludes) return true;
+  const lower = line.toLowerCase();
+  const needle = bodyIncludes.toLowerCase();
+  return lower.includes(needle);
+}
+
+export function countRecipientOtpInLogs(logs, opts) {
+  const { channel, to, bodyIncludes } = opts;
+  const lines = logs.split('\n').filter(Boolean);
+  let count = 0;
+  for (const line of lines) {
+    const isMock =
+      channel === 'email' ? line.includes('mock email sent') : line.includes('mock SMS sent');
+    if (!isMock) continue;
+    if (!lineMatchesBodyIncludes(line, bodyIncludes)) continue;
+    if (lineMatchesRecipient(line, channel, to)) count += 1;
+  }
+  return count;
+}
+
 export function findOtpInLogs(logs, opts) {
-  const { channel, to, skipPriorMatches = 0, minRecipientMatches = 1, excludeCode } = opts;
+  const {
+    channel,
+    to,
+    skipPriorMatches = 0,
+    minRecipientMatches = 1,
+    excludeCode,
+    bodyIncludes,
+  } = opts;
   const lines = logs.split('\n').filter(Boolean);
   const matches = [];
 
@@ -178,6 +210,7 @@ export function findOtpInLogs(logs, opts) {
     const isMock =
       channel === 'email' ? line.includes('mock email sent') : line.includes('mock SMS sent');
     if (!isMock) continue;
+    if (!lineMatchesBodyIncludes(line, bodyIncludes)) continue;
 
     const prefersRecipient = lineMatchesRecipient(line, channel, to);
     const code = channel === 'email' ? extractEmailCode(line) : extractSmsCode(line);
@@ -195,5 +228,6 @@ export function findOtpInLogs(logs, opts) {
 
   const pick = pool[skipPriorMatches];
   if (!pick) return null;
-  return pick.code.length === 6 ? pick.code : null;
+  // Sign-in phone OTP is 4 digits; device/onboarding SMS uses 6.
+  return pick.code.length >= 4 ? pick.code : null;
 }

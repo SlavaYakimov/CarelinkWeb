@@ -37,6 +37,53 @@ try {
   process.exit(1);
 }
 
+const recoveryProbeUrl = `${gatewayUrl}/v2/auth/recovery/request`;
+const recoveryProbeBody = JSON.stringify({
+  familySlug: 'e2echeck',
+  phone: '+79000000000',
+});
+
+try {
+  const { stdout } = await exec(
+    'curl',
+    [
+      '-s',
+      '-w',
+      '\n%{http_code}',
+      '--max-time',
+      '10',
+      '-X',
+      'POST',
+      recoveryProbeUrl,
+      '-H',
+      'Content-Type: application/json',
+      '-H',
+      'X-Device-Id: e2e-recovery-probe',
+      '-d',
+      recoveryProbeBody,
+    ],
+    { env: process.env },
+  );
+  const trimmed = stdout.trimEnd();
+  const lastNewline = trimmed.lastIndexOf('\n');
+  const body = lastNewline >= 0 ? trimmed.slice(0, lastNewline) : trimmed;
+  const statusRaw = lastNewline >= 0 ? trimmed.slice(lastNewline + 1) : '';
+  const status = Number.parseInt(statusRaw, 10);
+  if (status === 501 || body.includes('NOT_IMPLEMENTED')) {
+    console.error(
+      'E2E compose: recovery is disabled on gateway (501 NOT_IMPLEMENTED). ' +
+        'Run: cd ../CarelinkAuth && make compose-web-e2e-up',
+    );
+    process.exit(1);
+  }
+} catch {
+  console.error(
+    `E2E compose: recovery probe failed at ${recoveryProbeUrl}. ` +
+      'Run: cd ../CarelinkAuth && make compose-web-e2e-up',
+  );
+  process.exit(1);
+}
+
 const authRoot = resolveCarelinkAuthRoot();
 try {
   assertCarelinkAuthRoot(authRoot);
