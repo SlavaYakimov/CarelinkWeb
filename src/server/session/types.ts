@@ -51,6 +51,10 @@ export type FlowRecord = {
   personalEmail?: string;
   /** Onboarding: keeper display name (step 12). */
   keeperDisplayName?: string;
+  /** Onboarding: phone already registered — second workspace for an existing user (step 12a). */
+  existingUser?: boolean;
+  /** Onboarding step 12a: families the existing user can sign in to (BE-27). */
+  existingWorkspaces?: { workspaceSlug: string; displayName: string }[];
   /** Onboarding: draft slug before finalize (step 15). */
   workspaceSlug?: string;
   /** Onboarding: provisional workspace email after email verify. */

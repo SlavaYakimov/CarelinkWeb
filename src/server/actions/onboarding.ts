@@ -13,7 +13,9 @@ import {
 } from '@/lib/workspace-slug';
 import { GatewayError } from '@/server/gateway/errors';
 import { gatewayRegisterDevice } from '@/server/gateway/devices';
+import { getLogger } from '@/server/log/logger';
 import {
+  onboardingAbandon,
   onboardingCheckWorkspaceSlug,
   onboardingConfirmDevice,
   onboardingDeviceVerifyRequestSms,
@@ -328,20 +330,22 @@ async function confirmOnboardingPhoneOtpActionImpl(
       { clientIp, deviceId },
     )) as OnboardingPhoneVerifyResult;
 
-    if (verified.existingUser) {
-      await clearOnboardingFlow(fid);
-      redirect('/login?reason=phone-registered');
-    }
-
     const updated: FlowRecord = {
       ...flow,
       step: 'device',
       userId: verified.userId,
       onboardingChallengeId: verified.onboardingChallengeId,
       deviceRegistrationToken: verified.deviceRegistrationToken,
+      existingUser: verified.existingUser,
+      existingWorkspaces: verified.existingUser
+        ? (verified.workspaces ?? []).map(({ workspaceSlug, displayName }) => ({
+            workspaceSlug,
+            displayName,
+          }))
+        : undefined,
     };
     await persistOnboardingFlow(fid, updated);
-    redirect('/onboarding/device');
+    redirect(verified.existingUser ? '/onboarding/existing' : '/onboarding/device');
   } catch (err) {
     if (err instanceof GatewayError) {
       if (err.code === 'RATE_LIMIT') {
@@ -360,6 +364,48 @@ async function confirmOnboardingPhoneOtpActionImpl(
     }
     throw err;
   }
+}
+
+async function continueOnboardingAsNewFamilyActionImpl(): Promise<void> {
+  await requireOnboardingFlow('device');
+  redirect('/onboarding/device');
+}
+
+const leaveToLoginSchema = z.object({
+  workspaceSlug: z
+    .string()
+    .transform((v) => normalizeWorkspaceSlug(v))
+    .refine(isValidWorkspaceSlug)
+    .optional(),
+});
+
+async function leaveOnboardingToLoginActionImpl(formData?: FormData): Promise<void> {
+  const { flow } = await requireOnboardingFlow('device');
+  const raw = formData?.get('workspaceSlug');
+  const parsed = leaveToLoginSchema.safeParse({
+    workspaceSlug: typeof raw === 'string' && raw.trim() ? raw : undefined,
+  });
+  const slug = parsed.success ? parsed.data.workspaceSlug : undefined;
+  const knownSlug =
+    slug && flow.existingWorkspaces?.some((w) => w.workspaceSlug === slug) ? slug : undefined;
+
+  if (flow.onboardingChallengeId) {
+    const { clientIp, deviceId } = await gatewayActionContext();
+    try {
+      await onboardingAbandon(
+        { onboardingChallengeId: flow.onboardingChallengeId },
+        { clientIp, deviceId },
+      );
+    } catch (err) {
+      if (!(err instanceof GatewayError)) throw err;
+      getLogger().warn({ code: err.code }, 'onboarding abandon failed');
+    }
+  }
+
+  await clearOnboardingFlow();
+  const params = new URLSearchParams({ reason: 'phone-registered' });
+  if (knownSlug) params.set('workspace', knownSlug);
+  redirect(`/login?${params.toString()}`);
 }
 
 async function sendOnboardingDeviceSmsActionImpl(
@@ -691,6 +737,10 @@ export const sendOnboardingPhoneOtpAction = withServerAction(sendOnboardingPhone
 export const confirmOnboardingPhoneOtpAction = withServerAction(
   confirmOnboardingPhoneOtpActionImpl,
 );
+export const continueOnboardingAsNewFamilyAction = withServerAction(
+  continueOnboardingAsNewFamilyActionImpl,
+);
+export const leaveOnboardingToLoginAction = withServerAction(leaveOnboardingToLoginActionImpl);
 export const sendOnboardingDeviceSmsAction = withServerAction(sendOnboardingDeviceSmsActionImpl);
 export const confirmOnboardingDeviceSmsAction = withServerAction(
   confirmOnboardingDeviceSmsActionImpl,
