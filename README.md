@@ -26,6 +26,7 @@ pnpm dev
 2. На порту **3000** — один процесс: не запускайте `pnpm dev` и `pnpm start` одновременно.
 3. Ошибки webpack / `mini-css-extract-plugin` / `next/font`: `pnpm dev:reset` или `rm -rf .next node_modules && pnpm install --frozen-lockfile`.
 4. `/api/health` с кодом **503** без локального gateway — нормально (status `degraded`); для входа и онбординга нужен gateway или staging URL в `GATEWAY_URL`.
+5. **Recovery 501** / «Восстановление временно недоступно» на `/login/recovery`: backend поднят без web-overlay (`RECOVERY_ENABLED`). В соседнем клоне CarelinkAuth: `make compose-web-e2e-up` (три compose-файла, см. [CarelinkAuth README](https://github.com/SlavaYakimov/CarelinkAuth)). Preflight compose E2E (`node scripts/e2e-env-compose.mjs`) проверяет тот же endpoint.
 
 Health: [http://localhost:3000/api/health](http://localhost:3000/api/health)
 
@@ -95,8 +96,8 @@ Cypress happy path: login → family recovery → keeper approve (task) → conf
 
 - Spec: `cypress/e2e/_compose/login-and-forgot-password.cy.ts`
 - Run: `pnpm test:e2e:compose:recovery` (`CYPRESS_E2E_COMPOSE=1`)
-- Env: `CYPRESS_RECOVERY_PHONE_DIGITS` (телефон участника); `E2E_RECOVERY_KEEPER_WORKSPACE_EMAIL` + `E2E_RECOVERY_KEEPER_PASSWORD` (хранитель, shortcut workspace sign-in) или `E2E_RECOVERY_KEEPER_ACCESS_TOKEN`
-- Семья и участник должны уже существовать в compose/staging (не создаются онбординг-спекой)
+- Env (опционально): `CYPRESS_RECOVERY_PHONE_DIGITS` + `E2E_RECOVERY_KEEPER_*` для уже существующей семьи (например `yakimovs@workspaces.carelink.app`)
+- Без env: spec сам проходит онбординг (`composeOnboardingCreateFamily`) и затем recovery (дольше, ~3–5 мин)
 
 Ручной OTP из логов: `node scripts/e2e/fetch-onboarding-otp.mjs email 'you@example.com'`
 
