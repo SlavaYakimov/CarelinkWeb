@@ -17,9 +17,16 @@ export function RecoveryRequestForm() {
   return (
     <form action={formAction} className="space-y-4">
       {state.formError ? (
-        <p className="text-sm text-destructive" role="alert">
-          {state.formError}
-        </p>
+        <div className="space-y-1">
+          <p className="text-sm text-destructive" role="alert">
+            {state.formError}
+          </p>
+          {state.formError.includes('временно недоступно') ? (
+            <p className="text-xs text-muted-foreground">
+              Нужен CarelinkAuth compose с RECOVERY_ENABLED (см. README).
+            </p>
+          ) : null}
+        </div>
       ) : null}
 
       <WorkspaceSlugField
