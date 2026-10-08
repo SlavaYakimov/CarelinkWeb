@@ -8,7 +8,14 @@ import type { SessionRecord } from '@/server/session/types';
 /** Prevent accidental leakage of secrets into client components. */
 export function taintSessionSecrets(session: SessionRecord): void {
   taintUniqueValue('Carelink userRefresh must stay server-side', session, session.userRefresh);
-  taintUniqueValue('Carelink deviceSession must stay server-side', session, session.deviceSession);
+  // Shortcut sign-in may leave deviceSession empty; tainting '' trips RSC on unrelated client props.
+  if (session.deviceSession) {
+    taintUniqueValue(
+      'Carelink deviceSession must stay server-side',
+      session,
+      session.deviceSession,
+    );
+  }
   taintObjectReference('Carelink family tokens must stay server-side', session.families);
   for (const familyId of Object.keys(session.families)) {
     const ft = session.families[familyId]!;
