@@ -17,9 +17,10 @@ const initialState: SignInFormState = {};
 export type LoginFormProps = {
   nextPath: string;
   defaultEmail?: string;
+  notice?: 'phone-registered';
 };
 
-export function LoginForm({ nextPath, defaultEmail = '' }: LoginFormProps) {
+export function LoginForm({ nextPath, defaultEmail = '', notice }: LoginFormProps) {
   const [state, formAction, pending] = useActionState(signInAction, initialState);
   const [password, setPassword] = React.useState('');
   const defaultSlug =
@@ -36,6 +37,14 @@ export function LoginForm({ nextPath, defaultEmail = '' }: LoginFormProps) {
       <CardContent>
         <form action={formAction} className="space-y-4">
           <input type="hidden" name="next" value={nextPath} />
+
+          {notice === 'phone-registered' && !state.formError ? (
+            <Alert role="status">
+              <AlertDescription>
+                Этот номер уже есть в Carelink. Войдите с адресом своей семьи и её паролем.
+              </AlertDescription>
+            </Alert>
+          ) : null}
 
           {state.formError ? (
             <Alert variant="destructive" role="alert">
