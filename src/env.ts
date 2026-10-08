@@ -2,6 +2,20 @@ import { z } from 'zod';
 
 const durationSchema = z.string().regex(/^\d+[smhdw]$/, 'Expected duration like 7d, 15m, 12h');
 
+/** `.env.local` sometimes nests quotes (`'"development"'`); strip before zod. */
+function stripEnvQuotes(value: unknown): unknown {
+  if (typeof value !== 'string') return value;
+  let s = value.trim();
+  for (let i = 0; i < 3; i += 1) {
+    if ((s.startsWith('"') && s.endsWith('"')) || (s.startsWith("'") && s.endsWith("'"))) {
+      s = s.slice(1, -1).trim();
+    } else {
+      break;
+    }
+  }
+  return s;
+}
+
 const base64Key32Schema = z
   .string()
   .min(1)
@@ -15,7 +29,7 @@ const base64Key32Schema = z
   }, 'Must be 32 bytes encoded as base64');
 
 const envSchema = z.object({
-  APP_ENV: z.enum(['development', 'staging', 'production']),
+  APP_ENV: z.preprocess(stripEnvQuotes, z.enum(['development', 'staging', 'production'])),
   APP_ORIGIN: z.string().url(),
   GATEWAY_URL: z.string().url(),
   GATEWAY_TIMEOUT_MS: z.coerce.number().int().positive().default(10_000),
@@ -29,10 +43,13 @@ const envSchema = z.object({
   SESSION_ABSOLUTE_TTL: durationSchema.default('30d'),
   SESSION_GUEST_TTL: durationSchema.default('12h'),
   FLOW_TTL: durationSchema.default('15m'),
-  COOKIE_SECURE: z
-    .enum(['true', 'false'])
-    .default('true')
-    .transform((v) => v === 'true'),
+  COOKIE_SECURE: z.preprocess(
+    stripEnvQuotes,
+    z
+      .enum(['true', 'false'])
+      .default('true')
+      .transform((v) => v === 'true'),
+  ),
   COOKIE_PREFIX: z.string().default('__Host-'),
   TRUSTED_PROXY_HOPS: z.coerce.number().int().min(0).default(1),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
