@@ -1,8 +1,9 @@
 import { redirect } from 'next/navigation';
-import { requireSignInFlow } from '@/server/flows/signin-flow';
+import { persistSignInFlow, requireSignInFlow } from '@/server/flows/signin-flow';
 
-/** Web MVP uses SMS only; push path redirects back to login. */
+/** Legacy push URL — web uses SMS until BE-04 (PLAN.md). */
 export default async function VerifyPushPage() {
-  await requireSignInFlow('verify-push');
-  redirect('/login');
+  const { fid, flow } = await requireSignInFlow('verify-push');
+  await persistSignInFlow(fid, { ...flow, step: 'verify-sms' });
+  redirect('/login/verify-sms');
 }

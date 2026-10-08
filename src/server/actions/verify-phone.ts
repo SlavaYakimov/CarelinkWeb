@@ -15,7 +15,7 @@ const phoneSchema = z.object({
 });
 
 const otpSchema = z.object({
-  code: z.string().regex(/^\d{4}$/, 'Введите все 4 цифры кода'),
+  code: z.string().regex(/^\d{6}$/, 'Введите все 6 цифр кода'),
 });
 
 export type VerifyPhoneState = {
@@ -34,7 +34,7 @@ function deviceStepAfterPhone(flow: import('@/server/session/types').FlowRecord)
   path: string;
 } {
   const channel = flow.verificationChannel;
-  if (channel === 'push') return { step: 'verify-push', path: '/login/verify-push' };
+  if (channel === 'push') return { step: 'verify-sms', path: '/login/verify-sms' };
   if (channel === 'delegate') return { step: 'keeper-wait', path: '/login/keeper' };
   return { step: 'verify-sms', path: '/login/verify-sms' };
 }
@@ -134,6 +134,8 @@ async function confirmSignInPhoneOtpActionImpl(
       ...flow,
       phoneVerified: true,
       step: next.step,
+      // Device SMS on verify-sms is a separate step; do not reuse phone OTP send timestamp.
+      smsSentAt: undefined,
     });
     redirect(next.path);
   } catch (err) {

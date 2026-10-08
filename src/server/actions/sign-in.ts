@@ -143,8 +143,9 @@ async function signInActionImpl(
         verificationChannel =
           rawChannel === 'push' ? 'push' : rawChannel === 'delegate' ? 'delegate' : 'sms';
       } else if (rawChannel === 'push') {
-        step = 'verify-push';
-        redirectTo = '/login/verify-push';
+        // Web MVP: PLAN.md §этап 1 — push UI until BE-04; device path is SMS.
+        step = 'verify-sms';
+        redirectTo = '/login/verify-sms';
         verificationChannel = 'push';
       } else if (rawChannel === 'delegate') {
         step = 'keeper-wait';
