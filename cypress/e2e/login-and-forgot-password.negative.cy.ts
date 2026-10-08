@@ -1,6 +1,7 @@
 /**
  * Negative / boundary: login + family recovery (no compose).
- * Run: pnpm test:e2e:flows — spec cypress/e2e/login-and-forgot-password.negative.cy.ts
+ * Run via production server (Server Actions): pnpm test:e2e:flows or start-server-and-test + cypress.
+ * Do not point Cypress at `pnpm dev` — actions fail with "Invalid Server Actions request".
  */
 
 describe('login and forgot password — negative (guest)', () => {
@@ -47,11 +48,11 @@ describe('login and forgot password — negative (guest)', () => {
 
   it('redirects confirm after recovery flow cookie is cleared (R-3, R-28)', () => {
     cy.visit('/login/recovery');
-    cy.get('#familySlug').clear().type('yakimovs');
-    cy.get('#phone').clear().type('9000000000');
-    cy.contains('button', 'Отправить запрос хранителю').click();
-    cy.location('pathname', { timeout: 30_000 }).should('eq', '/login/recovery/sent');
+    cy.submitRecoveryRequest('yakimovs', '9001234567');
+    cy.location('pathname', { timeout: 45_000 }).should('eq', '/login/recovery/sent');
     cy.clearCarelinkCookie('cl_flow');
+    cy.visit('/login/recovery/confirm');
+    cy.location('pathname', { timeout: 15_000 }).should('eq', '/login/recovery');
     cy.task('flushE2eRedis');
     cy.visit('/login/recovery/confirm');
     cy.location('pathname', { timeout: 15_000 }).should('eq', '/login/recovery');
@@ -89,7 +90,8 @@ describe('login and forgot password — negative (guest)', () => {
     cy.get('#familySlug').clear().type('yakimovs');
     cy.get('#phone').clear().type('900');
     cy.contains('button', 'Отправить запрос хранителю').click();
-    cy.contains('[role="alert"]', 'Проверьте формат телефона').should('be.visible');
+    // Short display value → zod min(10) before normalizeRuPhone (`recovery.ts:29`)
+    cy.contains('[role="alert"]', 'Укажите телефон').should('be.visible');
     cy.location('pathname').should('eq', '/login/recovery');
   });
 

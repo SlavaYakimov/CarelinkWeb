@@ -42,6 +42,37 @@ Cypress.Commands.add(
     cy.fillOtp(otpCode);
     cy.get('#newPassword').clear().type(newPassword, { log: false });
     cy.get('#confirmPassword').clear().type(newPassword, { log: false });
+    cy.get('input[name="code"]').should('have.value', otpCode.replace(/\D/g, '').slice(0, 6));
     cy.contains('button', 'Сохранить и войти').click();
+  },
+);
+
+Cypress.Commands.add(
+  'completeRecoveryToFamilies',
+  (
+    fixture: {
+      workspaceEmail: string;
+      workspaceSlug: string;
+      phoneDigits: string;
+      password: string;
+    },
+    newPassword: string,
+    keeper?: { keeperWorkspaceEmail: string; keeperPassword: string },
+  ) => {
+    const familySlug = fixture.workspaceSlug;
+    cy.clearCarelinkCookie('cl_sid');
+    cy.visitLogin();
+    cy.openLoginRecoveryFromForgotLink();
+    cy.submitRecoveryRequest(familySlug, fixture.phoneDigits);
+    cy.assertRecoverySentPage();
+    cy.openRecoveryConfirmFromSent();
+    cy.task<{ requestId: string; smsCode: string }>('approveRecoveryRequest', {
+      phoneDigits: fixture.phoneDigits,
+      keeperWorkspaceEmail: keeper?.keeperWorkspaceEmail,
+      keeperPassword: keeper?.keeperPassword,
+    }).then(({ requestId, smsCode }) => {
+      cy.submitRecoveryConfirm(requestId, smsCode, newPassword);
+      cy.location('pathname', { timeout: 30_000 }).should('eq', '/families');
+    });
   },
 );

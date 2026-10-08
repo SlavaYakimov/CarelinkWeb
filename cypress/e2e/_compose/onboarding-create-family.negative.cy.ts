@@ -60,7 +60,12 @@ function advanceToPasswordStep(email: string, displayName: string, phoneDigits: 
 }
 
 describe('onboarding create family — negative (guest routing)', () => {
-  const protectedPaths = ['/onboarding/phone', '/onboarding/device', '/onboarding/workspace'];
+  const protectedPaths = [
+    '/onboarding/phone',
+    '/onboarding/existing',
+    '/onboarding/device',
+    '/onboarding/workspace',
+  ];
 
   protectedPaths.forEach((path) => {
     it(`redirects ${path} to /onboarding/email without flow cookie`, () => {

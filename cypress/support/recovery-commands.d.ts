@@ -14,6 +14,16 @@ declare global {
         otpCode: string,
         newPassword: string,
       ): Chainable<void>;
+      completeRecoveryToFamilies(
+        fixture: {
+          workspaceEmail: string;
+          workspaceSlug: string;
+          phoneDigits: string;
+          password: string;
+        },
+        newPassword: string,
+        keeper?: { keeperWorkspaceEmail: string; keeperPassword: string },
+      ): Chainable<void>;
     }
   }
 }

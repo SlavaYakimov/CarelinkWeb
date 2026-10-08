@@ -1,5 +1,10 @@
 describe('sign-in invalid credentials flow', () => {
-  it('submits workspace login and shows an error without leaving the app shell', () => {
+  beforeEach(() => {
+    cy.task('flushE2eRedis');
+    cy.clearAllCookies();
+  });
+
+  it('submits workspace login and shows an error without leaving /login (R-18)', () => {
     cy.visitLogin();
     cy.fillWorkspaceLogin('test@workspaces.carelink.app', 'wrong-password-1');
 

@@ -16,9 +16,12 @@ type FetchOnboardingOtpArgs = {
 const otpScriptPath = path.join(__dirname, 'scripts/e2e/fetch-onboarding-otp.mjs');
 const flushRedisScriptPath = path.join(__dirname, 'scripts/e2e/flush-redis.mjs');
 const approveRecoveryScriptPath = path.join(__dirname, 'scripts/e2e/approve-recovery-compose.mjs');
+const seedRecoveryFlowScriptPath = path.join(__dirname, 'scripts/e2e/seed-recovery-sent-flow.mjs');
 
 type ApproveRecoveryRequestArgs = {
   phoneDigits: string;
+  keeperWorkspaceEmail?: string;
+  keeperPassword?: string;
 };
 
 export default defineConfig({
@@ -62,13 +65,28 @@ export default defineConfig({
           return stdout.trim();
         },
         async approveRecoveryRequest(args: ApproveRecoveryRequestArgs) {
+          const taskEnv = { ...process.env };
+          if (args.keeperWorkspaceEmail) {
+            taskEnv.E2E_RECOVERY_KEEPER_WORKSPACE_EMAIL = args.keeperWorkspaceEmail;
+          }
+          if (args.keeperPassword) {
+            taskEnv.E2E_RECOVERY_KEEPER_PASSWORD = args.keeperPassword;
+          }
           const { stdout } = await execFileAsync(
             process.execPath,
             [approveRecoveryScriptPath, args.phoneDigits],
+            { env: taskEnv },
+          );
+          const parsed = JSON.parse(stdout.trim()) as { requestId: string; smsCode: string };
+          return parsed;
+        },
+        async seedRecoverySentFlow(args: { familySlug: string; phoneDigits: string }) {
+          const { stdout } = await execFileAsync(
+            process.execPath,
+            [seedRecoveryFlowScriptPath, args.familySlug, args.phoneDigits],
             { env: process.env },
           );
-          const requestId = stdout.trim();
-          return { requestId };
+          return JSON.parse(stdout.trim()) as { fid: string; flowCookieName: string };
         },
       });
       return config;
