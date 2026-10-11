@@ -14,7 +14,14 @@ cd CarelinkWeb
 # если клонировали без submodules:
 git submodule update --init memory
 ./scripts/sync-cursor-shared.sh   # .cursor/rules/shared/ из memory/cursor/shared
+pnpm install                      # prepare → core.hooksPath .githooks (commit-msg)
 ```
+
+### Коммиты и релизы
+
+- Формат: conventional subject (EN) + секции **Задача / Зачем / Что сделано** (RU) — [`.cursor/rules/commits.mdc`](.cursor/rules/commits.mdc); проверка локально через `.githooks/commit-msg` после `pnpm install`.
+- PR: CI прогоняет `pnpm commits:lint` (`memory/cursor/shared/ci/commit-lint.sh`, тот же hook что локально).
+- SemVer: [`VERSION`](VERSION) и `package.json` (`0.1.0`), журнал [`CHANGELOG.md`](CHANGELOG.md). Публикация тега — только вручную: `./scripts/release.sh` (dry-run), `./scripts/release.sh --publish` (создаёт tag + `gh release`; не в CI).
 
 ### Bump memory bank
 

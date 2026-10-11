@@ -1,0 +1,20 @@
+---
+description: Формат коммитов Carelink — conventional subject (EN) и тело Задача / Зачем / Что сделано (RU); skill обязателен перед каждым commit
+alwaysApply: true
+---
+
+# Коммиты Carelink
+
+Перед **каждым** `git commit` в любом репозитории Carelink прочитай и следуй:
+
+**`cursor/shared/skills/carelink-commit/SKILL.md`**
+
+(После sync из CarelinkMemory путь в репо: `.cursor/skills/shared/carelink-commit/SKILL.md` или копия с тем же содержимым.)
+
+Кратко:
+
+- Subject: `type(scope): short summary` — English, imperative, ≤72 символов.
+- Тело: секции **Задача:** / **Зачем:** / **Что сделано:** — по-русски, буллеты в «Что сделано».
+- Коммит **только** по явной просьбе пользователя; без `Co-authored-by: Cursor`; без force-push без «ок».
+
+Валидация: hook `commit-msg` и CI `commit-lint.sh` (см. `cursor/README.md`).

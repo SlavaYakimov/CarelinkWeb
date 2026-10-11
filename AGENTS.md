@@ -33,7 +33,13 @@
 
 ## Коммиты
 
-Subject — conventional commits на английском (`type(scope): …`). Тело — секции **Задача / Зачем / Что сделано** на русском. Подробности: [`.cursor/rules/commits.mdc`](.cursor/rules/commits.mdc).
+Subject — conventional commits на английском (`type(scope): …`, ≤72). Тело — секции **Задача / Зачем / Что сделано** на русском. Подробности: [`.cursor/rules/commits.mdc`](.cursor/rules/commits.mdc), shared [`.cursor/rules/shared/carelink-commit.mdc`](.cursor/rules/shared/carelink-commit.mdc).
+
+После `pnpm install` hook `.githooks/commit-msg` (копия из `memory/cursor/shared/hooks/` через `sync-cursor-shared.sh`). На PR — `memory/cursor/shared/ci/commit-lint.sh` через `scripts/lint-pr-commits.sh`. Skill: `.cursor/skills/shared/carelink-commit/SKILL.md`. Сообщение через HEREDOC; без co-author trailer'ов Cursor.
+
+## Релиз (SemVer)
+
+Единая линия с CarelinkAuth / Carelink: [`VERSION`](VERSION), `package.json`, [`CHANGELOG.md`](CHANGELOG.md). `./scripts/release.sh` — dry-run (команды tag/`gh release`); `--publish` только локально по явному решению (не мержить/не тегать из агента без «ок»).
 
 ## Проверка
 

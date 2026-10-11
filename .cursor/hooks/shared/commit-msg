@@ -1,0 +1,69 @@
+#!/bin/sh
+# Carelink commit-msg hook — validates epic commit format.
+# Install: copy to .git/hooks/commit-msg and chmod +x (or via sync-cursor.sh).
+set -eu
+
+MSG_FILE="${1:?usage: commit-msg <path-to-commit-message-file>}"
+
+# Allow merge/squash commits from GitHub
+if grep -qE '^Merge (branch|pull request|remote-tracking branch)' "$MSG_FILE" 2>/dev/null; then
+  exit 0
+fi
+if grep -qE '^Squashed commit' "$MSG_FILE" 2>/dev/null; then
+  exit 0
+fi
+
+# Strip comments and blank lines for validation
+BODY=$(grep -v '^#' "$MSG_FILE" | sed '/^[[:space:]]*$/d' || true)
+if [ -z "$BODY" ]; then
+  echo "carelink commit-msg: empty message" >&2
+  exit 1
+fi
+
+SUBJECT=$(printf '%s\n' "$BODY" | head -n 1)
+
+# Conventional subject: type(scope): summary
+echo "$SUBJECT" | grep -qE '^(feat|fix|refactor|test|chore|docs|style|perf)\([a-z0-9._-]+\): .+' || {
+  echo "carelink commit-msg: subject must match type(scope): summary (EN, ≤72 chars recommended)" >&2
+  echo "  got: $SUBJECT" >&2
+  exit 1
+}
+
+if [ "$(printf '%s' "$SUBJECT" | wc -c)" -gt 72 ]; then
+  echo "carelink commit-msg: subject longer than 72 characters" >&2
+  exit 1
+fi
+
+if grep -qi 'Co-authored-by:.*Cursor' "$MSG_FILE"; then
+  echo "carelink commit-msg: Co-authored-by: Cursor is not allowed" >&2
+  exit 1
+fi
+
+# Required Russian sections (labels may have trailing spaces)
+grep -qE '^Задача:[[:space:]]*$' "$MSG_FILE" || {
+  echo "carelink commit-msg: missing section header \"Задача:\"" >&2
+  exit 1
+}
+grep -qE '^Зачем:[[:space:]]*$' "$MSG_FILE" || {
+  echo "carelink commit-msg: missing section header \"Зачем:\"" >&2
+  exit 1
+}
+grep -qE '^Что сделано:[[:space:]]*$' "$MSG_FILE" || {
+  echo "carelink commit-msg: missing section header \"Что сделано:\"" >&2
+  exit 1
+}
+
+# Order: Задача before Зачем before Что сделано
+TASK_LINE=$(grep -n '^Задача:' "$MSG_FILE" | head -1 | cut -d: -f1)
+WHY_LINE=$(grep -n '^Зачем:' "$MSG_FILE" | head -1 | cut -d: -f1)
+DONE_LINE=$(grep -n '^Что сделано:' "$MSG_FILE" | head -1 | cut -d: -f1)
+if [ -z "$TASK_LINE" ] || [ -z "$WHY_LINE" ] || [ -z "$DONE_LINE" ]; then
+  echo "carelink commit-msg: could not verify section order" >&2
+  exit 1
+fi
+if [ "$TASK_LINE" -ge "$WHY_LINE" ] || [ "$WHY_LINE" -ge "$DONE_LINE" ]; then
+  echo "carelink commit-msg: sections must appear in order: Задача → Зачем → Что сделано" >&2
+  exit 1
+fi
+
+exit 0
