@@ -6,6 +6,10 @@
  */
 
 describe('onboarding create family (requires compose BE-21)', () => {
+  before(function () {
+    cy.skipUnlessCompose();
+  });
+
   // Auth limits OTP/email sends to 10/h per client IP, and in compose every request comes from the gateway IP.
   beforeEach(() => {
     cy.task('flushE2eRedis');

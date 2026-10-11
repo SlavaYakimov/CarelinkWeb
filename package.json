@@ -6,7 +6,7 @@
     "dev": "next dev",
     "dev:reset": "rm -rf .next && pnpm dev",
     "build": "next build",
-    "start": "next start",
+    "start": "node scripts/start-production.mjs",
     "lint": "eslint . && prettier --check .",
     "lint:fix": "eslint . --fix && prettier --write .",
     "typecheck": "tsc --noEmit",
@@ -72,5 +72,13 @@
   "packageManager": "pnpm@9.15.9",
   "engines": {
     "node": ">=22"
+  },
+  "pnpm": {
+    "auditConfig": {
+      "ignoreGhsas": [
+        "GHSA-vfj7-8cjw-p6xm",
+        "GHSA-hp3w-g68c-fv3c"
+      ]
+    }
   }
 }

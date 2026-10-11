@@ -113,7 +113,6 @@ export async function fetchOnboardingOtp(args) {
 }
 
 function parseFetchCliArgs(argv) {
-  let skipPriorMatches = 0;
   let minRecipientMatches = 1;
   let excludeCode;
   const positional = [];

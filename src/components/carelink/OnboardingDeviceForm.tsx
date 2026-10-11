@@ -72,9 +72,16 @@ export function OnboardingDeviceForm({ smsAlreadySent = false }: OnboardingDevic
               Введите код из SMS, чтобы доверить это устройство.
             </p>
             <div className="space-y-2">
-              <Label>Код из SMS</Label>
+              <Label id="device-otp-label">Код из SMS</Label>
               <input type="hidden" name="code" value={code} />
-              <OtpInput length={6} value={code} onChange={setCode} disabled={confirming} />
+              <OtpInput
+                id="device-otp"
+                labelledBy="device-otp-label"
+                length={6}
+                value={code}
+                onChange={setCode}
+                disabled={confirming}
+              />
             </div>
             <Button type="submit" className="w-full" disabled={confirming || code.length < 6}>
               Продолжить

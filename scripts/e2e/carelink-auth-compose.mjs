@@ -22,6 +22,13 @@ export function resolveCarelinkAuthRoot() {
   return path.resolve(WEB_REPO_ROOT, '../CarelinkAuth');
 }
 
+/** @returns {boolean} True when CarelinkAuth docker-compose.yml is present locally. */
+export function isCarelinkAuthComposeAvailable() {
+  const root = resolveCarelinkAuthRoot();
+  // eslint-disable-next-line security/detect-non-literal-fs-filename -- E2E path from env
+  return existsSync(path.join(root, 'docker-compose.yml'));
+}
+
 /**
  * @param {string} root
  */

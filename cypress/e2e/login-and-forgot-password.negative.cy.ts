@@ -47,9 +47,14 @@ describe('login and forgot password — negative (guest)', () => {
   });
 
   it('redirects confirm after recovery flow cookie is cleared (R-3, R-28)', () => {
-    cy.visit('/login/recovery');
-    cy.submitRecoveryRequest('yakimovs', '9001234567');
-    cy.location('pathname', { timeout: 45_000 }).should('eq', '/login/recovery/sent');
+    const phoneDigits = `900${String(Date.now()).slice(-7)}`;
+    cy.task('seedRecoverySentFlow', { familySlug: 'e2e-recovery', phoneDigits }).then(
+      ({ fid, flowCookieName }) => {
+        cy.setCarelinkFlowCookie(fid, flowCookieName);
+      },
+    );
+    cy.visit('/login/recovery/sent');
+    cy.location('pathname', { timeout: 15_000 }).should('eq', '/login/recovery/sent');
     cy.clearCarelinkCookie('cl_flow');
     cy.visit('/login/recovery/confirm');
     cy.location('pathname', { timeout: 15_000 }).should('eq', '/login/recovery');

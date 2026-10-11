@@ -87,6 +87,10 @@ describe('onboarding create family — negative (guest routing)', () => {
 });
 
 describe('onboarding create family — negative (compose BE-21)', () => {
+  before(function () {
+    cy.skipUnlessCompose();
+  });
+
   const displayName = 'E2E Негатив';
   const password = 'Testpass1';
 

@@ -90,7 +90,10 @@ describe('workspace login — negative (compose BE-21)', () => {
       cy.visitLogin();
       cy.get('input[name="trustDevice"]').uncheck();
       cy.fillWorkspaceLogin(family.workspaceEmail, family.password);
-      cy.location('pathname', { timeout: 45_000 }).should('match', /^\/login\/verify-(phone|sms|keeper)/);
+      cy.location('pathname', { timeout: 45_000 }).should(
+        'match',
+        /^\/login\/verify-(phone|sms|keeper)/,
+      );
       cy.location('pathname').should('not.eq', '/families');
     });
   });
@@ -103,7 +106,10 @@ describe('workspace login — negative (compose BE-21)', () => {
       cy.visitLogin();
       cy.get('input[name="trustDevice"]').uncheck();
       cy.fillWorkspaceLogin(family.workspaceEmail, family.password);
-      cy.location('pathname', { timeout: 45_000 }).should('match', /^\/login\/verify-(phone|sms|keeper)/);
+      cy.location('pathname', { timeout: 45_000 }).should(
+        'match',
+        /^\/login\/verify-(phone|sms|keeper)/,
+      );
       cy.location('pathname').should('not.eq', '/login');
       cy.location('pathname').then((pathname) => {
         if (pathname === '/login/verify-sms') {
@@ -112,5 +118,4 @@ describe('workspace login — negative (compose BE-21)', () => {
       });
     });
   });
-
 });

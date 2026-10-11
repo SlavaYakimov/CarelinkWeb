@@ -4,3 +4,4 @@ tmp
 pnpm-lock.yaml
 src/server/gateway/types.gen.ts
 docs/stitch-ref
+next-env.d.ts
