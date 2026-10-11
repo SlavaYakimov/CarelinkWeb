@@ -25,7 +25,6 @@ export function RecoveryConfirmForm({ phoneMasked }: RecoveryConfirmFormProps) {
   return (
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="next" value="/families" />
-      <input type="hidden" name="code" value={code} />
 
       {state.formError ? (
         <p className="text-sm text-destructive" role="alert">
@@ -56,6 +55,7 @@ export function RecoveryConfirmForm({ phoneMasked }: RecoveryConfirmFormProps) {
       <OtpInput
         id="recovery-otp"
         labelText="Код из SMS"
+        name="code"
         value={code}
         onChange={setCode}
         length={6}

@@ -15,6 +15,8 @@ export type VerifySmsPhoneState = {
   error?: string;
   phoneMasked?: string;
   smsSent?: boolean;
+  sentAt?: string;
+  retryAfter?: number;
 };
 
 export type VerifySmsOtpState = {
@@ -52,7 +54,8 @@ async function sendSignInSmsActionImpl(
       smsSentAt: new Date().toISOString(),
     };
     await persistSignInFlow(fid, updated);
-    return { smsSent: true, phoneMasked: maskRuPhoneE164(phoneE164) };
+    const sentAt = new Date().toISOString();
+    return { smsSent: true, phoneMasked: maskRuPhoneE164(phoneE164), sentAt };
   } catch (err) {
     if (err instanceof GatewayError) {
       if (err.code === 'RATE_LIMIT') {
@@ -77,12 +80,27 @@ async function resendSignInSmsActionImpl(): Promise<VerifySmsPhoneState> {
       { clientIp, deviceId },
     );
     await persistSignInFlow(fid, { ...flow, smsSentAt: new Date().toISOString() });
-    return { smsSent: true, phoneMasked: maskRuPhoneE164(phoneE164) };
+    return {
+      smsSent: true,
+      phoneMasked: maskRuPhoneE164(phoneE164),
+      sentAt: new Date().toISOString(),
+    };
   } catch (err) {
     if (err instanceof GatewayError && err.code === 'RATE_LIMIT') {
-      redirect(`/login/too-many?retryAfter=${err.retryAfter ?? 60}`);
+      return {
+        error: getErrorMessage(err.code),
+        smsSent: true,
+        phoneMasked: maskRuPhoneE164(phoneE164),
+        retryAfter: err.retryAfter ?? 60,
+      };
     }
-    if (err instanceof GatewayError) return { error: getErrorMessage(err.code) };
+    if (err instanceof GatewayError) {
+      return {
+        error: getErrorMessage(err.code),
+        smsSent: true,
+        phoneMasked: maskRuPhoneE164(phoneE164),
+      };
+    }
     throw err;
   }
 }

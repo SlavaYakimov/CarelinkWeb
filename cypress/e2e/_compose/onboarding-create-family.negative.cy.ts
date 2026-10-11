@@ -111,7 +111,7 @@ describe('onboarding create family — negative (compose BE-21)', () => {
     const email = uniqueEmail();
     advanceToEmailOtpPhase(email);
     for (let i = 0; i < 5; i += 1) {
-      cy.get(`[aria-label="Цифра ${i + 1} из 6"]`).type('1');
+      cy.get('#email-otp').type('1', { delay: 0 });
     }
     cy.contains('button', 'Продолжить').should('be.disabled');
   });
@@ -120,7 +120,7 @@ describe('onboarding create family — negative (compose BE-21)', () => {
     const email = uniqueEmail();
     advanceToPhoneOtpPhase(email, displayName, uniquePhoneDigits());
     for (let i = 0; i < 5; i += 1) {
-      cy.get(`[aria-label="Цифра ${i + 1} из 6"]`).type('1');
+      cy.get('#phone-otp').type('1', { delay: 0 });
     }
     cy.contains('button', 'Подтвердить').should('be.disabled');
   });

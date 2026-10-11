@@ -104,11 +104,8 @@ describe('login and forgot password — negative (compose BE-21)', () => {
   it('accepts six-digit OTP via fillOtp on confirm (R-13, R-31)', () => {
     withRecoveryFamilyCtx(({ familySlug, phoneDigits }) => {
       advanceToRecoveryConfirm(familySlug, phoneDigits);
-      cy.fillOtp('654321');
-      const digits = '654321';
-      for (let i = 1; i <= 6; i += 1) {
-        cy.get(`[aria-label="Цифра ${i} из 6"]`).should('have.value', digits[i - 1]);
-      }
+      cy.fillOtp('654321', 'recovery-otp');
+      cy.get('#recovery-otp').should('have.value', '654321');
     });
   });
 

@@ -1,32 +1,38 @@
 // @vitest-environment jsdom
+import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import { describe, it, expect, vi } from 'vitest';
 import { OtpInput } from '@/components/carelink/OtpInput';
 
 describe('OtpInput', () => {
-  it('links OTP group to external label via labelledBy', () => {
-    render(
-      <div>
-        <span id="email-otp-label">Код из письма</span>
-        <OtpInput id="email-otp" labelledBy="email-otp-label" value="" onChange={() => {}} />
-      </div>,
-    );
-    expect(screen.getByRole('group', { name: 'Код из письма' })).toBeInTheDocument();
+  it('renders single real input with one-time-code autocomplete', () => {
+    render(<OtpInput id="email-otp" labelledBy="email-otp-label" value="" onChange={() => {}} />);
+    const input = document.getElementById('email-otp');
+    expect(input).toHaveAttribute('autocomplete', 'one-time-code');
+    expect(input).toHaveAttribute('maxLength', '6');
+    expect(input).toHaveAttribute('data-otp-input');
   });
 
-  it('renders built-in sr-only label when labelledBy is omitted', () => {
-    render(<OtpInput id="phone-otp" labelText="Код из SMS" value="" onChange={() => {}} />);
-    expect(screen.getByRole('group', { name: 'Код из SMS' })).toBeInTheDocument();
-    expect(document.getElementById('phone-otp-label')).toHaveTextContent('Код из SMS');
+  it('shows field error text', () => {
+    render(<OtpInput id="otp-test" value="" onChange={() => {}} error="Неверный код" />);
+    expect(screen.getByRole('alert')).toHaveTextContent('Неверный код');
+    expect(document.getElementById('otp-test')).toHaveAttribute('aria-invalid', 'true');
   });
 
-  it('calls onChange when digits are entered', async () => {
-    const user = userEvent.setup();
+  it('clears value when error prop changes', () => {
     const onChange = vi.fn();
-    render(<OtpInput id="otp-test" value="" onChange={onChange} length={6} />);
-    const first = screen.getByLabelText('Цифра 1 из 6');
-    await user.type(first, '5');
-    expect(onChange).toHaveBeenCalled();
+    const { rerender } = render(<OtpInput id="otp-test" value="123456" onChange={onChange} />);
+    rerender(<OtpInput id="otp-test" value="123456" onChange={onChange} error="Неверный код" />);
+    expect(onChange).toHaveBeenCalledWith('');
+  });
+
+  it('calls onFilled once when value reaches six digits', () => {
+    const onFilled = vi.fn();
+    const { rerender } = render(
+      <OtpInput id="otp-filled" value="" onChange={() => {}} onFilled={onFilled} />,
+    );
+    rerender(<OtpInput id="otp-filled" value="123456" onChange={() => {}} onFilled={onFilled} />);
+    expect(onFilled).toHaveBeenCalledTimes(1);
+    rerender(<OtpInput id="otp-filled" value="1234567" onChange={() => {}} onFilled={onFilled} />);
+    expect(onFilled).toHaveBeenCalledTimes(1);
   });
 });

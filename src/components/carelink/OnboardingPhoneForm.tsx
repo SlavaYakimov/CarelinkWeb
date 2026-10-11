@@ -5,12 +5,14 @@ import { useActionState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import {
   confirmOnboardingPhoneOtpAction,
+  resendOnboardingPhoneOtpAction,
   sendOnboardingPhoneOtpAction,
   type OnboardingPhoneOtpState,
   type OnboardingPhoneState,
 } from '@/server/actions/onboarding';
 import { OtpInput } from '@/components/carelink/OtpInput';
 import { PhoneInput } from '@/components/carelink/PhoneInput';
+import { ResendButton } from '@/components/carelink/ResendButton';
 import { StepShell } from '@/components/carelink/StepShell';
 import { usePhoneField } from '@/components/carelink/use-phone-field';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -24,12 +26,14 @@ const otpInitial: OnboardingPhoneOtpState = {};
 export type OnboardingPhoneFormProps = {
   initialPhoneMasked?: string;
   smsAlreadySent?: boolean;
+  initialSentAt?: string;
   defaultDisplayName?: string;
 };
 
 export function OnboardingPhoneForm({
   initialPhoneMasked,
   smsAlreadySent = false,
+  initialSentAt,
   defaultDisplayName = '',
 }: OnboardingPhoneFormProps) {
   const [phoneState, sendOtp, sending] = useActionState(sendOnboardingPhoneOtpAction, phoneInitial);
@@ -37,12 +41,17 @@ export function OnboardingPhoneForm({
     confirmOnboardingPhoneOtpAction,
     otpInitial,
   );
+  const [resendState, resendOtp, resending] = useActionState(
+    resendOnboardingPhoneOtpAction,
+    phoneInitial,
+  );
   const phone = usePhoneField();
   const [code, setCode] = React.useState('');
   const [displayName, setDisplayName] = React.useState(defaultDisplayName);
 
-  const smsSent = smsAlreadySent || phoneState.smsSent;
-  const phoneMasked = phoneState.phoneMasked ?? initialPhoneMasked;
+  const smsSent = smsAlreadySent || phoneState.smsSent || resendState.smsSent;
+  const phoneMasked = phoneState.phoneMasked ?? resendState.phoneMasked ?? initialPhoneMasked;
+  const sentAt = phoneState.sentAt ?? resendState.sentAt ?? initialSentAt;
 
   return (
     <StepShell
@@ -83,35 +92,48 @@ export function OnboardingPhoneForm({
           </Button>
         </form>
       ) : (
-        <form action={confirmOtp} className="space-y-4">
-          {otpState.error ? (
-            <Alert variant="destructive">
-              <AlertDescription>{otpState.error}</AlertDescription>
-            </Alert>
-          ) : null}
-          {otpState.attemptsHint ? (
-            <p className="text-xs text-muted-foreground">{otpState.attemptsHint}</p>
-          ) : null}
-          <p className="text-sm text-muted-foreground">
-            {phoneMasked ? `Код отправлен на ${phoneMasked}.` : 'Введите код из SMS.'}
-          </p>
-          <div className="space-y-2">
-            <Label id="phone-otp-label">Код из SMS</Label>
-            <input type="hidden" name="code" value={code} />
-            <OtpInput
-              id="phone-otp"
-              labelledBy="phone-otp-label"
-              length={6}
-              value={code}
-              onChange={setCode}
-              disabled={confirming}
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={confirming || code.length < 6}>
-            Подтвердить
-            <ArrowRight className="size-4" aria-hidden />
-          </Button>
-        </form>
+        <div className="space-y-4">
+          <form id="onboarding-phone-otp-form" action={confirmOtp} className="space-y-4">
+            {otpState.error ? (
+              <Alert variant="destructive">
+                <AlertDescription>{otpState.error}</AlertDescription>
+              </Alert>
+            ) : null}
+            {otpState.attemptsHint ? (
+              <p className="text-xs text-muted-foreground">{otpState.attemptsHint}</p>
+            ) : null}
+            <p className="text-sm text-muted-foreground">
+              {phoneMasked ? `Код отправлен на ${phoneMasked}.` : 'Введите код из SMS.'}
+            </p>
+            <div className="space-y-2">
+              <Label id="phone-otp-label">Код из SMS</Label>
+              <OtpInput
+                id="phone-otp"
+                labelledBy="phone-otp-label"
+                name="code"
+                formId="onboarding-phone-otp-form"
+                length={6}
+                value={code}
+                onChange={setCode}
+                disabled={confirming}
+                error={otpState.error}
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={confirming || code.length < 6}>
+              Подтвердить
+              <ArrowRight className="size-4" aria-hidden />
+            </Button>
+          </form>
+          <ResendButton
+            action={resendOtp}
+            pending={resending}
+            successAt={sentAt}
+            startOnMount={smsAlreadySent}
+            retryAfter={resendState.retryAfter}
+            error={resendState.error}
+            onResendSuccess={() => setCode('')}
+          />
+        </div>
       )}
     </StepShell>
   );

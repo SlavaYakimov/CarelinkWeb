@@ -3,28 +3,35 @@
 import * as React from 'react';
 
 export type UseResendCountdownOptions = {
-  startOnMount: boolean;
-  trigger: boolean | undefined;
+  /** ISO time of last successful send; change restarts the timer */
+  successAt?: string | null;
+  /** Start countdown on mount (code already sent server-side) */
+  startOnMount?: boolean;
   seconds?: number;
 };
 
 export type ResendCountdown = {
   secondsLeft: number;
-  restart: () => void;
   label: string;
+  /** Apply server retryAfter after a failed resend (429) */
+  applyRetryAfter: (seconds: number) => void;
 };
 
 export function useResendCountdown({
-  startOnMount,
-  trigger,
+  successAt,
+  startOnMount = false,
   seconds = 60,
 }: UseResendCountdownOptions): ResendCountdown {
   const [secondsLeft, setSecondsLeft] = React.useState(startOnMount ? seconds : 0);
+  const lastSuccessAt = React.useRef<string | null | undefined>(undefined);
   const running = secondsLeft > 0;
 
   React.useEffect(() => {
-    if (trigger) setSecondsLeft(seconds);
-  }, [trigger, seconds]);
+    if (!successAt) return;
+    if (successAt === lastSuccessAt.current) return;
+    lastSuccessAt.current = successAt;
+    setSecondsLeft(seconds);
+  }, [successAt, seconds]);
 
   React.useEffect(() => {
     if (!running) return;
@@ -32,9 +39,15 @@ export function useResendCountdown({
     return () => window.clearInterval(id);
   }, [running]);
 
-  const restart = React.useCallback(() => setSecondsLeft(seconds), [seconds]);
+  const applyRetryAfter = React.useCallback((retrySeconds: number) => {
+    setSecondsLeft(Math.max(0, Math.floor(retrySeconds)));
+  }, []);
 
-  return { secondsLeft, restart, label: formatMmSs(secondsLeft) };
+  return {
+    secondsLeft,
+    label: formatMmSs(secondsLeft),
+    applyRetryAfter,
+  };
 }
 
 export function formatMmSs(total: number): string {
