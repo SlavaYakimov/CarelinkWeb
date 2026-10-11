@@ -34,13 +34,16 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          submodules: recursive
+          token: ${{ secrets.CARELINK_MEMORY_PAT || secrets.GITHUB_TOKEN }}
 
       - name: Epic commit messages (PR only)
         if: github.event_name == 'pull_request'
         env:
-          GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
-          GITHUB_SHA: ${{ github.event.pull_request.head.sha }}
-        run: bash scripts/lint-pr-commits.sh
+          COMMIT_LINT_BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          git checkout "${{ github.event.pull_request.head.sha }}"
+          bash scripts/lint-pr-commits.sh
 
       - uses: pnpm/action-setup@v4
 

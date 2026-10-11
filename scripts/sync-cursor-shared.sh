@@ -49,6 +49,11 @@ fi
 
 if [[ -d "${SRC_HOOKS}" ]]; then
   sync_dir "${SRC_HOOKS}" "${DST_HOOKS}"
+  if [[ -f "${SRC_HOOKS}/commit-msg" ]]; then
+    mkdir -p "${ROOT}/.githooks"
+    cp -a "${SRC_HOOKS}/commit-msg" "${ROOT}/.githooks/commit-msg"
+    chmod +x "${ROOT}/.githooks/commit-msg"
+  fi
 fi
 
-echo "sync-cursor-shared: updated .cursor/rules/shared (+ skills/commands/hooks if present)"
+echo "sync-cursor-shared: updated .cursor/rules/shared (+ skills/commands/hooks; .githooks/commit-msg if present)"

@@ -1,14 +1,20 @@
 ---
-description: Epic-коммиты Carelink — формат subject/body и локальный commit-msg hook
+description: Формат коммитов Carelink — conventional subject (EN) и тело Задача / Зачем / Что сделано (RU); skill обязателен перед каждым commit
 alwaysApply: true
 ---
 
-# Коммиты Carelink (epic)
+# Коммиты Carelink
 
-Перед **каждым** `git commit` в CarelinkWeb:
+Перед **каждым** `git commit` в любом репозитории Carelink прочитай и следуй:
 
-1. Сверься с [`.cursor/rules/commits.mdc`](../../commits.mdc) (repo) — subject EN (`type(scope): …`, ≤72), тело **Задача / Зачем / Что сделано** (RU).
-2. Локально после `pnpm install` активен `core.hooksPath=.githooks` (`commit-msg` → `scripts/validate-commit-msg.sh`). Сообщение через HEREDOC; без `Co-authored-by: Cursor`.
-3. Коммитить только по явной просьбе пользователя; не менять git config вручную (кроме автоматического `prepare`).
+**`cursor/shared/skills/carelink-commit/SKILL.md`**
 
-CI на PR прогоняет `scripts/lint-pr-commits.sh` для коммитов в ветке.
+(После sync из CarelinkMemory путь в репо: `.cursor/skills/shared/carelink-commit/SKILL.md` или копия с тем же содержимым.)
+
+Кратко:
+
+- Subject: `type(scope): short summary` — English, imperative, ≤72 символов.
+- Тело: секции **Задача:** / **Зачем:** / **Что сделано:** — по-русски, буллеты в «Что сделано».
+- Коммит **только** по явной просьбе пользователя; без `Co-authored-by: Cursor`; без force-push без «ок».
+
+Валидация: hook `commit-msg` и CI `commit-lint.sh` (см. `cursor/README.md`).

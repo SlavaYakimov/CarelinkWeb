@@ -35,7 +35,7 @@
 
 Subject — conventional commits на английском (`type(scope): …`, ≤72). Тело — секции **Задача / Зачем / Что сделано** на русском. Подробности: [`.cursor/rules/commits.mdc`](.cursor/rules/commits.mdc), shared [`.cursor/rules/shared/carelink-commit.mdc`](.cursor/rules/shared/carelink-commit.mdc).
 
-После `pnpm install` hook `.githooks/commit-msg` валидирует сообщение (`scripts/validate-commit-msg.sh`). На PR — `scripts/lint-pr-commits.sh` в CI. Сообщение через HEREDOC; без co-author trailer'ов Cursor.
+После `pnpm install` hook `.githooks/commit-msg` (копия из `memory/cursor/shared/hooks/` через `sync-cursor-shared.sh`). На PR — `memory/cursor/shared/ci/commit-lint.sh` через `scripts/lint-pr-commits.sh`. Skill: `.cursor/skills/shared/carelink-commit/SKILL.md`. Сообщение через HEREDOC; без co-author trailer'ов Cursor.
 
 ## Релиз (SemVer)
 
