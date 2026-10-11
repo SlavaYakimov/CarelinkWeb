@@ -14,6 +14,8 @@ import { OtpInput } from '@/components/carelink/OtpInput';
 import { PhoneInput } from '@/components/carelink/PhoneInput';
 import { ResendButton } from '@/components/carelink/ResendButton';
 import { StepShell } from '@/components/carelink/StepShell';
+import { onboardingPhoneClientSchema } from '@/lib/forms/schemas';
+import { useFormGate } from '@/lib/forms/use-form-gate';
 import { usePhoneField } from '@/components/carelink/use-phone-field';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -48,6 +50,13 @@ export function OnboardingPhoneForm({
   const phone = usePhoneField();
   const [code, setCode] = React.useState('');
   const [displayName, setDisplayName] = React.useState(defaultDisplayName);
+
+  const phoneGate = useFormGate(
+    onboardingPhoneClientSchema,
+    { phone: phone.submitValue, displayName },
+    ['phone', 'displayName'],
+    { pending: sending },
+  );
 
   const smsSent = smsAlreadySent || phoneState.smsSent || resendState.smsSent;
   const phoneMasked = phoneState.phoneMasked ?? resendState.phoneMasked ?? initialPhoneMasked;
@@ -86,7 +95,7 @@ export function OnboardingPhoneForm({
             error={phoneState.error}
           />
           <input type="hidden" name="phone" value={phone.submitValue} />
-          <Button type="submit" className="w-full" disabled={sending || !phone.e164}>
+          <Button type="submit" className="w-full" disabled={sending || !phoneGate.canSubmit}>
             Отправить SMS-код
             <ArrowRight className="size-4" aria-hidden />
           </Button>

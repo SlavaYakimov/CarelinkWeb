@@ -3,6 +3,10 @@
 import { useActionState } from 'react';
 import Link from 'next/link';
 import { createFamilyAction, type CreateFamilyFormState } from '@/server/actions/create-family';
+import { createFamilyFormSchema } from '@/lib/forms/schemas';
+import { useFormGate } from '@/lib/forms/use-form-gate';
+import { SubmitButton } from '@/components/carelink/SubmitButton';
+import * as React from 'react';
 import { FieldError } from '@/components/carelink/FieldError';
 import { FormAlert } from '@/components/carelink/FormAlert';
 import { Button } from '@/components/ui/button';
@@ -13,6 +17,8 @@ const initial: CreateFamilyFormState = {};
 
 export function CreateFamilyForm() {
   const [state, formAction, pending] = useActionState(createFamilyAction, initial);
+  const [name, setName] = React.useState('');
+  const gate = useFormGate(createFamilyFormSchema, { name }, ['name'], { pending });
 
   return (
     <form action={formAction} className="mx-auto flex w-full max-w-[520px] flex-col gap-6">
@@ -31,6 +37,8 @@ export function CreateFamilyForm() {
           id="familyName"
           name="name"
           placeholder="Сидоровы"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
           disabled={pending}
           aria-invalid={Boolean(state.fieldErrors?.name)}
         />
@@ -49,9 +57,9 @@ export function CreateFamilyForm() {
         <Button type="button" variant="secondary" asChild disabled={pending}>
           <Link href="/families">Отмена</Link>
         </Button>
-        <Button type="submit" disabled={pending}>
+        <SubmitButton type="submit" pending={pending} disabled={!gate.canSubmit}>
           Создать семью
-        </Button>
+        </SubmitButton>
       </div>
     </form>
   );

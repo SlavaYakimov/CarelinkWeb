@@ -143,6 +143,21 @@ export function phoneRawToE164(raw: string): string | null {
   return normalizeRuPhone(raw);
 }
 
+export const phoneE164FormSchema = phoneFormSchema.refine(
+  (v) => Boolean(phoneRawToE164(v.phone)),
+  { message: getValidationMessage('phoneInvalid'), path: ['phone'] },
+);
+
+export const recoveryRequestClientSchema = recoveryRequestFormSchema.refine(
+  (v) => Boolean(phoneRawToE164(v.phone)),
+  { message: getValidationMessage('phoneInvalid'), path: ['phone'] },
+);
+
+export const onboardingPhoneClientSchema = onboardingPhoneFormSchema.refine(
+  (v) => Boolean(phoneRawToE164(v.phone)),
+  { message: getValidationMessage('phoneInvalid'), path: ['phone'] },
+);
+
 export function normalizeSlugInput(raw: string): string {
   return normalizeWorkspaceSlug(raw);
 }

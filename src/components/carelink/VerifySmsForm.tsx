@@ -13,6 +13,8 @@ import {
 import { OtpInput } from '@/components/carelink/OtpInput';
 import { PhoneInput } from '@/components/carelink/PhoneInput';
 import { ResendButton } from '@/components/carelink/ResendButton';
+import { phoneE164FormSchema } from '@/lib/forms/schemas';
+import { useFormGate } from '@/lib/forms/use-form-gate';
 import { usePhoneField } from '@/components/carelink/use-phone-field';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -40,6 +42,12 @@ export function VerifySmsForm({
   const [resendState, resendSms, resending] = useActionState(resendSignInSmsAction, phoneInitial);
   const phone = usePhoneField();
   const [code, setCode] = React.useState('');
+  const phoneGate = useFormGate(
+    phoneE164FormSchema,
+    { phone: phone.submitValue },
+    ['phone'],
+    { pending: sending },
+  );
 
   const smsSent = smsAlreadySent || phoneState.smsSent || resendState.smsSent;
   const phoneMasked = phoneState.phoneMasked ?? resendState.phoneMasked ?? initialPhoneMasked;
@@ -72,7 +80,7 @@ export function VerifySmsForm({
               error={phoneState.error}
             />
             <input type="hidden" name="phone" value={phone.submitValue} />
-            <Button type="submit" className="w-full" disabled={sending}>
+            <Button type="submit" className="w-full" disabled={sending || !phoneGate.canSubmit}>
               Отправить код
             </Button>
           </form>
