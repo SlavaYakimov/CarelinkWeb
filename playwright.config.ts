@@ -12,6 +12,7 @@ const e2eServerEnv: Record<string, string> = {
 
 export default defineConfig({
   testDir: './tests/e2e',
+  testIgnore: ['**/memory/**'],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,

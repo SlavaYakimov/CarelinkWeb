@@ -14,8 +14,22 @@ env:
   COOKIE_PREFIX: ''
 
 jobs:
+  cursor-shared-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          # CarelinkMemory is private; GITHUB_TOKEN cannot read sibling private repos.
+          # Add repo secret CARELINK_MEMORY_PAT (read access to CarelinkMemory) when CI fails here.
+          token: ${{ secrets.CARELINK_MEMORY_PAT || secrets.GITHUB_TOKEN }}
+
+      - name: Cursor shared rules match memory submodule
+        run: ./scripts/check-cursor-shared-sync.sh
+
   web-check:
     runs-on: ubuntu-latest
+    needs: cursor-shared-sync
     steps:
       - uses: actions/checkout@v4
 
