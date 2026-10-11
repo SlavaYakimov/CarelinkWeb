@@ -17,11 +17,11 @@ describe('usePhoneField', () => {
     expect(result.current.submitValue).toBe('+79001234567');
   });
 
-  it('falls back to display while the number is incomplete', () => {
+  it('leaves submitValue empty while the number is incomplete', () => {
     const { result } = renderHook(() => usePhoneField());
     act(() => result.current.onChange('+7 (900) 12', null));
     expect(result.current.e164).toBe('');
-    expect(result.current.submitValue).toBe('+7 (900) 12');
+    expect(result.current.submitValue).toBe('');
   });
 
   it('keeps onChange stable across renders', () => {
