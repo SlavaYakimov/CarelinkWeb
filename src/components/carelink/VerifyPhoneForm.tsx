@@ -13,6 +13,8 @@ import {
 import { OtpInput } from '@/components/carelink/OtpInput';
 import { PhoneInput } from '@/components/carelink/PhoneInput';
 import { ResendButton } from '@/components/carelink/ResendButton';
+import { phoneE164FormSchema } from '@/lib/forms/schemas';
+import { useFormGate } from '@/lib/forms/use-form-gate';
 import { usePhoneField } from '@/components/carelink/use-phone-field';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -45,6 +47,9 @@ export function VerifyPhoneForm({
   );
   const phone = usePhoneField();
   const [code, setCode] = React.useState('');
+  const phoneGate = useFormGate(phoneE164FormSchema, { phone: phone.submitValue }, ['phone'], {
+    pending: sending,
+  });
 
   const otpSent = otpAlreadySent || phoneState.otpSent || resendState.otpSent;
   const phoneMasked = phoneState.phoneMasked ?? resendState.phoneMasked ?? initialPhoneMasked;
@@ -75,7 +80,7 @@ export function VerifyPhoneForm({
               error={phoneState.error}
             />
             <input type="hidden" name="phone" value={phone.submitValue} />
-            <Button type="submit" className="w-full" disabled={sending || !phone.e164}>
+            <Button type="submit" className="w-full" disabled={sending || !phoneGate.canSubmit}>
               Отправить код
               <ArrowRight className="size-4" aria-hidden />
             </Button>

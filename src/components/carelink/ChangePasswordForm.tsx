@@ -4,10 +4,12 @@ import * as React from 'react';
 import { useActionState } from 'react';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import { changePasswordAction, type ChangePasswordState } from '@/server/actions/change-password';
+import { changePasswordClientSchema } from '@/lib/forms/schemas';
+import { useFormGate } from '@/lib/forms/use-form-gate';
+import { SubmitButton } from '@/components/carelink/SubmitButton';
 import { FormAlert } from '@/components/carelink/FormAlert';
 import { PasswordField } from '@/components/carelink/PasswordField';
 import { useFocusFirstError } from '@/components/carelink/use-focus-first-error';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,6 +26,14 @@ export function ChangePasswordForm({ workspaceEmail, nextPath }: ChangePasswordF
   const [oldPassword, setOldPassword] = React.useState('');
   const [newPassword, setNewPassword] = React.useState('');
   const [confirmPassword, setConfirmPassword] = React.useState('');
+  const [confirmTouched, setConfirmTouched] = React.useState(false);
+
+  const gate = useFormGate(
+    changePasswordClientSchema,
+    { oldPassword, newPassword, confirmPassword },
+    ['oldPassword', 'newPassword', 'confirmPassword'],
+    { pending },
+  );
 
   useFocusFirstError(state.fieldErrors, state.formError);
 
@@ -84,17 +94,30 @@ export function ChangePasswordForm({ workspaceEmail, nextPath }: ChangePasswordF
             id="confirmPassword"
             label="Повторите пароль"
             value={confirmPassword}
-            onChange={setConfirmPassword}
+            onChange={(v) => {
+              setConfirmPassword(v);
+              setConfirmTouched(true);
+            }}
             autoComplete="new-password"
-            error={state.fieldErrors?.confirmPassword}
+            error={
+              state.fieldErrors?.confirmPassword ??
+              (confirmTouched && newPassword !== confirmPassword
+                ? 'Пароли не совпадают'
+                : undefined)
+            }
             disabled={pending}
             showRequirements={false}
           />
 
-          <Button type="submit" className="w-full" disabled={pending}>
+          <SubmitButton
+            type="submit"
+            className="w-full"
+            pending={pending}
+            disabled={!gate.canSubmit}
+          >
             Сохранить и продолжить
             <ArrowRight className="size-4" aria-hidden />
-          </Button>
+          </SubmitButton>
           <p className="text-center text-xs text-muted-foreground">
             Для смены пароля нужно подтверждённое устройство — пройдите SMS, если ещё не делали
           </p>

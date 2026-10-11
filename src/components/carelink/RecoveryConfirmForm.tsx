@@ -4,9 +4,13 @@ import * as React from 'react';
 import { useActionState } from 'react';
 import Link from 'next/link';
 import { recoveryConfirmAction, type RecoveryConfirmFormState } from '@/server/actions/recovery';
+import { recoveryConfirmClientSchema } from '@/lib/forms/schemas';
+import { useFormGate } from '@/lib/forms/use-form-gate';
+import { FormAlert } from '@/components/carelink/FormAlert';
 import { OtpInput } from '@/components/carelink/OtpInput';
 import { PasswordField } from '@/components/carelink/PasswordField';
-import { Button } from '@/components/ui/button';
+import { SubmitButton } from '@/components/carelink/SubmitButton';
+import { useFocusFirstError } from '@/components/carelink/use-focus-first-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -18,19 +22,30 @@ export type RecoveryConfirmFormProps = {
 
 export function RecoveryConfirmForm({ phoneMasked }: RecoveryConfirmFormProps) {
   const [state, formAction, pending] = useActionState(recoveryConfirmAction, initial);
+  const [requestId, setRequestId] = React.useState('');
   const [code, setCode] = React.useState('');
   const [password, setPassword] = React.useState('');
   const [confirmPassword, setConfirmPassword] = React.useState('');
+  const [confirmTouched, setConfirmTouched] = React.useState(false);
+
+  const gate = useFormGate(
+    recoveryConfirmClientSchema,
+    { requestId, code, newPassword: password, confirmPassword },
+    ['requestId', 'code', 'newPassword', 'confirmPassword'],
+    { pending },
+  );
+
+  useFocusFirstError(state.fieldErrors, state.formError);
+
+  const confirmError =
+    state.fieldErrors?.confirmPassword ??
+    (confirmTouched && password !== confirmPassword ? 'Пароли не совпадают' : undefined);
 
   return (
     <form action={formAction} className="space-y-4">
       <input type="hidden" name="next" value="/families" />
 
-      {state.formError ? (
-        <p className="text-sm text-destructive" role="alert">
-          {state.formError}
-        </p>
-      ) : null}
+      {state.formError ? <FormAlert message={state.formError} /> : null}
 
       {phoneMasked ? (
         <p className="text-sm text-muted-foreground">Код из SMS на {phoneMasked}</p>
@@ -44,6 +59,8 @@ export function RecoveryConfirmForm({ phoneMasked }: RecoveryConfirmFormProps) {
           autoComplete="off"
           spellCheck={false}
           maxLength={64}
+          value={requestId}
+          onChange={(e) => setRequestId(e.target.value)}
           placeholder="Из SMS после одобрения хранителем"
           disabled={pending}
           aria-invalid={Boolean(state.fieldErrors?.requestId)}
@@ -81,9 +98,12 @@ export function RecoveryConfirmForm({ phoneMasked }: RecoveryConfirmFormProps) {
         id="confirmPassword"
         label="Повторите пароль"
         value={confirmPassword}
-        onChange={setConfirmPassword}
+        onChange={(v) => {
+          setConfirmPassword(v);
+          setConfirmTouched(true);
+        }}
         autoComplete="new-password"
-        error={state.fieldErrors?.confirmPassword}
+        error={confirmError}
         disabled={pending}
         showRequirements={false}
       />
@@ -93,9 +113,9 @@ export function RecoveryConfirmForm({ phoneMasked }: RecoveryConfirmFormProps) {
         Восстановление одноразовое и ограничено по времени.
       </p>
 
-      <Button type="submit" className="w-full" disabled={pending}>
+      <SubmitButton type="submit" className="w-full" pending={pending} disabled={!gate.canSubmit}>
         Сохранить и войти
-      </Button>
+      </SubmitButton>
 
       <p className="text-center text-sm">
         <Link href="/login/recovery" className="text-primary hover:underline">

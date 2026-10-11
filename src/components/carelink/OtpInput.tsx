@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { useWebOtpAutofill } from '@/components/carelink/use-web-otp-autofill';
 import { filterOtp } from '@/lib/forms/filters';
 import { cn } from '@/lib/utils';
 
@@ -20,6 +21,8 @@ export type OtpInputProps = {
   onFilled?: () => void;
   /** Parent form id for auto-submit on 6th digit */
   formId?: string;
+  /** Progressive enhancement: Web OTP API when supported */
+  webOtp?: boolean;
 };
 
 export function OtpInput({
@@ -35,6 +38,7 @@ export function OtpInput({
   labelText = 'Код подтверждения',
   onFilled,
   formId,
+  webOtp = true,
 }: OtpInputProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const submittedForRef = React.useRef<string | null>(null);
@@ -45,6 +49,8 @@ export function OtpInput({
   const describedBy = [error ? errorId : null, attemptsHint ? hintId : null]
     .filter(Boolean)
     .join(' ');
+
+  useWebOtpAutofill(Boolean(webOtp && !disabled), value, onChange);
 
   const digits = value.padEnd(length, ' ').slice(0, length).split('');
   const activeIndex = Math.min(value.length, length - 1);

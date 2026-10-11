@@ -43,12 +43,9 @@ export function OnboardingEmailForm({ linkInvalid, initialSentAt }: OnboardingEm
   );
   const [code, setCode] = React.useState('');
   const [emailInput, setEmailInput] = React.useState('');
-  const emailGate = useFormGate(
-    emailFormSchema,
-    { email: emailInput },
-    ['email'],
-    { pending: requesting },
-  );
+  const emailGate = useFormGate(emailFormSchema, { email: emailInput }, ['email'], {
+    pending: requesting,
+  });
   const sent = emailState.sent || resendState.sent;
   const email = emailState.email ?? resendState.email ?? '';
   const sentAt = emailState.sentAt ?? resendState.sentAt ?? initialSentAt;

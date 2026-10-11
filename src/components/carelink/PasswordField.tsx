@@ -30,6 +30,17 @@ export function PasswordField({
 }: PasswordFieldProps) {
   const [visible, setVisible] = React.useState(false);
   const strong = isPasswordStrongEnough(value);
+  const requirementsId = `${id}-requirements`;
+  const errorId = `${id}-error`;
+  const weakHintId = `${id}-weak-hint`;
+
+  const describedBy = [
+    showRequirements ? requirementsId : null,
+    error ? errorId : null,
+    !error && value && !strong ? weakHintId : null,
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <div className="space-y-2">
@@ -42,6 +53,7 @@ export function PasswordField({
           value={value}
           disabled={disabled}
           aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy || undefined}
           onChange={(e) => onChange(e.target.value)}
           className="pr-11"
         />
@@ -50,12 +62,13 @@ export function PasswordField({
           className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
           onClick={() => setVisible((v) => !v)}
           aria-label={visible ? 'Скрыть пароль' : 'Показать пароль'}
+          aria-pressed={visible}
         >
           {visible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
         </button>
       </div>
       {showRequirements ? (
-        <ul className="space-y-1 text-sm" aria-live="polite">
+        <ul id={requirementsId} className="space-y-1 text-sm" aria-live="polite">
           {PASSWORD_RULES.map((rule) => {
             const ok = rule.test(value);
             return (
@@ -74,12 +87,12 @@ export function PasswordField({
         </ul>
       ) : null}
       {!error && value && !strong ? (
-        <p className="text-sm text-muted-foreground">
+        <p id={weakHintId} className="text-sm text-muted-foreground">
           Пароль пока не соответствует всем требованиям
         </p>
       ) : null}
       {error ? (
-        <p className="text-sm text-destructive" role="alert">
+        <p id={errorId} className="text-sm text-destructive" role="alert">
           {error}
         </p>
       ) : null}
