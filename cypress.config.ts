@@ -1,7 +1,13 @@
 import { defineConfig } from 'cypress';
 import { execFile } from 'node:child_process';
+import fs from 'node:fs';
+import { createRequire } from 'node:module';
 import { promisify } from 'node:util';
 import path from 'node:path';
+
+const require = createRequire(import.meta.url);
+const axeMinJsPath = require.resolve('axe-core/axe.min.js');
+let cachedAxeSource: string | null = null;
 
 const execFileAsync = promisify(execFile);
 
@@ -87,6 +93,12 @@ export default defineConfig({
             { env: process.env },
           );
           return JSON.parse(stdout.trim()) as { fid: string; flowCookieName: string };
+        },
+        readAxeSource() {
+          if (!cachedAxeSource) {
+            cachedAxeSource = fs.readFileSync(axeMinJsPath, 'utf8');
+          }
+          return cachedAxeSource;
         },
       });
       return config;
