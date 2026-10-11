@@ -16,6 +16,7 @@ export type PasswordFieldProps = {
   error?: string;
   disabled?: boolean;
   showRequirements?: boolean;
+  onBlur?: React.FocusEventHandler<HTMLInputElement>;
 };
 
 export function PasswordField({
@@ -27,6 +28,7 @@ export function PasswordField({
   error,
   disabled,
   showRequirements = true,
+  onBlur,
 }: PasswordFieldProps) {
   const [visible, setVisible] = React.useState(false);
   const strong = isPasswordStrongEnough(value);
@@ -55,6 +57,7 @@ export function PasswordField({
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy || undefined}
           onChange={(e) => onChange(e.target.value)}
+          onBlur={onBlur}
           className="pr-11"
         />
         <button

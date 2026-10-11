@@ -66,21 +66,27 @@ export function OtpInput({
     if (value.length < length) {
       submittedForRef.current = null;
     }
-    if (value.length !== length || disabled) return;
-    if (submittedForRef.current === value) return;
-    submittedForRef.current = value;
-    onFilled?.();
-    if (formId) {
+  }, [value.length, length]);
+
+  const submitWhenComplete = React.useCallback(
+    (next: string) => {
+      if (next.length !== length || disabled) return;
+      if (submittedForRef.current === next) return;
+      submittedForRef.current = next;
+      onFilled?.();
+      if (!formId) return;
       const form = document.getElementById(formId);
       if (form instanceof HTMLFormElement && !disabled) {
         form.requestSubmit();
       }
-    }
-  }, [value, length, disabled, formId, onFilled]);
+    },
+    [disabled, formId, length, onFilled],
+  );
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const next = filterOtp(e.target.value);
     onChange(next);
+    submitWhenComplete(next);
   };
 
   const focusInput = () => {

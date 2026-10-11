@@ -22,13 +22,13 @@ Cypress.Commands.add('onboardingEnterEmail', (email: string) => {
   cy.visit('/onboarding/email');
   cy.contains('h1', 'Личная почта').should('be.visible');
   cy.get('#email').clear().type(email);
-  cy.contains('button', 'Отправить код').click();
+  cy.clickSubmitWhenEnabled('Отправить код');
   cy.contains('Код отправлен на', { timeout: 30_000 }).should('be.visible');
 });
 
 Cypress.Commands.add('onboardingEnterEmailOtp', (code: string) => {
   cy.fillOtp(code, 'email-otp');
-  cy.contains('button', 'Продолжить').click();
+  cy.location('pathname', { timeout: 30_000 }).should('eq', '/onboarding/phone');
 });
 
 Cypress.Commands.add(
@@ -37,10 +37,10 @@ Cypress.Commands.add(
     cy.location('pathname', { timeout: 30_000 }).should('eq', '/onboarding/phone');
     cy.get('#displayName').clear().type(displayName);
     cy.get('#phone').clear().type(phoneDigits);
-    cy.contains('button', 'Отправить SMS-код').click();
+    cy.clickSubmitWhenEnabled('Отправить SMS-код');
     cy.contains('Код из SMS', { timeout: 30_000 }).should('be.visible');
     cy.fillOtp(smsCode);
-    cy.contains('button', 'Подтвердить').click();
+    cy.location('pathname', { timeout: 30_000 }).should('eq', '/onboarding/device');
   },
 );
 
@@ -60,7 +60,7 @@ Cypress.Commands.add('onboardingEnterDeviceSms', (phoneDigits: string, smsOrdina
     : { channel: 'sms', to: phoneDigits, skipPriorMatches: 1, minRecipientMatches: 2 };
   cy.task<string>('fetchOnboardingOtp', otpQuery).then((deviceOtp) => {
     cy.fillOtp(deviceOtp);
-    cy.contains('button', 'Продолжить').click();
+    cy.location('pathname', { timeout: 30_000 }).should('eq', '/onboarding/password');
   });
 });
 
@@ -68,7 +68,7 @@ Cypress.Commands.add('onboardingEnterPassword', (password: string) => {
   cy.location('pathname', { timeout: 30_000 }).should('eq', '/onboarding/password');
   cy.get('#newPassword').clear().type(password);
   cy.get('#confirmPassword').clear().type(password);
-  cy.contains('button', 'Сохранить пароль').click();
+  cy.clickSubmitWhenEnabled('Сохранить пароль');
 });
 
 Cypress.Commands.add('setCarelinkFlowCookie', (fid: string, cookieName = 'cl_flow') => {
@@ -100,12 +100,12 @@ Cypress.Commands.add('composeOnboardingCreateFamily', (ts = Date.now()) => {
     cy.location('pathname', { timeout: 30_000 }).should('eq', '/onboarding/phone');
     cy.get('#displayName').clear().type(displayName);
     cy.get('#phone').clear().type(phoneDigits);
-    cy.contains('button', 'Отправить SMS-код').click();
+    cy.clickSubmitWhenEnabled('Отправить SMS-код');
     cy.contains('Код из SMS', { timeout: 30_000 }).should('be.visible');
 
     cy.task<string>('fetchOnboardingOtp', { channel: 'sms', to: phoneDigits }).then((phoneOtp) => {
       cy.fillOtp(phoneOtp);
-      cy.contains('button', 'Подтвердить').click();
+      cy.clickSubmitWhenEnabled('Подтвердить');
 
       cy.onboardingEnterDeviceSms(phoneDigits);
       cy.onboardingEnterPassword(password);
@@ -131,7 +131,7 @@ Cypress.Commands.add(
       cy.get('body').then(($body) => {
         if ($body.find('#phone').length) {
           cy.get('#phone').clear().type(phoneDigits);
-          cy.contains('button', 'Отправить код').click();
+          cy.clickSubmitWhenEnabled('Отправить код');
         }
       });
       cy.contains('Код из SMS', { timeout: 30_000 }).should('be.visible');
@@ -141,7 +141,6 @@ Cypress.Commands.add(
         skipPriorMatches: 0,
       }).then((deviceOtp) => {
         cy.fillOtp(deviceOtp);
-        cy.contains('button', 'Подтвердить').click();
       });
       cy.location('pathname', { timeout: 45_000 }).should('eq', '/families');
       cy.getCookies().should((cookies) => {
@@ -160,7 +159,7 @@ Cypress.Commands.add(
     cy.location('pathname').then((pathname) => {
       if (pathname === '/login/verify-phone') {
         cy.get('#phone').clear().type(phoneDigits);
-        cy.contains('button', 'Отправить код').click();
+        cy.clickSubmitWhenEnabled('Отправить код');
         cy.get('[data-otp-input]', { timeout: 30_000 }).should('be.visible');
         cy.task<string>('fetchOnboardingOtp', {
           channel: 'sms',
@@ -168,7 +167,7 @@ Cypress.Commands.add(
           skipPriorMatches: 0,
         }).then((phoneOtp) => {
           cy.fillOtp(phoneOtp);
-          cy.contains('button', 'Продолжить').click();
+          cy.location('pathname', { timeout: 45_000 }).should('eq', '/login/verify-sms');
           completeVerifySmsDeviceStep();
         });
         return;
@@ -187,6 +186,6 @@ Cypress.Commands.add(
     cy.get('#workspaceSlug').blur();
     cy.contains('Проверяем, свободен ли адрес', { timeout: 15_000 }).should('not.exist');
     cy.contains('button', 'Создать семью', { timeout: 15_000 }).should('not.be.disabled');
-    cy.contains('button', 'Создать семью').click();
+    cy.clickSubmitWhenEnabled('Создать семью');
   },
 );

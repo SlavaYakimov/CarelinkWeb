@@ -11,6 +11,7 @@ import {
   type OnboardingEmailState,
 } from '@/server/actions/onboarding';
 import { emailFormSchema } from '@/lib/forms/schemas';
+import { mergeFieldError } from '@/lib/forms/client-field-error';
 import { useFormGate } from '@/lib/forms/use-form-gate';
 import { OtpInput } from '@/components/carelink/OtpInput';
 import { ResendButton } from '@/components/carelink/ResendButton';
@@ -84,9 +85,16 @@ export function OnboardingEmailForm({ linkInvalid, initialSentAt }: OnboardingEm
               placeholder="you@example.com"
               value={emailInput}
               onChange={(e) => setEmailInput(e.target.value)}
+              onBlur={() => emailGate.touch('email')}
               disabled={requesting}
               required
+              aria-invalid={Boolean(mergeFieldError(emailGate, 'email'))}
             />
+            {mergeFieldError(emailGate, 'email') ? (
+              <p className="text-sm text-destructive" role="alert">
+                {mergeFieldError(emailGate, 'email')}
+              </p>
+            ) : null}
           </div>
           <Button type="submit" className="w-full" disabled={requesting || !emailGate.canSubmit}>
             Отправить код

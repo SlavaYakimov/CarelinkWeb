@@ -36,10 +36,12 @@ describe('workspace login — negative (guest)', () => {
 
   it('rejects empty workspace slug (R-11)', () => {
     cy.visitLogin();
-    cy.get('#workspaceSlug').clear().invoke('prop', 'required', false);
     cy.get('#password').clear().type('longenough', { log: false });
-    cy.contains('button', 'Войти').click();
-    cy.contains('[role="alert"]', 'Укажите адрес семьи').should('be.visible');
+    cy.assertGatedValidation({
+      submitLabel: 'Войти',
+      blurSelector: '#workspaceSlug',
+      errorText: 'Укажите адрес семьи',
+    });
     cy.location('pathname').should('eq', '/login');
   });
 
@@ -47,8 +49,11 @@ describe('workspace login — negative (guest)', () => {
     cy.visitLogin();
     cy.get('#workspaceSlug').clear().type('ab');
     cy.get('#password').clear().type('longenough', { log: false });
-    cy.contains('button', 'Войти').click();
-    cy.contains('[role="alert"]', 'Адрес семьи не короче 3 символов').should('be.visible');
+    cy.assertGatedValidation({
+      submitLabel: 'Войти',
+      blurSelector: '#workspaceSlug',
+      errorText: 'Адрес семьи не короче 3 символов',
+    });
     cy.location('pathname').should('eq', '/login');
   });
 
@@ -56,18 +61,18 @@ describe('workspace login — negative (guest)', () => {
     cy.visitLogin();
     cy.get('#workspaceSlug').clear().type('тест');
     cy.get('#password').clear().type('longenough', { log: false });
-    cy.contains('button', 'Войти').click();
-    cy.contains('[role="alert"]', 'Только латиница').should('be.visible');
+    cy.contains('button', 'Войти').should('be.disabled');
+    cy.get('#workspaceSlug').should('have.value', '');
+    cy.get('[role="status"]').should('contain.text', 'Только латиница');
     cy.location('pathname').should('eq', '/login');
   });
 
-  it('rejects workspace slug longer than 32 characters (R-12)', () => {
+  it('caps workspace slug at 32 characters (R-12)', () => {
     cy.visitLogin();
     cy.get('#workspaceSlug').clear().type('a'.repeat(33));
+    cy.get('#workspaceSlug').should('have.value', 'a'.repeat(32));
     cy.get('#password').clear().type('longenough', { log: false });
-    cy.contains('button', 'Войти').click();
-    cy.contains('[role="alert"]', 'Слишком длинный адрес').should('be.visible');
-    cy.location('pathname').should('eq', '/login');
+    cy.contains('button', 'Войти').should('be.enabled');
   });
 
   it('normalizes workspace email to slug on submit via fillWorkspaceLogin (R-15)', () => {
@@ -77,22 +82,25 @@ describe('workspace login — negative (guest)', () => {
     cy.location('pathname').should('eq', '/login');
   });
 
-  it('trims surrounding spaces from workspace slug on submit (R-14)', () => {
+  it('normalizes spaces in workspace slug input (R-14)', () => {
     cy.visitLogin();
     cy.get('#workspaceSlug').clear().type('  ab  ');
     cy.get('#password').clear().type('longpassword', { log: false });
-    cy.contains('button', 'Войти').click();
-    cy.contains('[role="alert"]', 'Адрес семьи не короче 3 символов').should('be.visible');
+    cy.contains('button', 'Войти').should('be.disabled');
+    cy.get('#workspaceSlug').blur();
+    cy.contains('Адрес семьи не короче 3 символов').should('be.visible');
     cy.location('pathname').should('eq', '/login');
-    cy.get('#workspaceSlug').should('have.value', 'ab');
   });
 
   it('rejects password shorter than 8 characters (R-13)', () => {
     cy.visitLogin();
     cy.get('#workspaceSlug').clear().type('yakimovs');
     cy.get('#password').clear().type('short7', { log: false });
-    cy.contains('button', 'Войти').click();
-    cy.contains('[role="alert"]', 'Не короче 8 символов').should('be.visible');
+    cy.assertGatedValidation({
+      submitLabel: 'Войти',
+      blurSelector: '#password',
+      errorText: 'Не короче 8 символов',
+    });
     cy.location('pathname').should('eq', '/login');
   });
 
@@ -156,7 +164,7 @@ describe('workspace login — negative (guest)', () => {
     cy.visitLogin();
     cy.get('#workspaceSlug').clear().type('yakimovs');
     cy.get('#password').clear().type('wrong-password-1', { log: false });
-    cy.contains('button', 'Войти').click();
+    cy.clickSubmitWhenEnabled('Войти');
     cy.contains('button', 'Войти', { timeout: 500 }).should('be.disabled');
     cy.get('#workspaceSlug').should('be.disabled');
     cy.wait('@loginPost');

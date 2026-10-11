@@ -58,7 +58,7 @@ describe('login and forgot password — negative (compose BE-21)', () => {
       cy.openLoginRecoveryFromForgotLink();
       cy.get('#familySlug').clear().type(familySlug);
       cy.get('#phone').clear().type(phoneDigits);
-      cy.contains('button', 'Отправить запрос хранителю').click();
+      cy.clickSubmitWhenEnabled('Отправить запрос хранителю');
       cy.location('pathname', { timeout: 30_000 }).should('eq', '/login/recovery/sent');
       cy.contains('Запрос отправлен').should('be.visible');
     });
@@ -75,14 +75,14 @@ describe('login and forgot password — negative (compose BE-21)', () => {
   it('rejects confirm field validation without gateway success (R-12)', () => {
     withRecoveryFamilyCtx(({ familySlug, phoneDigits }) => {
       advanceToRecoveryConfirm(familySlug, phoneDigits);
-      cy.get('#requestId').clear().type('not-a-uuid');
+      cy.get('#requestId').clear().type('bad id!').blur();
       cy.fillOtp('123456');
-      cy.get('#newPassword').clear().type('short7', { log: false });
-      cy.get('#confirmPassword').clear().type('short7', { log: false });
-      cy.contains('button', 'Сохранить и войти').click();
+      cy.get('#newPassword').clear().type('short7', { log: false }).blur();
+      cy.get('#confirmPassword').clear().type('short7', { log: false }).blur();
+      cy.contains('button', 'Сохранить и войти').should('be.disabled');
       cy.location('pathname').should('eq', '/login/recovery/confirm');
-      cy.contains('[role="alert"]', 'Укажите идентификатор из SMS').should('be.visible');
-      cy.contains('[role="alert"]', 'Не короче 8 символов').should('be.visible');
+      cy.contains('Неверный формат идентификатора').should('be.visible');
+      cy.contains('Не короче 8 символов').should('be.visible');
     });
   });
 
@@ -94,10 +94,10 @@ describe('login and forgot password — negative (compose BE-21)', () => {
       cy.get('#requestId').clear().type(requestId);
       cy.fillOtp('123456');
       cy.get('#newPassword').clear().type('Testpass1', { log: false });
-      cy.get('#confirmPassword').clear().type('Testpass2', { log: false });
-      cy.contains('button', 'Сохранить и войти').click();
+      cy.get('#confirmPassword').clear().type('Testpass2', { log: false }).blur();
+      cy.contains('button', 'Сохранить и войти').should('be.disabled');
       cy.location('pathname').should('eq', '/login/recovery/confirm');
-      cy.contains('[role="alert"]', 'Пароли не совпадают').should('be.visible');
+      cy.contains('Пароли не совпадают').should('be.visible');
     });
   });
 
