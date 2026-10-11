@@ -3,7 +3,7 @@
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { signInFormSchema, normalizeSlugInput } from '@/lib/forms/schemas';
-import { zodFieldErrors } from '@/lib/forms/to-form-state';
+import { toFormState, zodFieldErrors } from '@/lib/forms/to-form-state';
 import { normalizeWorkspaceEmail } from '@/lib/workspace-email';
 import { formatWorkspaceLogin, normalizeWorkspaceSlug } from '@/lib/workspace-slug';
 import { GatewayError } from '@/server/gateway/errors';
@@ -163,9 +163,12 @@ async function signInActionImpl(
         redirect('/login/temp-expired');
       }
       if (err.code === 'INVALID_CREDENTIALS' || err.code === 'WORKSPACE_NOT_FOUND') {
+        const mapped = toFormState(err);
         return {
-          fieldErrors: { password: credentialMessage() },
-          formError: 'Не удалось войти. Проверьте логин и пароль.',
+          fieldErrors: {
+            password: mapped.fieldErrors?.password ?? credentialMessage(),
+            workspaceSlug: mapped.fieldErrors?.workspaceSlug,
+          },
           workspaceSlug,
         };
       }

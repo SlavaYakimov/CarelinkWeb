@@ -83,7 +83,7 @@ export function OnboardingPhoneForm({
             value={phone.display}
             onChange={phone.onChange}
             disabled={sending}
-            error={undefined}
+            error={phoneState.error}
           />
           <input type="hidden" name="phone" value={phone.submitValue} />
           <Button type="submit" className="w-full" disabled={sending || !phone.e164}>
@@ -94,14 +94,6 @@ export function OnboardingPhoneForm({
       ) : (
         <div className="space-y-4">
           <form id="onboarding-phone-otp-form" action={confirmOtp} className="space-y-4">
-            {otpState.error ? (
-              <Alert variant="destructive">
-                <AlertDescription>{otpState.error}</AlertDescription>
-              </Alert>
-            ) : null}
-            {otpState.attemptsHint ? (
-              <p className="text-xs text-muted-foreground">{otpState.attemptsHint}</p>
-            ) : null}
             <p className="text-sm text-muted-foreground">
               {phoneMasked ? `Код отправлен на ${phoneMasked}.` : 'Введите код из SMS.'}
             </p>
@@ -117,6 +109,7 @@ export function OnboardingPhoneForm({
                 onChange={setCode}
                 disabled={confirming}
                 error={otpState.error}
+                attemptsHint={otpState.attemptsHint}
               />
             </div>
             <Button type="submit" className="w-full" disabled={confirming || code.length < 6}>

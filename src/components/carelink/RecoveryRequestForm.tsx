@@ -6,7 +6,9 @@ import Link from 'next/link';
 import { recoveryRequestAction, type RecoveryRequestFormState } from '@/server/actions/recovery';
 import { PhoneInput } from '@/components/carelink/PhoneInput';
 import { WorkspaceSlugField } from '@/components/carelink/WorkspaceSlugField';
-import { Button } from '@/components/ui/button';
+import { FormAlert } from '@/components/carelink/FormAlert';
+import { SubmitButton } from '@/components/carelink/SubmitButton';
+import { useFocusFirstError } from '@/components/carelink/use-focus-first-error';
 
 const initial: RecoveryRequestFormState = {};
 
@@ -14,20 +16,11 @@ export function RecoveryRequestForm() {
   const [state, formAction, pending] = useActionState(recoveryRequestAction, initial);
   const [phone, setPhone] = React.useState('+7');
 
+  useFocusFirstError(state.fieldErrors, state.formError);
+
   return (
     <form action={formAction} className="space-y-4">
-      {state.formError ? (
-        <div className="space-y-1">
-          <p className="text-sm text-destructive" role="alert">
-            {state.formError}
-          </p>
-          {state.formError.includes('временно недоступно') ? (
-            <p className="text-xs text-muted-foreground">
-              Нужен CarelinkAuth compose с RECOVERY_ENABLED (см. README).
-            </p>
-          ) : null}
-        </div>
-      ) : null}
+      {state.formError ? <FormAlert message={state.formError} /> : null}
 
       <WorkspaceSlugField
         id="familySlug"
@@ -46,9 +39,9 @@ export function RecoveryRequestForm() {
         disabled={pending}
       />
 
-      <Button type="submit" className="w-full" disabled={pending}>
+      <SubmitButton type="submit" className="w-full" pending={pending}>
         Отправить запрос хранителю
-      </Button>
+      </SubmitButton>
 
       <p className="text-center text-sm">
         <Link href="/login" className="text-primary hover:underline">

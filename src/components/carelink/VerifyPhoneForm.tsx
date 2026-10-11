@@ -83,11 +83,6 @@ export function VerifyPhoneForm({
         ) : (
           <div className="space-y-4">
             <form id="verify-phone-otp-form" action={confirmOtp} className="space-y-4">
-              {otpState.error ? (
-                <Alert variant="destructive">
-                  <AlertDescription>{otpState.error}</AlertDescription>
-                </Alert>
-              ) : null}
               <p className="text-sm text-muted-foreground">
                 {phoneMasked ? `Код из SMS отправлен на ${phoneMasked}.` : 'Введите 6-значный код.'}
               </p>

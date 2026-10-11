@@ -74,11 +74,6 @@ export function OnboardingDeviceForm({
       ) : (
         <div className="space-y-4">
           <form id="onboarding-device-otp-form" action={confirmOtp} className="space-y-4">
-            {otpState.error ? (
-              <Alert variant="destructive">
-                <AlertDescription>{otpState.error}</AlertDescription>
-              </Alert>
-            ) : null}
             <p className="text-sm text-muted-foreground">
               Введите код из SMS, чтобы доверить это устройство.
             </p>
