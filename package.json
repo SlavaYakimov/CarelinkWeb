@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "prepare": "sh scripts/prepare-git-hooks.sh",
+    "commits:lint": "bash scripts/lint-pr-commits.sh",
     "dev": "next dev",
     "dev:reset": "rm -rf .next && pnpm dev",
     "build": "next build",

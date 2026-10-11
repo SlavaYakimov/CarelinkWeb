@@ -1,0 +1,15 @@
+#!/bin/sh
+# POSIX commit-msg hook — epic format (.cursor/rules/commits.mdc)
+set -eu
+
+ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+VALIDATOR="${ROOT}/scripts/validate-commit-msg.sh"
+
+if [ ! -x "$VALIDATOR" ] && [ -f "$VALIDATOR" ]; then
+  :
+elif [ ! -f "$VALIDATOR" ]; then
+  echo "commit-msg: missing ${VALIDATOR}" >&2
+  exit 1
+fi
+
+sh "$VALIDATOR" "$1"

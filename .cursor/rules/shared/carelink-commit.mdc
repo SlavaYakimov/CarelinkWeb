@@ -1,0 +1,14 @@
+---
+description: Epic-коммиты Carelink — формат subject/body и локальный commit-msg hook
+alwaysApply: true
+---
+
+# Коммиты Carelink (epic)
+
+Перед **каждым** `git commit` в CarelinkWeb:
+
+1. Сверься с [`.cursor/rules/commits.mdc`](../../commits.mdc) (repo) — subject EN (`type(scope): …`, ≤72), тело **Задача / Зачем / Что сделано** (RU).
+2. Локально после `pnpm install` активен `core.hooksPath=.githooks` (`commit-msg` → `scripts/validate-commit-msg.sh`). Сообщение через HEREDOC; без `Co-authored-by: Cursor`.
+3. Коммитить только по явной просьбе пользователя; не менять git config вручную (кроме автоматического `prepare`).
+
+CI на PR прогоняет `scripts/lint-pr-commits.sh` для коммитов в ветке.
