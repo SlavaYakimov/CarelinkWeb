@@ -86,6 +86,8 @@ export function VerifyPhoneForm({
               </p>
               <input type="hidden" name="code" value={code} />
               <OtpInput
+                id="verify-phone-otp"
+                labelText="Код из SMS"
                 length={6}
                 value={code}
                 onChange={setCode}

@@ -3,6 +3,8 @@ import { SESSION_ENDED_CODE } from '@/lib/session-ended';
 export { SESSION_ENDED_CODE };
 
 export function navigateToSessionEnded(): void {
+  // Full navigation clears client state after session teardown (not an in-app route transition).
+  // eslint-disable-next-line @next/next/no-location-assign-relative-destination -- intentional hard redirect
   window.location.assign('/session-ended');
 }
 

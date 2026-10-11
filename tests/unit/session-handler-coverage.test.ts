@@ -25,6 +25,7 @@ const ROUTE_HANDLERS: Array<{ path: string; exempt?: boolean }> = [
 describe('session handler coverage', () => {
   it('every gateway server action module uses withServerAction', () => {
     for (const file of ACTION_FILES) {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- fixed action file list
       const src = readFileSync(join(ROOT, 'server/actions', file), 'utf8');
       expect(src, `${file} must import withServerAction`).toMatch(/withServerAction/);
       expect(src, `${file} must export wrapped handlers`).toMatch(
@@ -38,6 +39,7 @@ describe('session handler coverage', () => {
 
   it('session-aware API routes use withRouteHandler', () => {
     for (const { path, exempt } of ROUTE_HANDLERS) {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename -- fixed route list
       const src = readFileSync(join(ROOT, path), 'utf8');
       if (exempt) continue;
       expect(src, path).toMatch(/withRouteHandler/);

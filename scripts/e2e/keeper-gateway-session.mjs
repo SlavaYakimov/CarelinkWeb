@@ -32,7 +32,9 @@ async function postJson(url, body, headers = {}) {
   });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(`keeper gateway POST ${url}: HTTP ${res.status} ${JSON.stringify(data).slice(0, 240)}`);
+    throw new Error(
+      `keeper gateway POST ${url}: HTTP ${res.status} ${JSON.stringify(data).slice(0, 240)}`,
+    );
   }
   return data;
 }
@@ -139,9 +141,7 @@ export async function getKeeperAccessToken(override) {
 
   const deviceId = process.env.E2E_RECOVERY_KEEPER_DEVICE_ID?.trim() || KEEPER_DEVICE_ID;
   const phoneRaw =
-    override?.phoneDigits?.trim() ||
-    process.env.CYPRESS_RECOVERY_PHONE_DIGITS?.trim() ||
-    '';
+    override?.phoneDigits?.trim() || process.env.CYPRESS_RECOVERY_PHONE_DIGITS?.trim() || '';
   const phoneE164 = normalizeRuPhoneE164(phoneRaw);
   if (!phoneE164) {
     throw new Error(

@@ -1849,7 +1849,8 @@ components:
 
     OnboardingVerifyPhoneResponse:
       type: object
-      required: [userId, onboardingChallengeId, existingUser, deviceRegistrationRequired, userCreatedAt]
+      required:
+        [userId, onboardingChallengeId, existingUser, deviceRegistrationRequired, userCreatedAt]
       properties:
         userId:
           type: string

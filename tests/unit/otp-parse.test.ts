@@ -26,12 +26,8 @@ describe('otp-parse', () => {
   });
 
   it('findOtpInLogs returns 4-digit sign-in phone OTP without padding to six', () => {
-    const line =
-      'info | mock SMS sent | {"to":"+79001234567","otp_code":"4829","body":"Код 4829"}';
-    const logs = [
-      'mock SMS sent | {"to":"+79001234567","otp_code":"111111"}',
-      line,
-    ].join('\n');
+    const line = 'info | mock SMS sent | {"to":"+79001234567","otp_code":"4829","body":"Код 4829"}';
+    const logs = ['mock SMS sent | {"to":"+79001234567","otp_code":"111111"}', line].join('\n');
     expect(findOtpInLogs(logs, { channel: 'sms', to: '9001234567', skipPriorMatches: 0 })).toBe(
       '4829',
     );

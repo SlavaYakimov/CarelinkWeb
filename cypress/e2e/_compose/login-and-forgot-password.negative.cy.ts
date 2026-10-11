@@ -74,90 +74,90 @@ describe('login and forgot password — negative (compose BE-21)', () => {
 
   it('rejects confirm field validation without gateway success (R-12)', () => {
     withRecoveryFamilyCtx(({ familySlug, phoneDigits }) => {
-    advanceToRecoveryConfirm(familySlug, phoneDigits);
-    cy.get('#requestId').clear().type('not-a-uuid');
-    cy.fillOtp('123456');
-    cy.get('#newPassword').clear().type('short7', { log: false });
-    cy.get('#confirmPassword').clear().type('short7', { log: false });
-    cy.contains('button', 'Сохранить и войти').click();
-    cy.location('pathname').should('eq', '/login/recovery/confirm');
-    cy.contains('[role="alert"]', 'Укажите идентификатор из SMS').should('be.visible');
-    cy.contains('[role="alert"]', 'Не короче 8 символов').should('be.visible');
+      advanceToRecoveryConfirm(familySlug, phoneDigits);
+      cy.get('#requestId').clear().type('not-a-uuid');
+      cy.fillOtp('123456');
+      cy.get('#newPassword').clear().type('short7', { log: false });
+      cy.get('#confirmPassword').clear().type('short7', { log: false });
+      cy.contains('button', 'Сохранить и войти').click();
+      cy.location('pathname').should('eq', '/login/recovery/confirm');
+      cy.contains('[role="alert"]', 'Укажите идентификатор из SMS').should('be.visible');
+      cy.contains('[role="alert"]', 'Не короче 8 символов').should('be.visible');
     });
   });
 
   it('rejects mismatched passwords on confirm (R-12)', () => {
     withRecoveryFamilyCtx(({ familySlug, phoneDigits }) => {
-    const requestId = '00000000-0000-4000-8000-000000000002';
+      const requestId = '00000000-0000-4000-8000-000000000002';
 
-    advanceToRecoveryConfirm(familySlug, phoneDigits);
-    cy.get('#requestId').clear().type(requestId);
-    cy.fillOtp('123456');
-    cy.get('#newPassword').clear().type('Testpass1', { log: false });
-    cy.get('#confirmPassword').clear().type('Testpass2', { log: false });
-    cy.contains('button', 'Сохранить и войти').click();
-    cy.location('pathname').should('eq', '/login/recovery/confirm');
-    cy.contains('[role="alert"]', 'Пароли не совпадают').should('be.visible');
+      advanceToRecoveryConfirm(familySlug, phoneDigits);
+      cy.get('#requestId').clear().type(requestId);
+      cy.fillOtp('123456');
+      cy.get('#newPassword').clear().type('Testpass1', { log: false });
+      cy.get('#confirmPassword').clear().type('Testpass2', { log: false });
+      cy.contains('button', 'Сохранить и войти').click();
+      cy.location('pathname').should('eq', '/login/recovery/confirm');
+      cy.contains('[role="alert"]', 'Пароли не совпадают').should('be.visible');
     });
   });
 
   it('accepts six-digit OTP via fillOtp on confirm (R-13, R-31)', () => {
     withRecoveryFamilyCtx(({ familySlug, phoneDigits }) => {
-    advanceToRecoveryConfirm(familySlug, phoneDigits);
-    cy.fillOtp('654321');
-    const digits = '654321';
-    for (let i = 1; i <= 6; i += 1) {
-      cy.get(`[aria-label="Цифра ${i} из 6"]`).should('have.value', digits[i - 1]);
-    }
+      advanceToRecoveryConfirm(familySlug, phoneDigits);
+      cy.fillOtp('654321');
+      const digits = '654321';
+      for (let i = 1; i <= 6; i += 1) {
+        cy.get(`[aria-label="Цифра ${i} из 6"]`).should('have.value', digits[i - 1]);
+      }
     });
   });
 
   it('sends at most two confirm action POSTs on double click while pending (R-22)', () => {
     withRecoveryFamilyCtx(({ familySlug, phoneDigits }) => {
-    const requestId = '00000000-0000-4000-8000-000000000004';
+      const requestId = '00000000-0000-4000-8000-000000000004';
 
-    advanceToRecoveryConfirm(familySlug, phoneDigits);
-    cy.intercept('POST', '**/login/recovery/confirm', (req) => {
-      req.reply((res) => {
-        res.delay = 800;
-        res.send();
+      advanceToRecoveryConfirm(familySlug, phoneDigits);
+      cy.intercept('POST', '**/login/recovery/confirm', (req) => {
+        req.reply((res) => {
+          res.delay = 800;
+          res.send();
+        });
+      }).as('confirmPost');
+      cy.get('#requestId').clear().type(requestId);
+      cy.fillOtp('111111');
+      cy.get('#newPassword').clear().type('Testpass1', { log: false });
+      cy.get('#confirmPassword').clear().type('Testpass1', { log: false });
+      cy.contains('button', 'Сохранить и войти').dblclick();
+      cy.get('@confirmPost.all', { timeout: 10_000 }).then((interceptions) => {
+        expect(interceptions.length).to.be.at.most(2);
       });
-    }).as('confirmPost');
-    cy.get('#requestId').clear().type(requestId);
-    cy.fillOtp('111111');
-    cy.get('#newPassword').clear().type('Testpass1', { log: false });
-    cy.get('#confirmPassword').clear().type('Testpass1', { log: false });
-    cy.contains('button', 'Сохранить и войти').dblclick();
-    cy.get('@confirmPost.all', { timeout: 10_000 }).then((interceptions) => {
-      expect(interceptions.length).to.be.at.most(2);
-    });
-    cy.location('pathname').should('eq', '/login/recovery/confirm');
+      cy.location('pathname').should('eq', '/login/recovery/confirm');
     });
   });
 
   it('shows gateway error on invalid confirm without leaving confirm (R-20)', () => {
     withRecoveryFamilyCtx(({ familySlug, phoneDigits }) => {
-    const requestId = '00000000-0000-4000-8000-000000000003';
+      const requestId = '00000000-0000-4000-8000-000000000003';
 
-    advanceToRecoveryConfirm(familySlug, phoneDigits);
-    cy.submitRecoveryConfirm(requestId, '000000', 'Testpass1');
-    cy.location('pathname').should('eq', '/login/recovery/confirm');
-    cy.get('[role="alert"]').should('be.visible');
-    cy.contains('button', 'Сохранить и войти').should('not.be.disabled');
+      advanceToRecoveryConfirm(familySlug, phoneDigits);
+      cy.submitRecoveryConfirm(requestId, '000000', 'Testpass1');
+      cy.location('pathname').should('eq', '/login/recovery/confirm');
+      cy.get('[role="alert"]').should('be.visible');
+      cy.contains('button', 'Сохранить и войти').should('not.be.disabled');
     });
   });
 
   it('sends at most two recovery request action POSTs on double click (R-21)', () => {
     withRecoveryFamilyCtx(({ familySlug, phoneDigits }) => {
-    cy.intercept('POST', '**/login/recovery').as('recoveryPost');
-    cy.visit('/login/recovery');
-    cy.get('#familySlug').clear().type(familySlug);
-    cy.get('#phone').clear().type(phoneDigits);
-    cy.contains('button', 'Отправить запрос хранителю').dblclick();
-    cy.assertRecoverySentPage();
-    cy.get('@recoveryPost.all', { timeout: 5_000 }).then((interceptions) => {
-      expect(interceptions.length).to.be.at.most(2);
-    });
+      cy.intercept('POST', '**/login/recovery').as('recoveryPost');
+      cy.visit('/login/recovery');
+      cy.get('#familySlug').clear().type(familySlug);
+      cy.get('#phone').clear().type(phoneDigits);
+      cy.contains('button', 'Отправить запрос хранителю').dblclick();
+      cy.assertRecoverySentPage();
+      cy.get('@recoveryPost.all', { timeout: 5_000 }).then((interceptions) => {
+        expect(interceptions.length).to.be.at.most(2);
+      });
     });
   });
 

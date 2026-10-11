@@ -98,7 +98,14 @@ export function OnboardingPhoneForm({
           <div className="space-y-2">
             <Label id="phone-otp-label">Код из SMS</Label>
             <input type="hidden" name="code" value={code} />
-            <OtpInput length={6} value={code} onChange={setCode} disabled={confirming} />
+            <OtpInput
+              id="phone-otp"
+              labelledBy="phone-otp-label"
+              length={6}
+              value={code}
+              onChange={setCode}
+              disabled={confirming}
+            />
           </div>
           <Button type="submit" className="w-full" disabled={confirming || code.length < 6}>
             Подтвердить

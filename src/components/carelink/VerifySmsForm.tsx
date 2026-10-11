@@ -88,6 +88,7 @@ export function VerifySmsForm({
                   Код из SMS
                 </p>
                 <OtpInput
+                  labelledBy="otp-label"
                   value={code}
                   onChange={setCode}
                   disabled={confirming}

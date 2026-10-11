@@ -10,6 +10,10 @@ export type OtpInputProps = {
   disabled?: boolean;
   error?: string;
   id?: string;
+  /** id of an external label; when omitted, a built-in sr-only label is rendered */
+  labelledBy?: string;
+  /** Text for the built-in sr-only label when `labelledBy` is not set */
+  labelText?: string;
 };
 
 export function OtpInput({
@@ -19,9 +23,13 @@ export function OtpInput({
   disabled,
   error,
   id = 'otp',
+  labelledBy,
+  labelText = 'Код подтверждения',
 }: OtpInputProps) {
   const refs = React.useRef<Array<HTMLInputElement | null>>([]);
   const digits = value.padEnd(length, ' ').slice(0, length).split('');
+  const groupLabelId = labelledBy ?? `${id}-label`;
+  const showBuiltinLabel = !labelledBy;
 
   const setAt = (index: number, char: string) => {
     const next = digits.map((d, i) => (i === index ? char : d === ' ' ? '' : d)).join('');
@@ -30,7 +38,12 @@ export function OtpInput({
 
   return (
     <div>
-      <div className="flex gap-2" role="group" aria-labelledby={`${id}-label`}>
+      {showBuiltinLabel ? (
+        <span id={groupLabelId} className="sr-only">
+          {labelText}
+        </span>
+      ) : null}
+      <div className="flex gap-2" role="group" aria-labelledby={groupLabelId}>
         {digits.map((d, i) => (
           <input
             key={i}

@@ -94,6 +94,7 @@ export function OnboardingEmailForm({ linkInvalid }: OnboardingEmailFormProps) {
             <input type="hidden" name="code" value={code} />
             <OtpInput
               id="email-otp"
+              labelledBy="email-otp-label"
               length={6}
               value={code}
               onChange={setCode}

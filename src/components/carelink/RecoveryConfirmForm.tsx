@@ -55,6 +55,7 @@ export function RecoveryConfirmForm({ phoneMasked }: RecoveryConfirmFormProps) {
 
       <OtpInput
         id="recovery-otp"
+        labelText="Код из SMS"
         value={code}
         onChange={setCode}
         length={6}

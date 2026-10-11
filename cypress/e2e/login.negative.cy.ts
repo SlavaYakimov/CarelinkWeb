@@ -79,11 +79,12 @@ describe('workspace login — negative (guest)', () => {
 
   it('trims surrounding spaces from workspace slug on submit (R-14)', () => {
     cy.visitLogin();
-    cy.get('#workspaceSlug').clear().type('  yakimovs  ');
-    cy.get('#password').clear().type('wrong-password-1', { log: false });
+    cy.get('#workspaceSlug').clear().type('  ab  ');
+    cy.get('#password').clear().type('longpassword', { log: false });
     cy.contains('button', 'Войти').click();
+    cy.contains('[role="alert"]', 'Адрес семьи не короче 3 символов').should('be.visible');
     cy.location('pathname').should('eq', '/login');
-    cy.get('#workspaceSlug').should('have.value', 'yakimovs');
+    cy.get('#workspaceSlug').should('have.value', 'ab');
   });
 
   it('rejects password shorter than 8 characters (R-13)', () => {
@@ -147,19 +148,18 @@ describe('workspace login — negative (guest)', () => {
   });
 
   it('disables login fields while sign-in action is pending (R-4)', () => {
-    cy.intercept('POST', '**/login', (req) => {
-      req.reply((res) => {
-        res.delay = 1200;
-        res.send();
+    cy.intercept('POST', '/login', (req) => {
+      req.continue((res) => {
+        res.setDelay(1200);
       });
-    }).as('signInPost');
+    }).as('loginPost');
     cy.visitLogin();
     cy.get('#workspaceSlug').clear().type('yakimovs');
     cy.get('#password').clear().type('wrong-password-1', { log: false });
     cy.contains('button', 'Войти').click();
-    cy.contains('button', 'Войти').should('be.disabled');
+    cy.contains('button', 'Войти', { timeout: 500 }).should('be.disabled');
     cy.get('#workspaceSlug').should('be.disabled');
-    cy.wait('@signInPost');
+    cy.wait('@loginPost');
     cy.contains('button', 'Войти').should('not.be.disabled');
   });
 
