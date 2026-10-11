@@ -1,8 +1,11 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { z } from 'zod';
-import { normalizeRuPhone } from '@/lib/phone';
+import {
+  phoneRawToE164,
+  recoveryConfirmFormSchema,
+  recoveryRequestFormSchema,
+} from '@/lib/forms/schemas';
 import { gatewayActionContext } from '@/server/actions/request-context';
 import {
   clearRecoveryFlow,
@@ -19,23 +22,6 @@ import type { FlowRecord } from '@/server/session/types';
 import { withServerAction } from '@/server/session/with-session-handler';
 import { sanitizeNextParam } from '@/server/security/next-param';
 
-const requestSchema = z.object({
-  familySlug: z
-    .string()
-    .trim()
-    .min(3, 'Адрес семьи не короче 3 символов')
-    .max(32, 'Слишком длинный адрес')
-    .regex(/^[a-z0-9-]+$/, 'Только латиница, цифры и дефис'),
-  phone: z.string().min(10, 'Укажите телефон'),
-});
-
-const confirmSchema = z.object({
-  requestId: z.string().uuid('Укажите идентификатор из SMS'),
-  code: z.string().regex(/^\d{4,6}$/, 'Код из SMS'),
-  newPassword: z.string().min(8, 'Не короче 8 символов'),
-  confirmPassword: z.string().min(8),
-});
-
 export type RecoveryRequestFormState = {
   formError?: string;
   fieldErrors?: { familySlug?: string; phone?: string };
@@ -50,7 +36,7 @@ async function recoveryRequestActionImpl(
   _prev: RecoveryRequestFormState,
   formData: FormData,
 ): Promise<RecoveryRequestFormState> {
-  const parsed = requestSchema.safeParse({
+  const parsed = recoveryRequestFormSchema.safeParse({
     familySlug: formData.get('familySlug'),
     phone: formData.get('phone'),
   });
@@ -64,7 +50,7 @@ async function recoveryRequestActionImpl(
     };
   }
 
-  const phoneE164 = normalizeRuPhone(parsed.data.phone);
+  const phoneE164 = phoneRawToE164(parsed.data.phone);
   if (!phoneE164) {
     return { fieldErrors: { phone: 'Проверьте формат телефона' } };
   }
@@ -105,7 +91,7 @@ async function recoveryConfirmActionImpl(
   formData: FormData,
 ): Promise<RecoveryConfirmFormState> {
   const { flow } = await requireRecoveryFlow('sent');
-  const parsed = confirmSchema.safeParse({
+  const parsed = recoveryConfirmFormSchema.safeParse({
     requestId: formData.get('requestId'),
     code: formData.get('code'),
     newPassword: formData.get('newPassword'),

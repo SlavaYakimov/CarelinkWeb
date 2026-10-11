@@ -2,13 +2,10 @@
 
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { z } from 'zod';
+import { signInFormSchema, normalizeSlugInput } from '@/lib/forms/schemas';
+import { zodFieldErrors } from '@/lib/forms/to-form-state';
 import { normalizeWorkspaceEmail } from '@/lib/workspace-email';
-import {
-  formatWorkspaceLogin,
-  isValidWorkspaceSlug,
-  normalizeWorkspaceSlug,
-} from '@/lib/workspace-slug';
+import { formatWorkspaceLogin, normalizeWorkspaceSlug } from '@/lib/workspace-slug';
 import { GatewayError } from '@/server/gateway/errors';
 import { workspaceSignIn } from '@/server/gateway/auth';
 import { clearSignInFlow, persistSignInFlow } from '@/server/flows/signin-flow';
@@ -26,23 +23,6 @@ import { deleteSession, loadSession, newFlowId } from '@/server/session/store';
 import type { FlowRecord } from '@/server/session/types';
 import { withServerAction } from '@/server/session/with-session-handler';
 
-const workspaceSlugSchema = z
-  .string()
-  .trim()
-  .min(3, 'Адрес семьи не короче 3 символов')
-  .max(32, 'Слишком длинный адрес')
-  .refine((v) => /^[a-z0-9-]+$/i.test(v), 'Только латиница, цифры и дефис')
-  .refine((v) => isValidWorkspaceSlug(v), 'Только латиница, цифры и дефис, от 3 до 32 символов');
-
-const signInSchema = z.object({
-  workspaceSlug: z.string().min(1, 'Укажите адрес семьи').pipe(workspaceSlugSchema),
-  password: z.string().min(8, 'Не короче 8 символов'),
-  trustDevice: z
-    .union([z.literal('on'), z.literal('true'), z.literal('1'), z.undefined()])
-    .optional(),
-  next: z.string().optional(),
-});
-
 export type SignInFormState = {
   formError?: string;
   fieldErrors?: { workspaceSlug?: string; password?: string };
@@ -58,7 +38,7 @@ async function signInActionImpl(
   formData: FormData,
 ): Promise<SignInFormState> {
   const rawSlug = String(formData.get('workspaceSlug') ?? '');
-  const parsed = signInSchema.safeParse({
+  const parsed = signInFormSchema.safeParse({
     workspaceSlug: rawSlug,
     password: formData.get('password'),
     trustDevice: formData.get('trustDevice') ?? undefined,
@@ -66,13 +46,13 @@ async function signInActionImpl(
   });
 
   if (!parsed.success) {
-    const flat = parsed.error.flatten().fieldErrors;
+    const flat = zodFieldErrors(parsed.error.flatten().fieldErrors);
     return {
       fieldErrors: {
-        workspaceSlug: flat.workspaceSlug?.[0],
-        password: flat.password?.[0],
+        workspaceSlug: flat.workspaceSlug,
+        password: flat.password,
       },
-      workspaceSlug: normalizeWorkspaceSlug(rawSlug),
+      workspaceSlug: normalizeSlugInput(rawSlug),
     };
   }
 
