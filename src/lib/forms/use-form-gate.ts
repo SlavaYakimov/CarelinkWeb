@@ -32,11 +32,15 @@ export function useFormGate<S extends z.ZodTypeAny>(
   const parsed = schema.safeParse(values);
   const flat = parsed.success ? {} : parsed.error.flatten().fieldErrors;
 
-  const clientFieldErrors: Record<string, string | undefined> = {};
-  for (const name of fieldNames) {
-    const msgs = flat[name as keyof typeof flat];
-    clientFieldErrors[name] = Array.isArray(msgs) ? msgs[0] : undefined;
-  }
+  const fieldErrorKey = parsed.success ? '' : JSON.stringify(flat);
+  const clientFieldErrors = React.useMemo(() => {
+    const out: Record<string, string | undefined> = {};
+    for (const name of fieldNames) {
+      const msgs = flat[name as keyof typeof flat];
+      out[name] = Array.isArray(msgs) ? msgs[0] : undefined;
+    }
+    return out;
+  }, [fieldNames, fieldErrorKey, flat]);
 
   const canSubmit = parsed.success && !pending && !cooldownActive && extraOk;
 

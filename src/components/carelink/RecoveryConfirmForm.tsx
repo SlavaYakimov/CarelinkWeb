@@ -41,6 +41,9 @@ export function RecoveryConfirmForm({ phoneMasked }: RecoveryConfirmFormProps) {
         <Input
           id="requestId"
           name="requestId"
+          autoComplete="off"
+          spellCheck={false}
+          maxLength={64}
           placeholder="Из SMS после одобрения хранителем"
           disabled={pending}
           aria-invalid={Boolean(state.fieldErrors?.requestId)}

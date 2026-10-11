@@ -81,6 +81,8 @@ export function OnboardingPhoneForm({
             <Input
               id="displayName"
               name="displayName"
+              autoComplete="name"
+              maxLength={64}
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
               placeholder="Мария"

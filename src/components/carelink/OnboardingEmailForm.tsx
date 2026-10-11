@@ -82,6 +82,8 @@ export function OnboardingEmailForm({ linkInvalid, initialSentAt }: OnboardingEm
               name="email"
               type="email"
               autoComplete="email"
+              autoCapitalize="none"
+              enterKeyHint="send"
               placeholder="you@example.com"
               value={emailInput}
               onChange={(e) => setEmailInput(e.target.value)}
