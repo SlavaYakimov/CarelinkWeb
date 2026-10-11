@@ -16,7 +16,13 @@ const eslintConfig = [
     },
   },
   {
-    ignores: ['node_modules/**', '.next/**', 'next-env.d.ts', 'src/server/gateway/types.gen.ts'],
+    ignores: [
+      'node_modules/**',
+      '.next/**',
+      'memory/**',
+      'next-env.d.ts',
+      'src/server/gateway/types.gen.ts',
+    ],
   },
 ];
 

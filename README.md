@@ -4,6 +4,37 @@ Next.js BFF для семейного приложения Carelink. Брауз�
 
 План: [`docs/PLAN.md`](docs/PLAN.md).
 
+Memory bank проекта — git submodule [`memory/`](memory/) ([CarelinkMemory](https://github.com/SlavaYakimov/CarelinkMemory), приватный). Сборка Next.js **не использует** содержимое `memory/` (исключено из lint/typecheck/tests).
+
+### Клон и субмодуль
+
+```bash
+git clone --recurse-submodules https://github.com/SlavaYakimov/CarelinkWeb.git
+cd CarelinkWeb
+# если клонировали без submodules:
+git submodule update --init memory
+./scripts/sync-cursor-shared.sh   # .cursor/rules/shared/ из memory/cursor/shared
+```
+
+### Bump memory bank
+
+После мержа PR в CarelinkMemory:
+
+```bash
+cd memory
+git fetch origin
+git checkout <новый-sha>   # или git merge --ff-only origin/main
+cd ..
+git add memory
+./scripts/sync-cursor-shared.sh
+git add .cursor/rules/shared .cursor/skills/shared 2>/dev/null || git add .cursor/rules/shared
+git commit -m "chore(memory): bump CarelinkMemory submodule"
+```
+
+CI (`cursor-shared-sync`) сверяет `.cursor/rules/shared/` с `memory/cursor/shared/rules/` — нужен checkout субмодуля. Репозиторий **private**: в GitHub Actions добавьте secret `CARELINK_MEMORY_PAT` (read) с доступом к CarelinkMemory; иначе job упадёт на `git submodule update`.
+
+**Vercel:** деплой не зависит от `memory/`, но при клоне с submodules Vercel должен иметь доступ к private CarelinkMemory (подключить репо в GitHub App Vercel) **или** отключить инициализацию submodules в настройках проекта. Без доступа clone может упасть до `pnpm build`.
+
 ## Требования
 
 - Node.js 22+

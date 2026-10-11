@@ -2,6 +2,20 @@
 
 Полный план: [`docs/PLAN.md`](docs/PLAN.md) (§7.1).
 
+## Memory bank (CarelinkMemory)
+
+Субмодуль [`memory/`](memory/) → [CarelinkMemory](https://github.com/SlavaYakimov/CarelinkMemory) (закреплённый коммит в gitlink). После клона: `git submodule update --init memory`.
+
+Перед задачей читай:
+
+- [`memory/README.md`](memory/README.md) — структура и правила обновления
+- [`memory/status.md`](memory/status.md) — текущее состояние репозиториев и стендов
+- [`memory/process/orchestrator/SKILL.md`](memory/process/orchestrator/SKILL.md) — оркестратор фичи
+
+Общие Cursor-правила синхронизируются в [`.cursor/rules/shared/`](.cursor/rules/shared/) скриптом [`scripts/sync-cursor-shared.sh`](scripts/sync-cursor-shared.sh) (не редактировать shared вручную). Repo-специфичные правила — [`.cursor/rules/web.mdc`](.cursor/rules/web.mdc), [`commits.mdc`](.cursor/rules/commits.mdc), [`forms.mdc`](.cursor/rules/forms.mdc) и skills в `.cursor/skills/` — не трогает sync.
+
+**Обновление знаний:** правки только в CarelinkMemory (свой PR в `cursor/*` / `docs/*`), затем в CarelinkWeb — bump субмодуля `memory` и `./scripts/sync-cursor-shared.sh`, коммит vendored `.cursor/rules/shared/`.
+
 ## Безопасность и границы
 
 - Токены (`access`, `refresh`, `userRefresh`, `deviceSession`) **никогда** не попадают в клиентский код, props клиентских компонентов, HTML или `localStorage`.
