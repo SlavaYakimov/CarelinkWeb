@@ -980,6 +980,177 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/families/{familyId}/role-templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Role templates for member invites */
+        get: operations["listFamilyRoleTemplates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/families/{familyId}/member-invites/lookup-email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Check whether personal email is registered (keeper only) */
+        post: operations["lookupMemberInviteEmail"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/families/{familyId}/member-invites/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload invitee avatar (multipart) */
+        post: operations["uploadMemberInviteAvatar"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/families/{familyId}/member-invites": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List member invites for a family */
+        get: operations["listFamilyMemberInvites"];
+        put?: never;
+        /** Create member invite (keeper) */
+        post: operations["createMemberInvite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/families/{familyId}/member-invites/{inviteId}/resend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Resend invite email (keeper) */
+        post: operations["resendMemberInvite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/families/{familyId}/member-invites/{inviteId}/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Revoke pending invite (keeper) */
+        post: operations["revokeMemberInvite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/member-invites/pending": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Pending invites for current user */
+        get: operations["listPendingMemberInvites"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/member-invites/{inviteId}/accept": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Accept family invite */
+        post: operations["acceptMemberInvite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/member-invites/{inviteId}/decline": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Decline family invite */
+        post: operations["declineMemberInvite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/session/rebuild": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Rebuild session after family membership change (BE-07) */
+        post: operations["rebuildAuthSession"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1439,6 +1610,91 @@ export interface components {
         };
         /** @enum {string} */
         UnionRole: "keeper" | "partner" | "parent";
+        RoleTemplate: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            description?: string;
+        };
+        RoleTemplateListResponse: {
+            items: components["schemas"]["RoleTemplate"][];
+        };
+        MemberInviteLookupEmailRequest: {
+            /** Format: email */
+            email: string;
+        };
+        MemberInviteLookupEmailResponse: {
+            registered: boolean;
+        };
+        MemberInviteAvatarResponse: {
+            /** Format: uri */
+            avatarUrl: string;
+        };
+        CreateMemberInviteRequest: {
+            /** Format: uuid */
+            roleTemplateId: string;
+            displayName: string;
+            /** @description E.164 */
+            phone: string;
+            /** Format: email */
+            personalEmail: string;
+            /** Format: uri */
+            avatarUrl?: string;
+        };
+        CreateMemberInviteResponse: {
+            /** Format: uuid */
+            inviteId: string;
+            emailSent: boolean;
+            /** @enum {string} */
+            inviteeKind?: "new" | "existing";
+        };
+        /** @enum {string} */
+        MemberInviteStatus: "sent" | "pending_accept" | "accepted" | "declined" | "expired" | "revoked";
+        MemberInviteView: {
+            /** Format: uuid */
+            id: string;
+            displayName: string;
+            emailMasked?: string;
+            /** @description E.164; only for keeper (BE-23) */
+            phone?: string;
+            roleName: string;
+            status: components["schemas"]["MemberInviteStatus"];
+            /** @enum {string} */
+            inviteeKind?: "new" | "existing";
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            expiresAt?: string;
+        };
+        MemberInviteListResponse: {
+            items: components["schemas"]["MemberInviteView"][];
+        };
+        PendingMemberInviteView: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            familyId: string;
+            familyName: string;
+            roleName: string;
+            invitedByDisplayName: string;
+            /** Format: date-time */
+            expiresAt: string;
+        };
+        PendingMemberInviteListResponse: {
+            items: components["schemas"]["PendingMemberInviteView"][];
+        };
+        MemberInviteAcceptResponse: {
+            accepted: boolean;
+        };
+        MemberInviteDeclineResponse: {
+            declined: boolean;
+        };
+        MemberInviteResendResponse: {
+            emailSent: boolean;
+        };
+        MemberInviteRevokeResponse: {
+            revoked: boolean;
+        };
         /** @enum {string} */
         TrustTier: "nuclear" | "kin" | "friend" | "advisor" | "guest";
     };
@@ -3029,6 +3285,337 @@ export interface operations {
                     "application/json": components["schemas"]["FamilyListResponse"] | components["schemas"]["FamilySyncResponse"];
                 };
             };
+        };
+    };
+    listFamilyRoleTemplates: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Role templates */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleTemplateListResponse"];
+                };
+            };
+            404: components["responses"]["Error"];
+        };
+    };
+    lookupMemberInviteEmail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MemberInviteLookupEmailRequest"];
+            };
+        };
+        responses: {
+            /** @description Lookup result */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberInviteLookupEmailResponse"];
+                };
+            };
+            403: components["responses"]["Error"];
+            429: components["responses"]["RateLimit"];
+            501: components["responses"]["NotImplemented"];
+        };
+    };
+    uploadMemberInviteAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Avatar URL */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberInviteAvatarResponse"];
+                };
+            };
+            /** @description Avatar too large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    listFamilyMemberInvites: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Invites */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberInviteListResponse"];
+                };
+            };
+            404: components["responses"]["Error"];
+        };
+    };
+    createMemberInvite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateMemberInviteRequest"];
+            };
+        };
+        responses: {
+            /** @description Invite created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CreateMemberInviteResponse"];
+                };
+            };
+            403: components["responses"]["Error"];
+            /** @description Duplicate pending invite */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            429: components["responses"]["RateLimit"];
+            501: components["responses"]["NotImplemented"];
+            /** @description Email undeliverable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    resendMemberInvite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+                inviteId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Email sent */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberInviteResendResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            429: components["responses"]["RateLimit"];
+        };
+    };
+    revokeMemberInvite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+                inviteId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Revoked */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberInviteRevokeResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            409: components["responses"]["Error"];
+        };
+    };
+    listPendingMemberInvites: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Pending invites */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PendingMemberInviteListResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    acceptMemberInvite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                inviteId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Accepted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberInviteAcceptResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            /** @description Already member */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    declineMemberInvite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                inviteId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": Record<string, never>;
+            };
+        };
+        responses: {
+            /** @description Declined */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberInviteDeclineResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+        };
+    };
+    rebuildAuthSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Full session with updated families */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthSessionResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
         };
     };
 }

@@ -16,7 +16,7 @@ type NavItem = {
 const NAV: NavItem[] = [
   { href: '/families', label: 'Главная', icon: Home },
   { href: '/families/members', label: 'Семья', icon: Users, disabled: true },
-  { href: '/invites', label: 'Приглашения', icon: Mail, disabled: true },
+  { href: '/invites', label: 'Приглашения', icon: Mail },
   { href: '/requests/join', label: 'Заявки', icon: LayoutGrid, disabled: true },
   { href: '/notifications', label: 'Уведомления', icon: Bell, disabled: true },
   { href: '/profile', label: 'Профиль', icon: User, disabled: true },
@@ -45,8 +45,9 @@ export function AppSidebar() {
           {NAV.map((item) => {
             const active =
               !item.disabled &&
+              Boolean(pathname) &&
               (pathname === item.href ||
-                (item.href !== '/families' && pathname.startsWith(item.href)));
+                (item.href !== '/families' && pathname!.startsWith(item.href)));
             const Icon = item.icon;
             if (item.disabled) {
               return (
