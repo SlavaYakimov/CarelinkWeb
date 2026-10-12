@@ -10,6 +10,11 @@ export type FilterSlugResult = {
 
 /** Filters slug input: latin digits hyphen, lower, space/_ → hyphen, collapse `--`, max 32. */
 export function filterSlug(raw: string, prev = ''): FilterSlugResult {
+  if (/^\s/.test(raw) && /\s$/.test(raw)) {
+    raw = raw.trim();
+  } else if (/^\s/.test(raw)) {
+    raw = raw.trimStart();
+  }
   let rejectedCyrillic = false;
   let out = '';
   for (const ch of raw) {
@@ -23,7 +28,7 @@ export function filterSlug(raw: string, prev = ''): FilterSlugResult {
       out += '-';
     }
   }
-  out = out.replace(/-+/g, '-').slice(0, SLUG_MAX);
+  out = out.replace(/-+/g, '-').replace(/^-+/, '').slice(0, SLUG_MAX);
   if (out.length === 0 && raw.length > 0 && !rejectedCyrillic) {
     return { value: prev, rejectedCyrillic: false };
   }

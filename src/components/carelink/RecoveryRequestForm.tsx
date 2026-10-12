@@ -5,6 +5,7 @@ import { useActionState } from 'react';
 import Link from 'next/link';
 import { recoveryRequestAction, type RecoveryRequestFormState } from '@/server/actions/recovery';
 import { recoveryRequestClientSchema } from '@/lib/forms/schemas';
+import { mergeFieldError } from '@/lib/forms/client-field-error';
 import { useFormGate } from '@/lib/forms/use-form-gate';
 import { PhoneInput } from '@/components/carelink/PhoneInput';
 import { usePhoneField } from '@/components/carelink/use-phone-field';
@@ -20,9 +21,12 @@ export function RecoveryRequestForm() {
   const phoneField = usePhoneField('+7');
   const [familySlug, setFamilySlug] = React.useState('');
 
+  const phoneDigits = phoneField.display.replace(/\D/g, '');
+  const phoneForGate =
+    phoneField.e164 || (phoneDigits.length > 1 ? phoneField.display : phoneDigits);
   const gate = useFormGate(
     recoveryRequestClientSchema,
-    { familySlug, phone: phoneField.submitValue },
+    { familySlug, phone: phoneForGate },
     ['familySlug', 'phone'],
     { pending },
   );
@@ -39,7 +43,8 @@ export function RecoveryRequestForm() {
         label="Адрес семьи (латиница)"
         value={familySlug}
         onChange={setFamilySlug}
-        error={state.fieldErrors?.familySlug}
+        onBlur={() => gate.touch('familySlug')}
+        error={mergeFieldError(gate, 'familySlug', state.fieldErrors?.familySlug)}
         disabled={pending}
         required
       />
@@ -47,7 +52,8 @@ export function RecoveryRequestForm() {
       <PhoneInput
         value={phoneField.display}
         onChange={phoneField.onChange}
-        error={state.fieldErrors?.phone}
+        onBlur={() => gate.touch('phone')}
+        error={mergeFieldError(gate, 'phone', state.fieldErrors?.phone)}
         disabled={pending}
       />
       <input type="hidden" name="phone" value={phoneField.e164} />

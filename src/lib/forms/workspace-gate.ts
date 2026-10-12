@@ -8,9 +8,7 @@ export type WorkspaceSlugCheckResult = {
 };
 
 export type WorkspaceSlugCheckUi =
-  | { phase: 'idle' }
-  | { phase: 'checking' }
-  | { phase: 'done'; result: WorkspaceSlugCheckResult };
+  { phase: 'idle' } | { phase: 'checking' } | { phase: 'done'; result: WorkspaceSlugCheckResult };
 
 export function isSlugAvailabilityOk(check: WorkspaceSlugCheckUi): boolean {
   return check.phase === 'done' && check.result.status === 'available';

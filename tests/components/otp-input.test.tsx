@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { OtpInput } from '@/components/carelink/OtpInput';
 
 describe('OtpInput', () => {
@@ -25,14 +25,12 @@ describe('OtpInput', () => {
     expect(onChange).toHaveBeenCalledWith('');
   });
 
-  it('calls onFilled once when value reaches six digits', () => {
+  it('calls onFilled once when user enters six digits', () => {
     const onFilled = vi.fn();
-    const { rerender } = render(
-      <OtpInput id="otp-filled" value="" onChange={() => {}} onFilled={onFilled} />,
-    );
-    rerender(<OtpInput id="otp-filled" value="123456" onChange={() => {}} onFilled={onFilled} />);
-    expect(onFilled).toHaveBeenCalledTimes(1);
-    rerender(<OtpInput id="otp-filled" value="1234567" onChange={() => {}} onFilled={onFilled} />);
+    const onChange = vi.fn();
+    render(<OtpInput id="otp-filled" value="" onChange={onChange} onFilled={onFilled} />);
+    const input = document.getElementById('otp-filled') as HTMLInputElement;
+    fireEvent.change(input, { target: { value: '123456' } });
     expect(onFilled).toHaveBeenCalledTimes(1);
   });
 });

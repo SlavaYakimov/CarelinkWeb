@@ -8,12 +8,12 @@ import {
   type OnboardingPasswordState,
 } from '@/server/actions/onboarding';
 import { passwordPairFormSchema } from '@/lib/forms/schemas';
+import { mergeFieldError } from '@/lib/forms/client-field-error';
 import { useFormGate } from '@/lib/forms/use-form-gate';
 import { PasswordField } from '@/components/carelink/PasswordField';
 import { SubmitButton } from '@/components/carelink/SubmitButton';
 import { StepShell } from '@/components/carelink/StepShell';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
 
 const initial: OnboardingPasswordState = {};
 
@@ -37,7 +37,7 @@ export function OnboardingPasswordForm() {
       title="Пароль семьи"
       description="Этот пароль вы будете использовать вместе с workspace-логином семьи."
     >
-      <form action={formAction} className="space-y-4">
+      <form action={formAction} className="space-y-4" onSubmit={() => gate.touchAll()}>
         {state.formError ? (
           <Alert variant="destructive">
             <AlertDescription>{state.formError}</AlertDescription>
@@ -49,8 +49,9 @@ export function OnboardingPasswordForm() {
           value={newPassword}
           onChange={setNewPassword}
           autoComplete="new-password"
-          error={state.fieldErrors?.newPassword}
+          error={mergeFieldError(gate, 'newPassword', state.fieldErrors?.newPassword)}
           disabled={pending}
+          onBlur={() => gate.touch('newPassword')}
         />
         <input type="hidden" name="newPassword" value={newPassword} />
         <PasswordField
@@ -63,11 +64,12 @@ export function OnboardingPasswordForm() {
           }}
           autoComplete="new-password"
           error={
-            state.fieldErrors?.confirmPassword ??
+            mergeFieldError(gate, 'confirmPassword', state.fieldErrors?.confirmPassword) ??
             (confirmTouched && newPassword !== confirmPassword ? 'Пароли не совпадают' : undefined)
           }
           disabled={pending}
           showRequirements={false}
+          onBlur={() => gate.touch('confirmPassword')}
         />
         <input type="hidden" name="confirmPassword" value={confirmPassword} />
         <SubmitButton type="submit" className="w-full" pending={pending} disabled={!gate.canSubmit}>

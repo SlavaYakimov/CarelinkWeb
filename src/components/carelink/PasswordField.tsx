@@ -16,6 +16,9 @@ export type PasswordFieldProps = {
   error?: string;
   disabled?: boolean;
   showRequirements?: boolean;
+  /** Static hint id (e.g. login “Не короче 8 символов”) when checklist is off */
+  formatHintId?: string;
+  onBlur?: React.FocusEventHandler<HTMLInputElement>;
 };
 
 export function PasswordField({
@@ -27,6 +30,8 @@ export function PasswordField({
   error,
   disabled,
   showRequirements = true,
+  formatHintId,
+  onBlur,
 }: PasswordFieldProps) {
   const [visible, setVisible] = React.useState(false);
   const strong = isPasswordStrongEnough(value);
@@ -36,6 +41,7 @@ export function PasswordField({
 
   const describedBy = [
     showRequirements ? requirementsId : null,
+    !showRequirements && formatHintId ? formatHintId : null,
     error ? errorId : null,
     !error && value && !strong ? weakHintId : null,
   ]
@@ -55,6 +61,7 @@ export function PasswordField({
           aria-invalid={error ? true : undefined}
           aria-describedby={describedBy || undefined}
           onChange={(e) => onChange(e.target.value)}
+          onBlur={onBlur}
           className="pr-11"
         />
         <button

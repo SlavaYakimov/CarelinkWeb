@@ -31,13 +31,13 @@ describe('onboarding create family (requires compose BE-21)', () => {
       cy.location('pathname', { timeout: 30_000 }).should('eq', '/onboarding/phone');
       cy.get('#displayName').clear().type(displayName);
       cy.get('#phone').clear().type(phoneDigits);
-      cy.contains('button', 'Отправить SMS-код').click();
+      cy.clickSubmitWhenEnabled('Отправить SMS-код');
       cy.contains('Код из SMS', { timeout: 30_000 }).should('be.visible');
 
       cy.task<string>('fetchOnboardingOtp', { channel: 'sms', to: phoneDigits }).then(
         (phoneOtp) => {
-          cy.fillOtp(phoneOtp);
-          cy.contains('button', 'Подтвердить').click();
+          cy.fillOtp(phoneOtp, 'phone-otp');
+          cy.location('pathname', { timeout: 30_000 }).should('eq', '/onboarding/device');
 
           cy.onboardingEnterDeviceSms(phoneDigits);
 
@@ -80,9 +80,7 @@ describe('onboarding create family (requires compose BE-21)', () => {
           to: phoneDigits,
           minRecipientMatches: 3,
         }).then((phoneOtp) => {
-          cy.fillOtp(phoneOtp);
-          cy.contains('button', 'Подтвердить').click();
-
+          cy.fillOtp(phoneOtp, 'phone-otp');
           cy.location('pathname', { timeout: 30_000 }).should('eq', '/onboarding/existing');
           cy.contains('h1', 'Этот номер уже есть в Carelink').should('be.visible');
           cy.contains('button', 'Создать новую семью').click();
@@ -121,9 +119,7 @@ describe('onboarding create family (requires compose BE-21)', () => {
           to: phoneDigits,
           minRecipientMatches: 3,
         }).then((phoneOtp) => {
-          cy.fillOtp(phoneOtp);
-          cy.contains('button', 'Подтвердить').click();
-
+          cy.fillOtp(phoneOtp, 'phone-otp');
           cy.location('pathname', { timeout: 30_000 }).should('eq', '/onboarding/existing');
           cy.contains('li', workspaceEmail).within(() => {
             cy.contains('button', 'Войти').click();

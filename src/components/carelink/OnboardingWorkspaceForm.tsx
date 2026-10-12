@@ -9,6 +9,7 @@ import {
   type OnboardingWorkspaceState,
 } from '@/server/actions/onboarding';
 import { onboardingWorkspaceFormSchema } from '@/lib/forms/schemas';
+import { mergeFieldError } from '@/lib/forms/client-field-error';
 import { useFormGate } from '@/lib/forms/use-form-gate';
 import { isSlugAvailabilityOk, type WorkspaceSlugCheckUi } from '@/lib/forms/workspace-gate';
 import { formatWorkspaceLogin } from '@/lib/workspace-slug';
@@ -93,7 +94,9 @@ export function OnboardingWorkspaceForm({
     return () => window.clearTimeout(timer);
   }, [slug, runSlugCheck]);
 
-  const workspaceSlugError = slugFieldError(state.fieldErrors?.workspaceSlug, slugCheck);
+  const workspaceSlugError =
+    mergeFieldError(gate, 'workspaceSlug') ??
+    slugFieldError(state.fieldErrors?.workspaceSlug, slugCheck);
 
   const slugFooter =
     slugCheck.phase === 'checking' ? (
@@ -140,7 +143,10 @@ export function OnboardingWorkspaceForm({
           hint="Часть workspace-логина до @"
           value={slug}
           onChange={setSlug}
-          onBlur={() => void runSlugCheck(slug)}
+          onBlur={() => {
+            gate.touch('workspaceSlug');
+            void runSlugCheck(slug);
+          }}
           error={workspaceSlugError}
           disabled={pending}
           required

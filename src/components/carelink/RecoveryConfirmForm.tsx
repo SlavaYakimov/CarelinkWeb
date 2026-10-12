@@ -5,6 +5,7 @@ import { useActionState } from 'react';
 import Link from 'next/link';
 import { recoveryConfirmAction, type RecoveryConfirmFormState } from '@/server/actions/recovery';
 import { recoveryConfirmClientSchema } from '@/lib/forms/schemas';
+import { mergeFieldError } from '@/lib/forms/client-field-error';
 import { useFormGate } from '@/lib/forms/use-form-gate';
 import { FormAlert } from '@/components/carelink/FormAlert';
 import { OtpInput } from '@/components/carelink/OtpInput';
@@ -42,7 +43,7 @@ export function RecoveryConfirmForm({ phoneMasked }: RecoveryConfirmFormProps) {
     (confirmTouched && password !== confirmPassword ? 'Пароли не совпадают' : undefined);
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form action={formAction} className="space-y-4" onSubmit={() => gate.touchAll()}>
       <input type="hidden" name="next" value="/families" />
 
       {state.formError ? <FormAlert message={state.formError} /> : null}
@@ -61,13 +62,14 @@ export function RecoveryConfirmForm({ phoneMasked }: RecoveryConfirmFormProps) {
           maxLength={64}
           value={requestId}
           onChange={(e) => setRequestId(e.target.value)}
+          onBlur={() => gate.touch('requestId')}
           placeholder="Из SMS после одобрения хранителем"
           disabled={pending}
-          aria-invalid={Boolean(state.fieldErrors?.requestId)}
+          aria-invalid={Boolean(mergeFieldError(gate, 'requestId', state.fieldErrors?.requestId))}
         />
-        {state.fieldErrors?.requestId ? (
+        {mergeFieldError(gate, 'requestId', state.fieldErrors?.requestId) ? (
           <p className="text-sm text-destructive" role="alert">
-            {state.fieldErrors.requestId}
+            {mergeFieldError(gate, 'requestId', state.fieldErrors?.requestId)}
           </p>
         ) : null}
       </div>
@@ -89,8 +91,9 @@ export function RecoveryConfirmForm({ phoneMasked }: RecoveryConfirmFormProps) {
         value={password}
         onChange={setPassword}
         autoComplete="new-password"
-        error={state.fieldErrors?.newPassword}
+        error={mergeFieldError(gate, 'newPassword', state.fieldErrors?.newPassword)}
         disabled={pending}
+        onBlur={() => gate.touch('newPassword')}
       />
       <input type="hidden" name="newPassword" value={password} />
 
@@ -103,9 +106,13 @@ export function RecoveryConfirmForm({ phoneMasked }: RecoveryConfirmFormProps) {
           setConfirmTouched(true);
         }}
         autoComplete="new-password"
-        error={confirmError}
+        error={
+          mergeFieldError(gate, 'confirmPassword', state.fieldErrors?.confirmPassword) ??
+          confirmError
+        }
         disabled={pending}
         showRequirements={false}
+        onBlur={() => gate.touch('confirmPassword')}
       />
       <input type="hidden" name="confirmPassword" value={confirmPassword} />
 

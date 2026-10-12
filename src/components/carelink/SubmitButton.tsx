@@ -26,14 +26,11 @@ export function SubmitButton({
       className={cn(className)}
       {...props}
     >
-      {pending ? (
-        <>
-          <Loader2 className="size-4 animate-spin" aria-hidden />
-          {pendingLabel}
-        </>
-      ) : (
-        children
-      )}
+      <span className="inline-flex items-center justify-center gap-2">
+        {pending ? <Loader2 className="size-4 animate-spin" aria-hidden /> : null}
+        {children}
+      </span>
+      {pending ? <span className="sr-only">{pendingLabel}</span> : null}
     </Button>
   );
 }

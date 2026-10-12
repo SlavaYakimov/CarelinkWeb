@@ -1,25 +1,27 @@
-import axe from 'axe-core';
+type AxeRunOptions = {
+  includedImpacts?: string[];
+  [key: string]: unknown;
+};
 
-type AxeRunOptions = Parameters<typeof axe.run>[1];
-
-function injectAxeIntoWindow(win: Window & typeof globalThis): void {
+function injectAxeSource(win: Window & typeof globalThis, source: string): void {
   if (win.axe) return;
   const script = win.document.createElement('script');
-  script.text = axe.source;
+  script.text = source;
   win.document.head.appendChild(script);
 }
 
 Cypress.Commands.add('injectAxe', () => {
-  cy.window({ log: false }).then((win) => {
-    injectAxeIntoWindow(win);
+  cy.task<string>('readAxeSource').then((source) => {
+    cy.window({ log: false }).then((win) => {
+      injectAxeSource(win, source);
+    });
   });
 });
 
-Cypress.Commands.add(
-  'checkA11y',
-  (context?: string | Node | axe.ElementContext, options?: AxeRunOptions) => {
+Cypress.Commands.add('checkA11y', (context?: string | Node, options?: AxeRunOptions) => {
+  cy.task<string>('readAxeSource').then((source) => {
     cy.window({ log: false }).then((win) => {
-      injectAxeIntoWindow(win);
+      injectAxeSource(win, source);
       const target = context ?? win.document;
       return win.axe.run(target, options).then((results) => {
         const impacts = options?.includedImpacts ?? ['serious', 'critical'];
@@ -32,5 +34,5 @@ Cypress.Commands.add(
         }
       });
     });
-  },
-);
+  });
+});

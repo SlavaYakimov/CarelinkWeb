@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { signInAction, type SignInFormState } from '@/server/actions/sign-in';
 import { signInFormSchema } from '@/lib/forms/schemas';
+import { mergeFieldError } from '@/lib/forms/client-field-error';
 import { useFormGate } from '@/lib/forms/use-form-gate';
 import { parseWorkspaceSlugFromLogin } from '@/lib/workspace-slug';
 import { PasswordField } from '@/components/carelink/PasswordField';
@@ -73,7 +74,7 @@ export function LoginForm({ nextPath, defaultEmail = '', notice }: LoginFormProp
             value={slug}
             onChange={setSlug}
             onBlur={() => gate.touch('workspaceSlug')}
-            error={state.fieldErrors?.workspaceSlug}
+            error={mergeFieldError(gate, 'workspaceSlug', state.fieldErrors?.workspaceSlug)}
             disabled={pending}
             required
             autoComplete="username"
@@ -85,16 +86,20 @@ export function LoginForm({ nextPath, defaultEmail = '', notice }: LoginFormProp
             value={password}
             onChange={setPassword}
             autoComplete="current-password"
-            error={state.fieldErrors?.password}
+            error={mergeFieldError(gate, 'password', state.fieldErrors?.password)}
             disabled={pending}
             showRequirements={false}
+            formatHintId="password-format-hint"
+            onBlur={() => gate.touch('password')}
           />
           {state.fieldErrors?.password ? (
-            <p className="text-xs text-muted-foreground">
+            <p id="password-format-hint" className="text-xs text-muted-foreground">
               После нескольких неудачных попыток вход временно блокируется
             </p>
           ) : (
-            <p className="text-xs text-muted-foreground">Не короче 8 символов</p>
+            <p id="password-format-hint" className="text-xs text-muted-foreground">
+              Не короче 8 символов
+            </p>
           )}
           <input type="hidden" name="password" value={password} />
 
