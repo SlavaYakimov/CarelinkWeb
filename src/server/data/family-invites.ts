@@ -63,7 +63,8 @@ export async function fetchFamilyRoleTemplates(familyId: string): Promise<RoleTe
   }
 }
 
-export async function isFamilyKeeper(familyId: string): Promise<boolean> {
+/** Keeper or family owner may manage member invites (product + family-service). */
+export async function canManageInvites(familyId: string): Promise<boolean> {
   const { fetchUserFamilies } = await import('@/server/data/user-families');
   const families = await fetchUserFamilies();
   const family = families?.find((f) => f.id === familyId);
@@ -71,10 +72,9 @@ export async function isFamilyKeeper(familyId: string): Promise<boolean> {
   return family.role === 'keeper' || family.isOwner === true;
 }
 
-/** Keeper-only invite management (list, new, sent, resend/revoke). */
-export async function requireFamilyInviteKeeper(familyId: string): Promise<void> {
-  const keeper = await isFamilyKeeper(familyId);
-  if (!keeper) {
+export async function requireCanManageInvites(familyId: string): Promise<void> {
+  const allowed = await canManageInvites(familyId);
+  if (!allowed) {
     redirect('/forbidden');
   }
 }

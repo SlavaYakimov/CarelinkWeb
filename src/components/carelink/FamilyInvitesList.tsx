@@ -7,11 +7,11 @@ import type { MemberInviteView } from '@/server/data/family-invites';
 export function FamilyInvitesList({
   familyId,
   invites,
-  isKeeper,
+  canManageInvites,
 }: {
   familyId: string;
   invites: MemberInviteView[];
-  isKeeper: boolean;
+  canManageInvites: boolean;
 }) {
   if (invites.length === 0) {
     return (
@@ -20,7 +20,7 @@ export function FamilyInvitesList({
         <p className="mt-2 text-sm text-muted-foreground">
           Пригласите близкого по личной почте — мы отправим инструкции для входа.
         </p>
-        {isKeeper ? (
+        {canManageInvites ? (
           <Button className="mt-6" asChild>
             <Link href={`/families/${familyId}/invites/new`}>Пригласить</Link>
           </Button>
@@ -32,7 +32,7 @@ export function FamilyInvitesList({
   return (
     <div className="space-y-4">
       <div className="flex justify-end">
-        {isKeeper ? (
+        {canManageInvites ? (
           <Button asChild>
             <Link href={`/families/${familyId}/invites/new`}>Пригласить</Link>
           </Button>
@@ -49,14 +49,14 @@ export function FamilyInvitesList({
               <p className="text-sm text-muted-foreground">
                 {invite.emailMasked ?? '—'} · {invite.roleName}
               </p>
-              {isKeeper && invite.phone ? (
+              {canManageInvites && invite.phone ? (
                 <p className="text-sm text-muted-foreground">{invite.phone}</p>
               ) : null}
               <p className="mt-1 text-xs font-medium text-primary">
                 {memberInviteStatusLabel(invite.status)}
               </p>
             </div>
-            {isKeeper && inviteCanResendOrRevoke(invite.status) ? (
+            {canManageInvites && inviteCanResendOrRevoke(invite.status) ? (
               <FamilyInviteRowActions familyId={familyId} inviteId={invite.id} canManage />
             ) : null}
           </li>

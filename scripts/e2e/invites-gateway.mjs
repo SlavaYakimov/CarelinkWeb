@@ -126,6 +126,17 @@ export async function lookupInviteEmail(gatewayUrl, familyId, access, email, opt
 /**
  * @param {object} params
  */
+/**
+ * @param {{ gatewayUrl: string; familyId: string; access: string }} params
+ */
+export async function listFamilyMemberInvitesGateway(params) {
+  const { gatewayUrl, familyId, access } = params;
+  const { res, data } = await requestJson(`${gatewayUrl}/v1/families/${familyId}/member-invites`, {
+    headers: { Authorization: `Bearer ${access}` },
+  });
+  return { status: res.status, data };
+}
+
 export async function createMemberInviteGateway(params) {
   const { gatewayUrl, familyId, access, body } = params;
   const { res, data } = await requestJson(`${gatewayUrl}/v1/families/${familyId}/member-invites`, {

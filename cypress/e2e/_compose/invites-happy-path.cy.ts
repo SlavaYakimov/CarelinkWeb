@@ -1,5 +1,5 @@
 /**
- * Member invites compose — happy path matrix E1–E6, E12, E14.
+ * Member invites compose — happy path matrix E1–E6, E12, E14, E18.
  * Run: pnpm test:e2e:compose:invites
  */
 
@@ -176,6 +176,99 @@ describe('invites compose happy path', () => {
         cy.visit('/invites');
         cy.contains('button', 'Отклонить').click();
         cy.contains('Отклонено', { timeout: 20_000 }).should('be.visible');
+      });
+    });
+  });
+
+  it('E18: owner-not-keeper manages invites; plain member stays forbidden', () => {
+    const ts = Date.now();
+    const seedEmail = `e2e.owner.seed.${ts}@example.com`;
+    const seedPhone = `906${String(ts).slice(-7)}`;
+    const uiEmail = `e2e.owner.ui.${ts}@example.com`;
+    const uiPhone = `908${String(ts).slice(-7)}`;
+    const memberTs = ts + 18;
+    const memberEmail = `e2e+${memberTs}@example.com`;
+
+    seedKeeper(ts).then((keeper) => {
+      cy.task('invitesSeedPendingExisting', {
+        keeper,
+        inviteeEmail: seedEmail,
+        inviteePhoneDigits: seedPhone,
+        displayName: 'E18 Seed',
+      }).then((seed) => {
+        cy.task('invitesSeedOwnerNotKeeper', { keeper, familyId: keeper.familyId }).then(
+          (demote: { ok: boolean; role?: string; isOwner?: boolean; message?: string }) => {
+            expect(demote.ok, demote.message ?? 'seed owner-not-keeper').to.eq(true);
+            expect(demote.role).to.not.eq('keeper');
+            expect(demote.isOwner).to.eq(true);
+          },
+        );
+
+        cy.task('invitesProbeOwnerNotKeeper', {
+          keeper,
+          familyId: keeper.familyId,
+          roleTemplateId: keeper.roleTemplateId,
+          inviteId: seed.inviteId,
+          inviteEmail: `e2e.owner.probe.${ts}@example.com`,
+          invitePhoneDigits: `907${String(ts).slice(-7)}`,
+        }).then(
+          (probe: {
+            ok: boolean;
+            createStatus: number;
+            resendStatus: number;
+            listStatus: number;
+            roleTemplatesStatus: number;
+          }) => {
+            expect(probe.ok).to.eq(true);
+            expect(probe.listStatus).to.eq(200);
+            expect(probe.roleTemplatesStatus).to.eq(200);
+            expect(probe.createStatus).to.be.within(200, 299);
+            expect(probe.resendStatus).to.eq(200);
+          },
+        );
+
+        cy.clearCarelinkCookie('cl_sid');
+        cy.invitesSignInShortcut(keeper.workspaceEmail, keeper.password);
+        cy.invitesOpenNewForm(keeper.familyId);
+        cy.invitesFillForm({
+          displayName: 'E18 Owner UI',
+          personalEmail: uiEmail,
+          phoneDigits: uiPhone,
+          waitLookup: 'new',
+        });
+        cy.invitesSubmitForm();
+        cy.location('pathname', { timeout: 45_000 }).should(
+          'eq',
+          `/families/${keeper.familyId}/invites/sent`,
+        );
+
+        cy.visit(`/families/${keeper.familyId}/invites`);
+        cy.contains('E18 Seed', { timeout: 30_000 }).should('be.visible');
+        cy.contains('E18 Owner UI').should('be.visible');
+        cy.contains('li', 'E18 Owner UI').within(() => {
+          cy.contains('button', 'Отправить снова').click();
+        });
+        cy.contains('Письмо отправлено', { timeout: 30_000 }).should('be.visible');
+        cy.contains('li', 'E18 Seed').within(() => {
+          cy.contains('button', 'Отозвать').click();
+        });
+        cy.contains('Отозвано', { timeout: 20_000 }).should('be.visible');
+
+        cy.composeOnboardingCreateFamily(memberTs).then((member) => {
+          cy.task('invitesSeedPendingExisting', {
+            keeper,
+            inviteeEmail: memberEmail,
+            inviteePhoneDigits: member.phoneDigits,
+          });
+          cy.clearAllCookies();
+          cy.composeSignInViaSms(member.workspaceEmail, member.password, member.phoneDigits);
+          cy.visit('/invites');
+          cy.contains('button', 'Принять').click();
+          cy.location('pathname', { timeout: 45_000 }).should('eq', '/families');
+          cy.visit(`/families/${keeper.familyId}/invites/new`);
+          cy.location('pathname', { timeout: 30_000 }).should('eq', '/forbidden');
+          cy.contains('Недостаточно прав').should('be.visible');
+        });
       });
     });
   });
