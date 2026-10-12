@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Parse member_invite_new / member_invite_existing bodies from notification mock logs.
+ * Parse member invite emails from notification mock logs (Carelink invitation).
  */
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
@@ -8,6 +8,8 @@ import { notificationLogArgv } from './carelink-auth-compose.mjs';
 import { jsonLogPayload, lineMatchesRecipient } from './otp-parse.mjs';
 
 const execFileAsync = promisify(execFile);
+
+const DEFAULT_SUBJECT = 'Carelink invitation';
 
 /**
  * @returns {Promise<string>}
@@ -41,11 +43,13 @@ function parseInviteEmailBody(body) {
   const tempPassword =
     body.match(/временн[^\n]*парол[^\n:]*[:\s]+(\S+)/i)?.[1] ??
     body.match(/temporary password[:\s]+(\S+)/i)?.[1] ??
+    body.match(/Temporary password[:\s]+(\S+)/i)?.[1] ??
     body.match(/парол[^\n:]*[:\s]+(\S{8,})/i)?.[1] ??
     null;
 
   const inviteCode =
     body.match(/[?&]code=([a-zA-Z0-9_-]{8,128})/)?.[1] ??
+    body.match(/Invite code[:\s]+([a-zA-Z0-9_-]{8,128})/i)?.[1] ??
     body.match(/код[^\n:]*[:\s]+([a-zA-Z0-9_-]{8,128})/i)?.[1] ??
     null;
 
@@ -53,10 +57,25 @@ function parseInviteEmailBody(body) {
 }
 
 /**
- * @param {{ to: string; skipPriorMatches?: number; bodyIncludes?: string }} args
+ * @param {unknown} payload
+ * @param {string | undefined} subjectIncludes
+ */
+function logLineMatchesInviteEmail(payload, subjectIncludes) {
+  if (!subjectIncludes) return true;
+  const subject = typeof payload?.subject === 'string' ? payload.subject : '';
+  return subject.includes(subjectIncludes);
+}
+
+/**
+ * @param {{ to: string; skipPriorMatches?: number; subjectIncludes?: string; bodyIncludes?: string }} args
  */
 export async function fetchMemberInviteEmail(args) {
-  const { to, skipPriorMatches = 0, bodyIncludes = 'member_invite' } = args;
+  const {
+    to,
+    skipPriorMatches = 0,
+    subjectIncludes = DEFAULT_SUBJECT,
+    bodyIncludes,
+  } = args;
   const logs = await fetchNotificationLogs();
   const lines = logs.split('\n').filter(Boolean);
   const matches = [];
@@ -64,16 +83,20 @@ export async function fetchMemberInviteEmail(args) {
   for (let i = lines.length - 1; i >= 0; i -= 1) {
     const line = lines[i];
     if (!line.includes('mock email sent')) continue;
+
+    const payload = jsonLogPayload(line);
+    if (!logLineMatchesInviteEmail(payload, subjectIncludes)) continue;
     if (bodyIncludes && !line.toLowerCase().includes(bodyIncludes.toLowerCase())) continue;
     if (!lineMatchesRecipient(line, 'email', to)) continue;
 
-    const payload = jsonLogPayload(line);
     const body = typeof payload?.body === 'string' ? payload.body : line;
     matches.push(parseInviteEmailBody(body));
   }
 
   if (matches.length <= skipPriorMatches) {
-    throw new Error(`No member_invite email in logs for ${to} (matches=${matches.length})`);
+    throw new Error(
+      `No invite email in logs for ${to} (subject~="${subjectIncludes}", matches=${matches.length})`,
+    );
   }
   return matches[skipPriorMatches];
 }

@@ -17,6 +17,22 @@ describe('normalizePendingMemberInvite', () => {
     expect(normalizePendingMemberInvite(row)).toEqual(row);
   });
 
+  it('maps minimal server row with only inviteId and familyId', () => {
+    const normalized = normalizePendingMemberInvite({
+      inviteId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      familyId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+      displayName: 'Invitee display name',
+    });
+    expect(normalized).toMatchObject({
+      id: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',
+      familyId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+      familyName: 'Семья',
+      roleName: '—',
+      invitedByDisplayName: '—',
+      expiresAt: '',
+    });
+  });
+
   it('maps family-service inviteId and invitedByName', () => {
     const normalized = normalizePendingMemberInvite({
       inviteId: '33333333-3333-4333-8333-333333333333',

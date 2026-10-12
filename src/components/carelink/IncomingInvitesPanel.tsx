@@ -10,6 +10,7 @@ import {
 import { FormAlert } from '@/components/carelink/FormAlert';
 import { SubmitButton } from '@/components/carelink/SubmitButton';
 import { Button } from '@/components/ui/button';
+import { pendingInviteHasExpiry } from '@/lib/invites/normalize-pending-invite';
 import type { PendingMemberInvite } from '@/server/data/pending-invites';
 
 const initial: InviteMutationState = {};
@@ -29,9 +30,11 @@ function InviteCard({ invite }: { invite: PendingMemberInvite }) {
       <h2 className="text-lg font-semibold">{invite.familyName}</h2>
       <p className="mt-1 text-sm text-muted-foreground">Роль: {invite.roleName}</p>
       <p className="text-sm text-muted-foreground">Пригласил: {invite.invitedByDisplayName}</p>
-      <p className="mt-2 text-xs text-muted-foreground">
-        Принять до {new Date(invite.expiresAt).toLocaleString('ru-RU')}
-      </p>
+      {pendingInviteHasExpiry(invite.expiresAt) ? (
+        <p className="mt-2 text-xs text-muted-foreground">
+          Принять до {new Date(invite.expiresAt).toLocaleString('ru-RU')}
+        </p>
+      ) : null}
       <div className="mt-4 flex flex-wrap gap-2">
         <form action={acceptAction}>
           <input type="hidden" name="inviteId" value={invite.id} />

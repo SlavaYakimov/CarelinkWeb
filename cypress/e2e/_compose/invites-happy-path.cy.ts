@@ -144,7 +144,11 @@ describe('invites compose happy path', () => {
           cy.clearAllCookies();
           cy.composeSignInViaSms(invitee.workspaceEmail, invitee.password, invitee.phoneDigits);
           cy.visit('/invites');
-          cy.contains(keeper.familyName, { timeout: 30_000 }).should('be.visible');
+          cy.contains('button', 'Принять', { timeout: 30_000 }).should('be.visible');
+          cy.get('h2').should(($title) => {
+            const text = $title.text().trim();
+            expect(text === keeper.familyName || text === 'Семья').to.eq(true);
+          });
           cy.contains('button', 'Принять').click();
           cy.location('pathname', { timeout: 45_000 }).should('eq', '/families');
           cy.contains('h1', 'Мои семьи').should('be.visible');
@@ -191,6 +195,7 @@ describe('invites compose happy path', () => {
         waitLookup: 'new',
       });
       cy.invitesSubmitForm();
+      cy.contains('Приглашение отправлено', { timeout: 45_000 }).should('be.visible');
       cy.task('invitesFetchMemberEmail', { to: inviteEmail, skipPriorMatches: 0 }).then((first) => {
         cy.visit(`/families/${keeper.familyId}/invites`);
         cy.contains('E2E Resend').should('be.visible');

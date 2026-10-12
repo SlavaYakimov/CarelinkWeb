@@ -2,6 +2,9 @@ import type { components } from '@/server/gateway/types.gen';
 
 export type PendingMemberInvite = components['schemas']['PendingMemberInviteView'];
 
+export const PENDING_INVITE_FALLBACK_FAMILY_NAME = 'Семья';
+export const PENDING_INVITE_FALLBACK_DASH = '—';
+
 function readString(record: Record<string, unknown>, ...keys: string[]): string | undefined {
   for (const key of keys) {
     const value = record[key];
@@ -19,8 +22,16 @@ export function normalizePendingMemberInvite(raw: unknown): PendingMemberInvite 
 
   const id = readString(row, 'id', 'inviteId', 'invite_id');
   const familyId = readString(row, 'familyId', 'family_id');
-  const familyName = readString(row, 'familyName', 'family_name');
-  const roleName = readString(row, 'roleName', 'role_name', 'roleDisplayName', 'role_display_name');
+
+  if (!id || !familyId) {
+    return null;
+  }
+
+  const familyName =
+    readString(row, 'familyName', 'family_name') ?? PENDING_INVITE_FALLBACK_FAMILY_NAME;
+  const roleName =
+    readString(row, 'roleName', 'role_name', 'roleDisplayName', 'role_display_name') ??
+    PENDING_INVITE_FALLBACK_DASH;
   const invitedByDisplayName = readString(
     row,
     'invitedByDisplayName',
@@ -29,12 +40,8 @@ export function normalizePendingMemberInvite(raw: unknown): PendingMemberInvite 
     'invited_by_name',
     'invitedBy',
     'invited_by',
-  );
-  const expiresAt = readString(row, 'expiresAt', 'expires_at');
-
-  if (!id || !familyId || !familyName || !roleName || !invitedByDisplayName || !expiresAt) {
-    return null;
-  }
+  ) ?? PENDING_INVITE_FALLBACK_DASH;
+  const expiresAt = readString(row, 'expiresAt', 'expires_at') ?? '';
 
   return {
     id,
@@ -44,6 +51,10 @@ export function normalizePendingMemberInvite(raw: unknown): PendingMemberInvite 
     invitedByDisplayName,
     expiresAt,
   };
+}
+
+export function pendingInviteHasExpiry(expiresAt: string | undefined): boolean {
+  return Boolean(expiresAt?.trim());
 }
 
 export function extractPendingMemberInviteRows(payload: unknown): unknown[] {
