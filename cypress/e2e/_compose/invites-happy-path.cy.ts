@@ -201,7 +201,7 @@ describe('invites compose happy path', () => {
         cy.contains('E2E Resend').should('be.visible');
         cy.contains('button', 'Отправить снова').click();
         cy.contains('Письмо отправлено', { timeout: 30_000 }).should('be.visible');
-        cy.task('invitesFetchMemberEmail', { to: inviteEmail, skipPriorMatches: 1 }).then(
+        cy.task('invitesFetchMemberEmail', { to: inviteEmail, skipPriorMatches: 0 }).then(
           (second) => {
             expect(first.tempPassword).to.be.a('string');
             expect(second.tempPassword).to.be.a('string');

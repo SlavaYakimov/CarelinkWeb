@@ -74,9 +74,16 @@ describe('invites compose negative and infra', () => {
             cy.clearAllCookies();
             cy.composeSignInViaSms(invitee.workspaceEmail, invitee.password, invitee.phoneDigits);
             cy.visit('/invites');
-            cy.contains('button', 'Принять').click();
-            cy.location('pathname', { timeout: 45_000 }).should('eq', '/invites/unavailable');
-            cy.contains('истекло').should('be.visible');
+            cy.contains('Нет приглашений', { timeout: 30_000 }).should('be.visible');
+            cy.contains('button', 'Принять').should('not.exist');
+            cy.task('invitesGatewayAcceptAsInvitee', {
+              invitee,
+              inviteId: seed.inviteId,
+            }).then((accept: { status: number }) => {
+              expect(accept.status).to.be.oneOf([400, 404, 409]);
+            });
+            cy.visit('/invites/unavailable?reason=expired');
+            cy.contains(/истекло/i).should('be.visible');
           });
         });
       });

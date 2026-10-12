@@ -23,6 +23,10 @@ import {
   uploadMemberInviteAvatar,
 } from '@/server/gateway/invites';
 import { sessionRecordFromAuthResponse } from '@/server/session/from-auth-session';
+import {
+  InvalidAuthSessionPayloadError,
+  parseAuthSessionPayload,
+} from '@/server/session/parse-auth-session-payload';
 import { getSession } from '@/server/session/get-session';
 import { saveSession } from '@/server/session/store';
 import { withServerAction } from '@/server/session/with-session-handler';
@@ -89,7 +93,8 @@ async function mergeSessionFromRebuild(
     clientIp,
     deviceId,
   });
-  const patch = sessionRecordFromAuthResponse(rebuilt, {
+  const authSession = parseAuthSessionPayload(rebuilt);
+  const patch = sessionRecordFromAuthResponse(authSession, {
     deviceSession: session.deviceSession,
     guestMode: session.guestMode,
   });
@@ -272,7 +277,19 @@ async function acceptMemberInviteActionImpl(
   const ctx = await requireSessionUser();
   try {
     await acceptMemberInvite(inviteParsed.data, ctx);
-    await mergeSessionFromRebuild(ctx.sid, ctx.session, ctx.clientIp, ctx.deviceId);
+    try {
+      await mergeSessionFromRebuild(ctx.sid, ctx.session, ctx.clientIp, ctx.deviceId);
+    } catch (mergeErr) {
+      if (mergeErr instanceof InvalidAuthSessionPayloadError) {
+        return { formError: 'Не удалось обновить сессию после принятия. Войдите снова.' };
+      }
+      if (mergeErr instanceof GatewayError) {
+        return {
+          formError: toFormState(mergeErr, INVITE_FIELD_MAP, getInviteErrorMessage).formError,
+        };
+      }
+      return { formError: 'Не удалось обновить сессию после принятия.' };
+    }
     redirect('/families');
   } catch (err) {
     if (err instanceof GatewayError) {
@@ -280,11 +297,14 @@ async function acceptMemberInviteActionImpl(
       if (err.code === 'ALREADY_EXISTS' || err.status === 409) {
         redirect('/invites/unavailable?reason=already_member');
       }
+      if (err.code === 'INVITE_EXPIRED' || err.message?.toLowerCase().includes('expired')) {
+        redirect('/invites/unavailable?reason=expired');
+      }
       if (err.status === 400) redirect('/invites/unavailable?reason=not_pending');
       if (err.code === 'NOT_FOUND') redirect('/invites/unavailable?reason=not_found');
       return { formError: toFormState(err).formError };
     }
-    throw err;
+    return { formError: 'Не удалось принять приглашение' };
   }
 }
 
@@ -308,7 +328,7 @@ async function declineMemberInviteActionImpl(
       if (err.code === 'NOT_FOUND') redirect('/invites/unavailable?reason=not_found');
       return { formError: toFormState(err).formError };
     }
-    throw err;
+    return { formError: 'Не удалось отклонить приглашение' };
   }
 }
 
