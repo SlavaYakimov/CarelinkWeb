@@ -4,6 +4,8 @@ Next.js BFF для семейного приложения Carelink. Брауз�
 
 План: [`docs/PLAN.md`](docs/PLAN.md).
 
+Дизайн и UI-токены: [`DESIGN.md`](DESIGN.md) (источник правды; витрина — `/dev/kit` в development).
+
 Memory bank проекта — git submodule [`memory/`](memory/) ([CarelinkMemory](https://github.com/SlavaYakimov/CarelinkMemory), приватный). Сборка Next.js **не использует** содержимое `memory/` (исключено из lint/typecheck/tests).
 
 ### Клон и субмодуль
