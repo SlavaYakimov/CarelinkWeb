@@ -42,6 +42,13 @@ export const emailFormSchema = z.object({
   email: emailFieldSchema,
 });
 
+/** Client-only gate for onboarding step 1 (152-ФЗ consent until BE field exists). */
+export const onboardingEmailConsentGateSchema = emailFormSchema.extend({
+  personalDataConsent: z.boolean().refine((value) => value, {
+    message: 'Подтвердите согласие на обработку персональных данных',
+  }),
+});
+
 export const otp6CodeSchema = z.string().regex(/^\d{6}$/, getValidationMessage('otpIncomplete'));
 
 export const emailOtpFormSchema = z.object({
