@@ -1,9 +1,8 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { z } from 'zod';
 import { getErrorMessage } from '@/lib/messages';
-import { isPasswordStrongEnough } from '@/lib/password-rules';
+import { changePasswordFormSchema } from '@/lib/forms/schemas';
 import { GatewayError } from '@/server/gateway/errors';
 import { workspaceChangePassword } from '@/server/gateway/auth';
 import { gatewayActionContext } from '@/server/actions/request-context';
@@ -13,22 +12,6 @@ import { setSessionCookie } from '@/server/session/cookies';
 import { bindNewSession } from '@/server/session/get-session';
 import { sessionRecordFromAuthResponse } from '@/server/session/from-auth-session';
 import { withServerAction } from '@/server/session/with-session-handler';
-
-const schema = z
-  .object({
-    oldPassword: z.string().min(8, 'Не короче 8 символов'),
-    newPassword: z.string().min(8, 'Не короче 8 символов'),
-    confirmPassword: z.string().min(8),
-    next: z.string().optional(),
-  })
-  .refine((v) => v.newPassword === v.confirmPassword, {
-    message: 'Пароли не совпадают',
-    path: ['confirmPassword'],
-  })
-  .refine((v) => isPasswordStrongEnough(v.newPassword), {
-    message: 'Пароль не соответствует требованиям',
-    path: ['newPassword'],
-  });
 
 export type ChangePasswordState = {
   fieldErrors?: { oldPassword?: string; newPassword?: string; confirmPassword?: string };
@@ -42,7 +25,7 @@ async function changePasswordActionImpl(
   const { fid, flow } = await requireSignInFlow('change-password');
   if (!flow.challengeId) redirect('/login');
 
-  const parsed = schema.safeParse({
+  const parsed = changePasswordFormSchema.safeParse({
     oldPassword: formData.get('oldPassword'),
     newPassword: formData.get('newPassword'),
     confirmPassword: formData.get('confirmPassword'),

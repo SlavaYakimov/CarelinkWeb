@@ -3,7 +3,14 @@
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { getErrorMessage } from '@/lib/messages';
-import { isPasswordStrongEnough } from '@/lib/password-rules';
+import {
+  emailFormSchema,
+  emailOtpFormSchema,
+  onboardingPhoneFormSchema,
+  onboardingWorkspaceFormSchema,
+  otpFormSchema,
+  passwordPairFormSchema,
+} from '@/lib/forms/schemas';
 import { maskRuPhoneE164, normalizeRuPhone } from '@/lib/phone';
 import {
   formatWorkspaceLogin,
@@ -61,51 +68,6 @@ async function ensureOnboardingDeviceRegistered(
 }
 import { withServerAction } from '@/server/session/with-session-handler';
 
-const emailSchema = z.object({
-  email: z.string().email('Укажите корректную почту'),
-});
-
-const emailOtpSchema = z.object({
-  email: z.string().email(),
-  code: z.string().min(4, 'Введите код из письма'),
-});
-
-const phoneSchema = z.object({
-  phone: z.string().min(1, 'Укажите номер телефона'),
-  displayName: z.string().min(1, 'Укажите, как к вам обращаться').max(128),
-});
-
-const phoneOtpSchema = z.object({
-  code: z.string().regex(/^\d{6}$/, 'Введите все 6 цифр кода'),
-});
-
-const deviceOtpSchema = z.object({
-  code: z.string().regex(/^\d{6}$/, 'Введите все 6 цифр кода'),
-});
-
-const passwordSchema = z
-  .object({
-    newPassword: z.string().min(8, 'Не короче 8 символов'),
-    confirmPassword: z.string().min(8),
-  })
-  .refine((v) => v.newPassword === v.confirmPassword, {
-    message: 'Пароли не совпадают',
-    path: ['confirmPassword'],
-  })
-  .refine((v) => isPasswordStrongEnough(v.newPassword), {
-    message: 'Пароль не соответствует требованиям',
-    path: ['newPassword'],
-  });
-
-const workspaceSchema = z.object({
-  workspaceSlug: z
-    .string()
-    .min(3, 'Не короче 3 символов')
-    .max(32)
-    .refine((v) => isValidWorkspaceSlug(v), 'Только латиница, цифры и дефис'),
-  displayName: z.string().min(1, 'Укажите название семьи').max(128),
-});
-
 export type OnboardingEmailState = { error?: string; sent?: boolean; email?: string };
 export type OnboardingEmailOtpState = { error?: string };
 export type OnboardingPhoneState = { error?: string; smsSent?: boolean; phoneMasked?: string };
@@ -140,7 +102,7 @@ async function requestOnboardingEmailActionImpl(
   _prev: OnboardingEmailState,
   formData: FormData,
 ): Promise<OnboardingEmailState> {
-  const parsed = emailSchema.safeParse({ email: formData.get('email') });
+  const parsed = emailFormSchema.safeParse({ email: formData.get('email') });
   if (!parsed.success) {
     return { error: parsed.error.flatten().fieldErrors.email?.[0] };
   }
@@ -177,7 +139,7 @@ async function verifyOnboardingEmailActionImpl(
   _prev: OnboardingEmailOtpState,
   formData: FormData,
 ): Promise<OnboardingEmailOtpState> {
-  const parsed = emailOtpSchema.safeParse({
+  const parsed = emailOtpFormSchema.safeParse({
     email: formData.get('email'),
     code: formData.get('code'),
   });
@@ -258,7 +220,7 @@ async function sendOnboardingPhoneOtpActionImpl(
   formData: FormData,
 ): Promise<OnboardingPhoneState> {
   const { fid, flow } = await requireOnboardingFlow('phone');
-  const parsed = phoneSchema.safeParse({
+  const parsed = onboardingPhoneFormSchema.safeParse({
     phone: formData.get('phone'),
     displayName: formData.get('displayName'),
   });
@@ -305,7 +267,7 @@ async function confirmOnboardingPhoneOtpActionImpl(
   formData: FormData,
 ): Promise<OnboardingPhoneOtpState> {
   const { fid, flow } = await requireOnboardingFlow('phone');
-  const parsed = phoneOtpSchema.safeParse({ code: formData.get('code') });
+  const parsed = otpFormSchema.safeParse({ code: formData.get('code') });
   if (!parsed.success) {
     return { error: parsed.error.flatten().fieldErrors.code?.[0] };
   }
@@ -446,7 +408,7 @@ async function confirmOnboardingDeviceSmsActionImpl(
   formData: FormData,
 ): Promise<OnboardingDeviceOtpState> {
   const { fid, flow } = await requireOnboardingFlow('device');
-  const parsed = deviceOtpSchema.safeParse({ code: formData.get('code') });
+  const parsed = otpFormSchema.safeParse({ code: formData.get('code') });
   if (!parsed.success) {
     return { error: parsed.error.flatten().fieldErrors.code?.[0] };
   }
@@ -509,7 +471,7 @@ async function setupOnboardingPasswordActionImpl(
   formData: FormData,
 ): Promise<OnboardingPasswordState> {
   const { fid, flow } = await requireOnboardingFlow('password');
-  const parsed = passwordSchema.safeParse({
+  const parsed = passwordPairFormSchema.safeParse({
     newPassword: formData.get('newPassword'),
     confirmPassword: formData.get('confirmPassword'),
   });
@@ -634,7 +596,7 @@ async function finalizeOnboardingWorkspaceActionImpl(
   formData: FormData,
 ): Promise<OnboardingWorkspaceState> {
   const { fid, flow } = await requireOnboardingFlow('workspace');
-  const parsed = workspaceSchema.safeParse({
+  const parsed = onboardingWorkspaceFormSchema.safeParse({
     workspaceSlug: formData.get('workspaceSlug'),
     displayName: formData.get('displayName'),
   });

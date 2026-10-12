@@ -2,7 +2,9 @@
 
 import { randomUUID } from 'node:crypto';
 import { redirect } from 'next/navigation';
-import { z } from 'zod';
+
+import { createFamilyFormSchema } from '@/lib/forms/schemas';
+import { zodFieldErrors } from '@/lib/forms/to-form-state';
 import { gatewayActionContext } from '@/server/actions/request-context';
 import { createFamily } from '@/server/gateway/families';
 import { GatewayError } from '@/server/gateway/errors';
@@ -10,10 +12,6 @@ import { sessionRecordFromAuthResponse } from '@/server/session/from-auth-sessio
 import { getSession } from '@/server/session/get-session';
 import { saveSession } from '@/server/session/store';
 import { withServerAction } from '@/server/session/with-session-handler';
-
-const schema = z.object({
-  name: z.string().trim().min(2, 'Укажите имя семьи').max(120, 'Слишком длинное имя'),
-});
 
 export type CreateFamilyFormState = {
   formError?: string;
@@ -24,10 +22,10 @@ async function createFamilyActionImpl(
   _prev: CreateFamilyFormState,
   formData: FormData,
 ): Promise<CreateFamilyFormState> {
-  const parsed = schema.safeParse({ name: formData.get('name') });
+  const parsed = createFamilyFormSchema.safeParse({ name: formData.get('name') });
   if (!parsed.success) {
-    const name = parsed.error.flatten().fieldErrors.name?.[0];
-    return { fieldErrors: name ? { name } : undefined };
+    const flat = zodFieldErrors(parsed.error.flatten().fieldErrors);
+    return { fieldErrors: flat.name ? { name: flat.name } : undefined };
   }
 
   const sessionCtx = await getSession();

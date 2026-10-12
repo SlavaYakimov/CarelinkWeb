@@ -1,22 +1,14 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { z } from 'zod';
 import { getErrorMessage } from '@/lib/messages';
+import { otpFormSchema, phoneFormSchema } from '@/lib/forms/schemas';
 import { maskRuPhoneE164, normalizeRuPhone } from '@/lib/phone';
 import { GatewayError } from '@/server/gateway/errors';
 import { workspaceSignInRequestOtp, workspaceSignInVerifyPhone } from '@/server/gateway/auth';
 import { persistSignInFlow, requireSignInFlow } from '@/server/flows/signin-flow';
 import { gatewayActionContext } from '@/server/actions/request-context';
 import { withServerAction } from '@/server/session/with-session-handler';
-
-const phoneSchema = z.object({
-  phone: z.string().min(1, 'Укажите номер телефона'),
-});
-
-const otpSchema = z.object({
-  code: z.string().regex(/^\d{6}$/, 'Введите все 6 цифр кода'),
-});
 
 export type VerifyPhoneState = {
   error?: string;
@@ -44,7 +36,7 @@ async function sendSignInPhoneOtpActionImpl(
   formData: FormData,
 ): Promise<VerifyPhoneState> {
   const { fid, flow } = await requireSignInFlow('verify-phone');
-  const parsed = phoneSchema.safeParse({ phone: formData.get('phone') });
+  const parsed = phoneFormSchema.safeParse({ phone: formData.get('phone') });
   if (!parsed.success) {
     return { error: parsed.error.flatten().fieldErrors.phone?.[0] };
   }
@@ -107,7 +99,7 @@ async function confirmSignInPhoneOtpActionImpl(
   formData: FormData,
 ): Promise<VerifyPhoneOtpState> {
   const { fid, flow } = await requireSignInFlow('verify-phone');
-  const parsed = otpSchema.safeParse({ code: formData.get('code') });
+  const parsed = otpFormSchema.safeParse({ code: formData.get('code') });
   if (!parsed.success) {
     return { error: parsed.error.flatten().fieldErrors.code?.[0] };
   }
