@@ -5,8 +5,12 @@ Cypress.Commands.add('fillWorkspaceEmail', (emailOrSlug: string) => {
 });
 
 Cypress.Commands.add('submitLoginExpectPasswordMinLength', () => {
-  cy.contains('button', 'Войти').click();
-  cy.contains('[role="alert"]', 'Не короче 8 символов').should('be.visible');
+  cy.get('#password').clear().type('short7', { log: false });
+  cy.assertGatedValidation({
+    submitLabel: 'Войти',
+    blurSelector: '#password',
+    errorText: 'Не короче 8 символов',
+  });
   cy.location('pathname').should('eq', '/login');
 });
 
@@ -21,7 +25,11 @@ Cypress.Commands.add('openLoginRecoveryFromForgotLink', () => {
 Cypress.Commands.add('submitRecoveryRequest', (familySlug: string, phoneDigits: string) => {
   cy.get('#familySlug').clear().type(familySlug);
   cy.get('#phone').clear().type(phoneDigits);
-  cy.contains('button', 'Отправить запрос хранителю').click();
+  cy.get('#phone').then(($el) => {
+    $el[0].focus();
+    $el[0].blur();
+  });
+  cy.clickSubmitWhenEnabled('Отправить запрос хранителю');
 });
 
 Cypress.Commands.add('assertRecoverySentPage', () => {

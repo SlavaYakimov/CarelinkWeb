@@ -12,7 +12,7 @@ declare global {
         errorText: string;
         blurSelector: string;
       }): Chainable<void>;
-      clickSubmitWhenEnabled(label: string | RegExp): Chainable<void>;
+      clickSubmitWhenEnabled(label: string | RegExp, timeout?: number): Chainable<void>;
     }
   }
 }
