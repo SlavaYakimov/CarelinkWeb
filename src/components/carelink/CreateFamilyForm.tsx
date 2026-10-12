@@ -3,6 +3,8 @@
 import { useActionState } from 'react';
 import Link from 'next/link';
 import { createFamilyAction, type CreateFamilyFormState } from '@/server/actions/create-family';
+import { FieldError } from '@/components/carelink/FieldError';
+import { FormAlert } from '@/components/carelink/FormAlert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -21,11 +23,7 @@ export function CreateFamilyForm() {
         </p>
       </div>
 
-      {state.formError ? (
-        <p className="text-sm text-destructive" role="alert">
-          {state.formError}
-        </p>
-      ) : null}
+      {state.formError ? <FormAlert message={state.formError} /> : null}
 
       <div className="space-y-2">
         <Label htmlFor="familyName">Имя семьи</Label>
@@ -37,9 +35,7 @@ export function CreateFamilyForm() {
           aria-invalid={Boolean(state.fieldErrors?.name)}
         />
         {state.fieldErrors?.name ? (
-          <p className="text-sm text-destructive" role="alert">
-            {state.fieldErrors.name}
-          </p>
+          <FieldError id="familyName-error">{state.fieldErrors.name}</FieldError>
         ) : (
           <p className="text-xs text-muted-foreground">Отображается в списках и приглашениях</p>
         )}

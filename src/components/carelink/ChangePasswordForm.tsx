@@ -4,7 +4,9 @@ import * as React from 'react';
 import { useActionState } from 'react';
 import { ArrowRight, CheckCircle2 } from 'lucide-react';
 import { changePasswordAction, type ChangePasswordState } from '@/server/actions/change-password';
+import { FormAlert } from '@/components/carelink/FormAlert';
 import { PasswordField } from '@/components/carelink/PasswordField';
+import { useFocusFirstError } from '@/components/carelink/use-focus-first-error';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -22,6 +24,8 @@ export function ChangePasswordForm({ workspaceEmail, nextPath }: ChangePasswordF
   const [oldPassword, setOldPassword] = React.useState('');
   const [newPassword, setNewPassword] = React.useState('');
   const [confirmPassword, setConfirmPassword] = React.useState('');
+
+  useFocusFirstError(state.fieldErrors, state.formError);
 
   return (
     <Card className="mx-auto w-full max-w-[440px] shadow-card">
@@ -43,9 +47,9 @@ export function ChangePasswordForm({ workspaceEmail, nextPath }: ChangePasswordF
           <input type="hidden" name="confirmPassword" value={confirmPassword} />
 
           <div className="space-y-2">
-            <Label>Логин участника</Label>
+            <Label htmlFor="workspace-login">Логин участника</Label>
             <div className="relative">
-              <Input readOnly value={workspaceEmail} className="pr-10" />
+              <Input id="workspace-login" readOnly value={workspaceEmail} className="pr-10" />
               <CheckCircle2
                 className="absolute right-3 top-1/2 size-4 -translate-y-1/2 text-success"
                 aria-hidden
@@ -53,11 +57,7 @@ export function ChangePasswordForm({ workspaceEmail, nextPath }: ChangePasswordF
             </div>
           </div>
 
-          {state.formError ? (
-            <p className="text-sm text-destructive" role="alert">
-              {state.formError}
-            </p>
-          ) : null}
+          {state.formError ? <FormAlert message={state.formError} /> : null}
 
           <PasswordField
             id="oldPassword"

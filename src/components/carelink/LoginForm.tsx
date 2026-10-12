@@ -8,8 +8,10 @@ import { signInAction, type SignInFormState } from '@/server/actions/sign-in';
 import { parseWorkspaceSlugFromLogin } from '@/lib/workspace-slug';
 import { PasswordField } from '@/components/carelink/PasswordField';
 import { WorkspaceSlugField } from '@/components/carelink/WorkspaceSlugField';
+import { FormAlert } from '@/components/carelink/FormAlert';
+import { SubmitButton } from '@/components/carelink/SubmitButton';
+import { useFocusFirstError } from '@/components/carelink/use-focus-first-error';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 const initialState: SignInFormState = {};
@@ -27,6 +29,8 @@ export function LoginForm({ nextPath, defaultEmail = '', notice }: LoginFormProp
     state.workspaceSlug !== undefined
       ? state.workspaceSlug
       : parseWorkspaceSlugFromLogin(defaultEmail);
+
+  useFocusFirstError(state.fieldErrors, state.formError);
 
   return (
     <Card className="mx-auto w-full max-w-[440px] shadow-card">
@@ -46,11 +50,7 @@ export function LoginForm({ nextPath, defaultEmail = '', notice }: LoginFormProp
             </Alert>
           ) : null}
 
-          {state.formError ? (
-            <Alert variant="destructive" role="alert">
-              <AlertDescription>{state.formError}</AlertDescription>
-            </Alert>
-          ) : null}
+          {state.formError ? <FormAlert message={state.formError} /> : null}
 
           <WorkspaceSlugField
             id="workspaceSlug"
@@ -93,10 +93,10 @@ export function LoginForm({ nextPath, defaultEmail = '', notice }: LoginFormProp
             Доверять этому устройству
           </label>
 
-          <Button type="submit" className="w-full" disabled={pending}>
+          <SubmitButton type="submit" className="w-full" pending={pending} pendingLabel="Входим…">
             Войти
             <ArrowRight className="size-4" aria-hidden />
-          </Button>
+          </SubmitButton>
 
           <p className="text-center text-sm">
             <Link href="/login/recovery" className="text-primary hover:underline">

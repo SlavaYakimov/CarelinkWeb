@@ -88,11 +88,6 @@ export function OnboardingEmailForm({ linkInvalid, initialSentAt }: OnboardingEm
         <div className="space-y-4">
           <form id="onboarding-email-otp-form" action={verifyEmail} className="space-y-4">
             <input type="hidden" name="email" value={email} />
-            {otpState.error ? (
-              <Alert variant="destructive">
-                <AlertDescription>{otpState.error}</AlertDescription>
-              </Alert>
-            ) : null}
             <p className="text-sm text-muted-foreground">
               Код отправлен на {email}. Можно ввести 6 цифр или перейти по ссылке из письма.
             </p>
@@ -109,7 +104,7 @@ export function OnboardingEmailForm({ linkInvalid, initialSentAt }: OnboardingEm
                 value={code}
                 onChange={setCode}
                 disabled={verifying}
-                error={otpState.error}
+                error={otpState.error ?? undefined}
               />
             </div>
             <Button type="submit" className="w-full" disabled={verifying || code.length < 6}>
