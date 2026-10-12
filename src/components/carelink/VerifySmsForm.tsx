@@ -42,12 +42,9 @@ export function VerifySmsForm({
   const [resendState, resendSms, resending] = useActionState(resendSignInSmsAction, phoneInitial);
   const phone = usePhoneField();
   const [code, setCode] = React.useState('');
-  const phoneGate = useFormGate(
-    phoneE164FormSchema,
-    { phone: phone.submitValue },
-    ['phone'],
-    { pending: sending },
-  );
+  const phoneGate = useFormGate(phoneE164FormSchema, { phone: phone.submitValue }, ['phone'], {
+    pending: sending,
+  });
 
   const smsSent = smsAlreadySent || phoneState.smsSent || resendState.smsSent;
   const phoneMasked = phoneState.phoneMasked ?? resendState.phoneMasked ?? initialPhoneMasked;

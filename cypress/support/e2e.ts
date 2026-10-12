@@ -1,4 +1,4 @@
-import 'cypress-axe';
+import './axe-commands';
 import './commands';
 import './onboarding-commands';
 import './recovery-commands';

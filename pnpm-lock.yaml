@@ -90,9 +90,6 @@ importers:
       cypress:
         specifier: ^16.1.1
         version: 16.1.1
-      cypress-axe:
-        specifier: ^1.7.0
-        version: 1.7.0(axe-core@4.14.0)(cypress@16.1.1)
       eslint:
         specifier: ^9.36.0
         version: 9.39.5(jiti@2.7.0)
@@ -1826,13 +1823,6 @@ packages:
 
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
-
-  cypress-axe@1.7.0:
-    resolution: {integrity: sha512-zzJpvAAjauEB3GZl0KYXb8i3w6MztWAt2WM3czYTFyNVC30alDmqCm9E7GwZ4bgkldZJlmHakaVEyu73R5St4w==}
-    engines: {node: '>=10'}
-    peerDependencies:
-      axe-core: ^3 || ^4
-      cypress: ^10 || ^11 || ^12 || ^13 || ^14 || ^15
 
   cypress@16.1.1:
     resolution: {integrity: sha512-T09qNpMKssD6eEMqqfywQ8OUub/VrNCvIUFAyQCfWsJ6o4CZ5Yeapce+WoZY9FXly6+3+pk7sjEB5voxduWQlQ==}
@@ -5390,11 +5380,6 @@ snapshots:
   css.escape@1.5.1: {}
 
   csstype@3.2.3: {}
-
-  cypress-axe@1.7.0(axe-core@4.14.0)(cypress@16.1.1):
-    dependencies:
-      axe-core: 4.14.0
-      cypress: 16.1.1
 
   cypress@16.1.1:
     dependencies:

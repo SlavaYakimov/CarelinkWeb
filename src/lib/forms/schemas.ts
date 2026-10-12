@@ -94,21 +94,28 @@ export const passwordPairFormSchema = z
     path: ['newPassword'],
   });
 
-export const changePasswordFormSchema = z
-  .object({
-    oldPassword: z.string().min(8, 'Не короче 8 символов'),
-    newPassword: z.string().min(8, 'Не короче 8 символов'),
-    confirmPassword: z.string().min(8),
-    next: z.string().optional(),
-  })
-  .refine((v) => v.newPassword === v.confirmPassword, {
-    message: 'Пароли не совпадают',
-    path: ['confirmPassword'],
-  })
-  .refine((v) => isPasswordStrongEnough(v.newPassword), {
-    message: 'Пароль не соответствует требованиям',
-    path: ['newPassword'],
-  });
+const changePasswordCoreSchema = z.object({
+  oldPassword: z.string().min(8, 'Не короче 8 символов'),
+  newPassword: z.string().min(8, 'Не короче 8 символов'),
+  confirmPassword: z.string().min(8),
+});
+
+const changePasswordMatchAndStrength = <S extends z.ZodTypeAny>(schema: S) =>
+  schema
+    .refine((v: z.infer<S>) => v.newPassword === v.confirmPassword, {
+      message: 'Пароли не совпадают',
+      path: ['confirmPassword'],
+    })
+    .refine((v: z.infer<S>) => isPasswordStrongEnough(v.newPassword), {
+      message: 'Пароль не соответствует требованиям',
+      path: ['newPassword'],
+    });
+
+export const changePasswordClientSchema = changePasswordMatchAndStrength(changePasswordCoreSchema);
+
+export const changePasswordFormSchema = changePasswordMatchAndStrength(
+  changePasswordCoreSchema.extend({ next: z.string().optional() }),
+);
 
 export const recoveryRequestFormSchema = z.object({
   familySlug: familySlugSchema,
@@ -129,6 +136,16 @@ export const recoveryConfirmFormSchema = z.object({
   confirmPassword: z.string().min(8),
 });
 
+export const recoveryConfirmClientSchema = recoveryConfirmFormSchema
+  .refine((v) => v.newPassword === v.confirmPassword, {
+    message: 'Пароли не совпадают',
+    path: ['confirmPassword'],
+  })
+  .refine((v) => isPasswordStrongEnough(v.newPassword), {
+    message: 'Пароль не соответствует требованиям',
+    path: ['newPassword'],
+  });
+
 export const onboardingWorkspaceFormSchema = z.object({
   workspaceSlug: z
     .string()
@@ -143,10 +160,10 @@ export function phoneRawToE164(raw: string): string | null {
   return normalizeRuPhone(raw);
 }
 
-export const phoneE164FormSchema = phoneFormSchema.refine(
-  (v) => Boolean(phoneRawToE164(v.phone)),
-  { message: getValidationMessage('phoneInvalid'), path: ['phone'] },
-);
+export const phoneE164FormSchema = phoneFormSchema.refine((v) => Boolean(phoneRawToE164(v.phone)), {
+  message: getValidationMessage('phoneInvalid'),
+  path: ['phone'],
+});
 
 export const recoveryRequestClientSchema = recoveryRequestFormSchema.refine(
   (v) => Boolean(phoneRawToE164(v.phone)),

@@ -19,4 +19,13 @@ describe('Forms a11y (axe)', () => {
       includedImpacts: ['serious', 'critical'],
     });
   });
+
+  it('password field toggle has aria-pressed and describedby checklist', () => {
+    cy.get('#password')
+      .should('have.attr', 'aria-describedby')
+      .and('include', 'password-requirements');
+    cy.contains('button', 'Показать пароль').should('have.attr', 'aria-pressed', 'false');
+    cy.contains('button', 'Показать пароль').click();
+    cy.contains('button', 'Скрыть пароль').should('have.attr', 'aria-pressed', 'true');
+  });
 });

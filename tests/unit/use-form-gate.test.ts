@@ -8,11 +8,10 @@ import { signInFormSchema } from '@/lib/forms/schemas';
 describe('useFormGate', () => {
   it('blocks login submit when password too short', () => {
     const { result } = renderHook(() =>
-      useFormGate(
-        signInFormSchema,
-        { workspaceSlug: 'valid-slug', password: 'short' },
-        ['workspaceSlug', 'password'],
-      ),
+      useFormGate(signInFormSchema, { workspaceSlug: 'valid-slug', password: 'short' }, [
+        'workspaceSlug',
+        'password',
+      ]),
     );
     expect(result.current.canSubmit).toBe(false);
   });
