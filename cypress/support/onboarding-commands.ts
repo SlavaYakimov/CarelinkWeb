@@ -17,19 +17,10 @@ Cypress.Commands.add('fillOtp', (code: string, inputId?: string) => {
   cy.get(selector, { timeout: 30_000 }).first().click().clear().type(digits, { delay: 0 });
 });
 
-Cypress.Commands.add('acceptPersonalDataConsent', () => {
-  cy.get('#personalDataConsent').then(($el) => {
-    if ($el.attr('data-state') === 'checked') return;
-    cy.wrap($el).click({ force: true });
-    cy.get('#personalDataConsent').should('have.attr', 'data-state', 'checked');
-  });
-});
-
 Cypress.Commands.add('onboardingEnterEmail', (email: string) => {
   cy.visit('/onboarding/email');
   cy.contains('h1', 'Личная почта').should('be.visible');
   cy.get('#email').clear().type(email).should('have.value', email);
-  cy.acceptPersonalDataConsent();
   cy.clickSubmitWhenEnabled('Отправить код');
   cy.contains('Код отправлен на', { timeout: 30_000 }).should('be.visible');
 });

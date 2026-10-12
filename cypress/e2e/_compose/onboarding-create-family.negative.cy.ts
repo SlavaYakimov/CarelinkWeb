@@ -26,7 +26,6 @@ function uniquePhoneDigits(): string {
 function advanceToEmailOtpPhase(email: string): void {
   cy.visit('/onboarding/email');
   cy.get('#email').clear().type(email);
-  cy.acceptPersonalDataConsent();
   cy.clickSubmitWhenEnabled('Отправить код');
   cy.contains('Код отправлен на', { timeout: 30_000 }).should('be.visible');
 }
@@ -159,7 +158,6 @@ describe('onboarding create family — negative (compose BE-21)', () => {
     advanceToPhoneStep(email);
     cy.visit('/onboarding/email');
     cy.get('#email').clear().type(email2);
-    cy.acceptPersonalDataConsent();
     cy.clickSubmitWhenEnabled('Отправить код');
     cy.contains('Код отправлен на', { timeout: 30_000 }).should('be.visible');
     cy.clearCarelinkCookie('cl_flow');
@@ -235,7 +233,6 @@ describe('onboarding create family — negative (compose BE-21)', () => {
     cy.intercept('POST', '**/onboarding/email').as('emailPost');
     cy.visit('/onboarding/email');
     cy.get('#email').clear().type(email);
-    cy.acceptPersonalDataConsent();
     cy.contains('button', 'Отправить код').dblclick();
     cy.contains('Код отправлен на', { timeout: 30_000 }).should('be.visible');
     cy.get('@emailPost.all', { timeout: 5_000 }).then((interceptions) => {
