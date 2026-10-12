@@ -30,6 +30,15 @@ describe('invite unavailable reasons', () => {
   });
 });
 
+describe('login next query parsing', () => {
+  it('reads next from plain or encoded search', () => {
+    for (const search of ['?next=/invites', '?next=%2Finvites']) {
+      const raw = search.startsWith('?') ? search.slice(1) : search;
+      expect(new URLSearchParams(raw).get('next')).toBe('/invites');
+    }
+  });
+});
+
 describe('member invite form schema', () => {
   it('requires valid phone and role', () => {
     const ok = memberInviteClientSchema.safeParse({

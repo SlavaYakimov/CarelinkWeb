@@ -8,4 +8,9 @@ describe('invites routing (no compose)', () => {
     cy.visit('/invite');
     cy.location('pathname').should('eq', '/invite/unavailable');
   });
+
+  it('login next param parses encoded or plain', () => {
+    cy.visit('/login?next=/invites');
+    cy.assertLoginNextParam('/invites');
+  });
 });
