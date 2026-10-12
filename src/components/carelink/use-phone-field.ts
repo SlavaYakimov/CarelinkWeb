@@ -18,5 +18,5 @@ export function usePhoneField(initialDisplay = ''): PhoneField {
     setE164(nextE164 ?? '');
   }, []);
 
-  return { display, e164, onChange, submitValue: e164 || display };
+  return { display, e164, onChange, submitValue: e164 };
 }
