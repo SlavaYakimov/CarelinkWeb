@@ -227,7 +227,7 @@ describe('invites compose happy path', () => {
           },
         );
 
-        cy.clearAllCookies();
+        cy.clearCarelinkCookie('cl_sid');
         cy.invitesSignInShortcut(keeper.workspaceEmail, keeper.password);
         cy.invitesOpenNewForm(keeper.familyId);
         cy.invitesFillForm({
