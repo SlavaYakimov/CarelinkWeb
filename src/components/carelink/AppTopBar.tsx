@@ -40,7 +40,7 @@ export function AppTopBar({
       </div>
       <div className="flex shrink-0 items-center gap-3">
         {roleLabel ? (
-          <span className="rounded-full bg-secondary/15 px-3 py-1 text-xs font-medium text-secondary">
+          <span className="rounded-full bg-secondary/10 px-3 py-1 text-xs font-medium text-foreground">
             {roleLabel}
           </span>
         ) : null}

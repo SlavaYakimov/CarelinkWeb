@@ -14,7 +14,7 @@ export function AppSidebar() {
           </div>
           <div>
             <p className="font-heading text-base font-semibold text-primary">Carelink</p>
-            <p className="text-[10px] font-medium uppercase tracking-wider text-secondary">
+            <p className="text-xs font-medium uppercase tracking-wider text-secondary">
               Тихая забота
             </p>
           </div>
