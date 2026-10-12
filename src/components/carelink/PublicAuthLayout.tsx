@@ -1,5 +1,6 @@
 import * as React from 'react';
 import Link from 'next/link';
+import { BrandMark } from '@/components/brand/BrandMark';
 import { BellRing, Globe, Heart, Phone, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -107,24 +108,6 @@ export function PublicAuthLayout({
           © {new Date().getFullYear()} Carelink. Спокойная забота о семье. Все права защищены.
         </footer>
       ) : null}
-    </div>
-  );
-}
-
-function BrandMark() {
-  return (
-    <div className="flex items-center gap-3">
-      <div className="flex size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-        <span className="text-lg font-semibold" aria-hidden>
-          ⌂
-        </span>
-      </div>
-      <div>
-        <p className="font-heading text-lg font-semibold leading-tight text-primary">Carelink</p>
-        <p className="text-xs font-medium uppercase tracking-wider text-secondary">
-          Спокойная забота
-        </p>
-      </div>
     </div>
   );
 }
