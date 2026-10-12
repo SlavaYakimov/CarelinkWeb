@@ -135,13 +135,18 @@ export function OnboardingWorkspaceForm({
           <Input
             id="displayName"
             name="displayName"
+            autoComplete="off"
+            maxLength={64}
             defaultValue={defaultDisplayName}
             placeholder="Семья Ивановых"
             disabled={pending}
             required
+            aria-invalid={Boolean(state.fieldErrors?.displayName)}
           />
           {state.fieldErrors?.displayName ? (
-            <p className="text-sm text-destructive">{state.fieldErrors.displayName}</p>
+            <p className="text-sm text-destructive" role="alert">
+              {state.fieldErrors.displayName}
+            </p>
           ) : null}
         </div>
         <WorkspaceSlugField

@@ -39,6 +39,8 @@ export function CreateFamilyForm() {
           placeholder="Сидоровы"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          maxLength={64}
+          autoComplete="off"
           disabled={pending}
           aria-invalid={Boolean(state.fieldErrors?.name)}
         />
@@ -54,9 +56,15 @@ export function CreateFamilyForm() {
       </div>
 
       <div className="flex justify-end gap-3 border-t border-border pt-4">
-        <Button type="button" variant="secondary" asChild disabled={pending}>
-          <Link href="/families">Отмена</Link>
-        </Button>
+        {pending ? (
+          <Button type="button" variant="secondary" disabled>
+            Отмена
+          </Button>
+        ) : (
+          <Button type="button" variant="secondary" asChild>
+            <Link href="/families">Отмена</Link>
+          </Button>
+        )}
         <SubmitButton type="submit" pending={pending} disabled={!gate.canSubmit}>
           Создать семью
         </SubmitButton>
