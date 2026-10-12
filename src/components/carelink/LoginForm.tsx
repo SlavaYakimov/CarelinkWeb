@@ -51,7 +51,7 @@ export function LoginForm({ nextPath, defaultEmail = '', notice }: LoginFormProp
     <Card className="mx-auto w-full max-w-[440px] shadow-card">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl">Вход в Carelink</CardTitle>
-        <CardDescription>Войдите с логином Carelink Workspace вашей семьи</CardDescription>
+        <CardDescription>Войдите с адресом семьи и паролем, которые задали при создании семьи</CardDescription>
       </CardHeader>
       <CardContent>
         <form action={formAction} className="space-y-4" onSubmit={() => gate.touchAll()}>
@@ -103,13 +103,13 @@ export function LoginForm({ nextPath, defaultEmail = '', notice }: LoginFormProp
           )}
           <input type="hidden" name="password" value={password} />
 
-          <label className="flex cursor-pointer items-center gap-2 text-sm">
+          <label className="flex min-h-11 cursor-pointer items-center gap-3 text-sm">
             <input
               type="checkbox"
               name="trustDevice"
               defaultChecked
               disabled={pending}
-              className="size-4 rounded border border-primary accent-primary"
+              className="size-5 shrink-0 rounded border border-primary accent-primary"
             />
             Доверять этому устройству
           </label>
@@ -126,19 +126,26 @@ export function LoginForm({ nextPath, defaultEmail = '', notice }: LoginFormProp
           </SubmitButton>
 
           <p className="text-center text-sm">
-            <Link href="/login/recovery" className="text-primary hover:underline">
+            <Link
+              href="/login/recovery"
+              className="inline-flex min-h-11 items-center text-primary hover:underline"
+            >
               Забыли пароль? Восстановить через семью
             </Link>
           </p>
 
           <p className="text-center text-sm text-muted-foreground">
-            <Link href="/onboarding/email" className="text-primary hover:underline">
+            <Link
+              href="/onboarding/email"
+              className="inline-flex min-h-11 items-center text-primary hover:underline"
+            >
               + Создать новую семью
             </Link>
           </p>
 
           <div className="rounded-lg bg-muted/80 p-3 text-xs text-muted-foreground">
-            Вход только через Carelink Workspace. Личная почта используется лишь для приглашений.
+            Вход выполняется по адресу семьи. Личная почта используется только при регистрации новой
+            семьи.
           </div>
         </form>
       </CardContent>

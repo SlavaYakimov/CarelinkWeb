@@ -1,0 +1,625 @@
+openapi: 3.1.0
+info:
+  title: Carelink Family API
+  version: 1.0.0
+  description: Family-service HTTP routes (member invites). Synced from CarelinkAuth docs/backend/family/openapi.yaml
+servers:
+  - url: https://api.carelink.app/v1
+    description: Production (v1 — pairing, profile, tokens)
+  - url: https://api.staging.carelink.app/v1
+    description: Staging (v1)
+tags:
+  - name: invites
+    description: Member invites by email (family keeper + invitee)
+paths:
+  /families/{familyId}/role-templates:
+    get:
+      tags:
+        - invites
+      operationId: listFamilyRoleTemplates
+      summary: Role templates for member invites
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: familyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Role templates
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RoleTemplateListResponse"
+        "404":
+          $ref: "#/components/responses/Error"
+  /families/{familyId}/member-invites/lookup-email:
+    post:
+      tags:
+        - invites
+      operationId: lookupMemberInviteEmail
+      summary: Check whether personal email is registered (keeper only)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: familyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MemberInviteLookupEmailRequest"
+      responses:
+        "200":
+          description: Lookup result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemberInviteLookupEmailResponse"
+        "403":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/RateLimit"
+        "501":
+          $ref: "#/components/responses/NotImplemented"
+  /families/{familyId}/member-invites/avatar:
+    post:
+      tags:
+        - invites
+      operationId: uploadMemberInviteAvatar
+      summary: Upload invitee avatar (multipart)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: familyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: Avatar URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemberInviteAvatarResponse"
+        "413":
+          description: Avatar too large
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /families/{familyId}/member-invites:
+    get:
+      tags:
+        - invites
+      operationId: listFamilyMemberInvites
+      summary: List member invites for a family
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: familyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Invites
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemberInviteListResponse"
+        "404":
+          $ref: "#/components/responses/Error"
+    post:
+      tags:
+        - invites
+      operationId: createMemberInvite
+      summary: Create member invite (keeper)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: familyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateMemberInviteRequest"
+      responses:
+        "201":
+          description: Invite created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateMemberInviteResponse"
+        "403":
+          $ref: "#/components/responses/Error"
+        "409":
+          description: Duplicate pending invite
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          $ref: "#/components/responses/RateLimit"
+        "501":
+          $ref: "#/components/responses/NotImplemented"
+        "503":
+          description: Email undeliverable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /families/{familyId}/member-invites/{inviteId}/resend:
+    post:
+      tags:
+        - invites
+      operationId: resendMemberInvite
+      summary: Resend invite email (keeper)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: familyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: inviteId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+      responses:
+        "200":
+          description: Email sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemberInviteResendResponse"
+        "400":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "429":
+          $ref: "#/components/responses/RateLimit"
+  /families/{familyId}/member-invites/{inviteId}/revoke:
+    post:
+      tags:
+        - invites
+      operationId: revokeMemberInvite
+      summary: Revoke pending invite (keeper)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: familyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: inviteId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+      responses:
+        "200":
+          description: Revoked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemberInviteRevokeResponse"
+        "400":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          $ref: "#/components/responses/Error"
+  /user/member-invites/pending:
+    get:
+      tags:
+        - invites
+      operationId: listPendingMemberInvites
+      summary: Pending invites for current user
+      security:
+        - bearerAuth: []
+        - userRefreshAuth: []
+      responses:
+        "200":
+          description: Pending invites
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PendingMemberInviteListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /user/member-invites/{inviteId}/accept:
+    post:
+      tags:
+        - invites
+      operationId: acceptMemberInvite
+      summary: Accept family invite
+      security:
+        - bearerAuth: []
+        - userRefreshAuth: []
+      parameters:
+        - name: inviteId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+      responses:
+        "200":
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemberInviteAcceptResponse"
+        "400":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+        "409":
+          description: Already member
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /user/member-invites/{inviteId}/decline:
+    post:
+      tags:
+        - invites
+      operationId: declineMemberInvite
+      summary: Decline family invite
+      security:
+        - bearerAuth: []
+        - userRefreshAuth: []
+      parameters:
+        - name: inviteId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+      responses:
+        "200":
+          description: Declined
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MemberInviteDeclineResponse"
+        "400":
+          $ref: "#/components/responses/Error"
+        "403":
+          $ref: "#/components/responses/Error"
+        "404":
+          $ref: "#/components/responses/Error"
+components:
+  securitySchemes: {}
+  responses:
+    Error:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    RateLimit:
+      description: Rate limited. Response includes `Retry-After` header (seconds until window reset; fallback 60).
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+          description: Seconds until the rate-limit window resets
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotImplemented:
+      description: Feature disabled
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+  parameters: {}
+  schemas:
+    RoleTemplateListResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/RoleTemplate"
+    MemberInviteLookupEmailRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+    MemberInviteLookupEmailResponse:
+      type: object
+      required:
+        - registered
+      properties:
+        registered:
+          type: boolean
+    MemberInviteAvatarResponse:
+      type: object
+      required:
+        - avatarUrl
+      properties:
+        avatarUrl:
+          type: string
+          format: uri
+    ErrorResponse:
+      type: object
+      required:
+        - code
+      properties:
+        code:
+          type: string
+          enum:
+            - INVALID_CREDENTIALS
+            - UNAUTHORIZED
+            - TOKEN_EXPIRED
+            - INVALID_OTP
+            - PHONE_REGISTERED
+            - SMS_UNDELIVERED
+            - EMAIL_TAKEN
+            - WEAK_PASSWORD
+            - INVALID_PAIR_CODE
+            - PAIR_SESSION_EXPIRED
+            - PAIR_SESSION_NOT_FOUND
+            - OFFLINE
+            - RATE_LIMIT
+            - UNKNOWN
+            - PAIRING_SESSION_UNSUPPORTED
+            - TEMP_PASSWORD_EXPIRED
+            - WORKSPACE_NOT_FOUND
+            - BAD_REQUEST
+            - NOT_IMPLEMENTED
+            - KEEPER_NOT_FOUND
+        message:
+          type: string
+    MemberInviteListResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/MemberInviteView"
+    CreateMemberInviteRequest:
+      type: object
+      required:
+        - roleTemplateId
+        - displayName
+        - phone
+        - personalEmail
+      properties:
+        roleTemplateId:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        phone:
+          type: string
+          description: E.164
+        personalEmail:
+          type: string
+          format: email
+        avatarUrl:
+          type: string
+          format: uri
+    CreateMemberInviteResponse:
+      type: object
+      required:
+        - inviteId
+        - emailSent
+      properties:
+        inviteId:
+          type: string
+          format: uuid
+        emailSent:
+          type: boolean
+        inviteeKind:
+          type: string
+          enum:
+            - new
+            - existing
+    MemberInviteResendResponse:
+      type: object
+      required:
+        - emailSent
+      properties:
+        emailSent:
+          type: boolean
+    MemberInviteRevokeResponse:
+      type: object
+      required:
+        - revoked
+      properties:
+        revoked:
+          type: boolean
+    PendingMemberInviteListResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/PendingMemberInviteView"
+    MemberInviteAcceptResponse:
+      type: object
+      required:
+        - accepted
+      properties:
+        accepted:
+          type: boolean
+    MemberInviteDeclineResponse:
+      type: object
+      required:
+        - declined
+      properties:
+        declined:
+          type: boolean
+    RoleTemplate:
+      type: object
+      required:
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        description:
+          type: string
+    MemberInviteView:
+      type: object
+      required:
+        - id
+        - displayName
+        - status
+        - roleName
+        - createdAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        emailMasked:
+          type: string
+        phone:
+          type: string
+          description: E.164; only for keeper (BE-23)
+        roleName:
+          type: string
+        status:
+          $ref: "#/components/schemas/MemberInviteStatus"
+        inviteeKind:
+          type: string
+          enum:
+            - new
+            - existing
+        createdAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+    PendingMemberInviteView:
+      type: object
+      required:
+        - id
+        - familyId
+        - familyName
+        - roleName
+        - invitedByDisplayName
+        - expiresAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        familyId:
+          type: string
+          format: uuid
+        familyName:
+          type: string
+        roleName:
+          type: string
+        invitedByDisplayName:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+    MemberInviteStatus:
+      type: string
+      enum:
+        - sent
+        - pending_accept
+        - accepted
+        - declined
+        - expired
+        - revoked
+

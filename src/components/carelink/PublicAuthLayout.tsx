@@ -1,5 +1,6 @@
 import * as React from 'react';
 import Link from 'next/link';
+import { BrandMark } from '@/components/brand/BrandMark';
 import { BellRing, Globe, Heart, Phone, Shield } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -12,7 +13,7 @@ export type PublicAuthLayoutProps = {
 export function PublicAuthLayout({
   children,
   showTopNav = false,
-  gatewayBadge = true,
+  gatewayBadge = process.env.NODE_ENV === 'development',
 }: PublicAuthLayoutProps) {
   return (
     <div className="min-h-screen bg-background">
@@ -27,7 +28,7 @@ export function PublicAuthLayout({
               <Link href="/login" className="hover:text-foreground">
                 Безопасность
               </Link>
-              <Link href="/login" className="hover:text-foreground">
+              <Link href="/help" className="hover:text-foreground">
                 Помощь
               </Link>
             </nav>
@@ -88,6 +89,9 @@ export function PublicAuthLayout({
         </aside>
 
         <section className="flex flex-col">
+          <div className="mb-6 lg:hidden">
+            <BrandMark compact />
+          </div>
           {gatewayBadge ? (
             <div className="mb-4 flex items-center justify-between text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
@@ -107,24 +111,6 @@ export function PublicAuthLayout({
           © {new Date().getFullYear()} Carelink. Спокойная забота о семье. Все права защищены.
         </footer>
       ) : null}
-    </div>
-  );
-}
-
-function BrandMark() {
-  return (
-    <div className="flex items-center gap-3">
-      <div className="flex size-10 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-        <span className="text-lg font-semibold" aria-hidden>
-          ⌂
-        </span>
-      </div>
-      <div>
-        <p className="font-heading text-lg font-semibold leading-tight text-primary">Carelink</p>
-        <p className="text-[10px] font-medium uppercase tracking-wider text-secondary">
-          Спокойная забота
-        </p>
-      </div>
     </div>
   );
 }
@@ -154,11 +140,15 @@ function AuthFooter({ className }: { className?: string }) {
         className,
       )}
     >
-      <Link href="/login" className="hover:text-foreground">
+      <Link href="/privacy" className="inline-flex min-h-11 items-center hover:text-foreground">
         Конфиденциальность
       </Link>
       <span aria-hidden>·</span>
-      <Link href="/login" className="hover:text-foreground">
+      <Link href="/terms" className="inline-flex min-h-11 items-center hover:text-foreground">
+        Условия
+      </Link>
+      <span aria-hidden>·</span>
+      <Link href="/help" className="inline-flex min-h-11 items-center hover:text-foreground">
         Помощь
       </Link>
       <span aria-hidden>·</span>

@@ -27,7 +27,8 @@
     "test:e2e:compose:invites": "node scripts/e2e-env.mjs && node scripts/e2e-env-compose.mjs && CYPRESS_E2E_COMPOSE=1 start-server-and-test \"pnpm start\" http://127.0.0.1:3000/login \"pnpm cypress run --spec cypress/e2e/_compose/invites-*.cy.ts\"",
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
-    "contracts:generate": "openapi-typescript contracts/auth.openapi.yaml -o src/server/gateway/types.gen.ts",
+    "contracts:merge": "node scripts/contracts-merge.mjs",
+    "contracts:generate": "pnpm contracts:merge && openapi-typescript contracts/gateway.openapi.yaml -o src/server/gateway/types.gen.ts",
     "contracts:check": "pnpm contracts:generate && git diff --exit-code src/server/gateway/types.gen.ts",
     "contracts:sync": "node scripts/contracts-sync.mjs"
   },
@@ -71,7 +72,8 @@
     "start-server-and-test": "^2.0.12",
     "tailwindcss": "^4.1.13",
     "typescript": "^5.9.2",
-    "vitest": "^4.1.11"
+    "vitest": "^4.1.11",
+    "yaml": "2.7.0"
   },
   "packageManager": "pnpm@9.15.9",
   "engines": {

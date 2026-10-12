@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Carelink">
+  <title>Carelink — филин</title>
+  <path
+    fill="#000"
+    fill-rule="evenodd"
+    d="M132 60 L196 132 Q256 116 316 132 L380 60 L392 168 Q440 226 440 300 Q440 410 352 456 Q306 480 256 480 Q206 480 160 456 Q72 410 72 300 Q72 226 120 168 Z M190 168 a70 70 0 1 0 0.1 0 Z M322 168 a70 70 0 1 0 0.1 0 Z M256 270 L238 300 L256 336 L274 300 Z M214 372 q14 18 28 0 q-14 8 -28 0 Z M270 372 q14 18 28 0 q-14 8 -28 0 Z M242 404 q14 18 28 0 q-14 8 -28 0 Z M186 404 q14 18 28 0 q-14 8 -28 0 Z M298 404 q14 18 28 0 q-14 8 -28 0 Z"
+  />
+  <circle fill="#000" cx="190" cy="238" r="34" />
+  <circle fill="#000" cx="322" cy="238" r="34" />
+  <circle fill="none" stroke="#000" stroke-width="10" cx="190" cy="238" r="50" />
+  <circle fill="none" stroke="#000" stroke-width="10" cx="322" cy="238" r="50" />
+</svg>

@@ -1,25 +1,39 @@
 #!/usr/bin/env node
 /**
- * Pulls contracts/auth.openapi.yaml from CarelinkAuth (private repo).
- * Set CONTRACTS_SYNC_URL (raw file URL) or GITHUB_TOKEN to fetch from GitHub API.
+ * Pulls OpenAPI from CarelinkAuth (private repo):
+ * - contracts/auth.openapi.yaml  ← docs/backend/auth/openapi.yaml
+ * - contracts/family.openapi.yaml ← docs/backend/family/openapi.yaml
+ *
+ * Set GITHUB_TOKEN (or CONTRACTS_SYNC_TOKEN) for GitHub API raw fetch.
+ * Optional overrides: CONTRACTS_SYNC_AUTH_URL, CONTRACTS_SYNC_FAMILY_URL, CONTRACTS_SYNC_REF (default main).
  */
 import { writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const outPath = join(root, 'contracts', 'auth.openapi.yaml');
+const authOut = join(root, 'contracts', 'auth.openapi.yaml');
+const familyOut = join(root, 'contracts', 'family.openapi.yaml');
 
-const defaultRaw =
-  'https://raw.githubusercontent.com/SlavaYakimov/CarelinkAuth/main/docs/backend/auth/openapi.yaml';
+const repo = process.env.CONTRACTS_SYNC_REPO ?? 'SlavaYakimov/CarelinkAuth';
+const ref = process.env.CONTRACTS_SYNC_REF ?? 'main';
+const authPath = process.env.CONTRACTS_SYNC_AUTH_PATH ?? 'docs/backend/auth/openapi.yaml';
+const familyPath = process.env.CONTRACTS_SYNC_FAMILY_PATH ?? 'docs/backend/family/openapi.yaml';
 
-async function main() {
-  const url = process.env.CONTRACTS_SYNC_URL ?? defaultRaw;
-  const token = process.env.GITHUB_TOKEN;
+const defaultAuthRaw = `https://raw.githubusercontent.com/${repo}/${ref}/${authPath}`;
+const defaultFamilyRaw = `https://raw.githubusercontent.com/${repo}/${ref}/${familyPath}`;
 
-  if (!process.env.CONTRACTS_SYNC_URL && !token) {
+async function fetchSpec(label, defaultRawUrl) {
+  const token = process.env.CONTRACTS_SYNC_TOKEN ?? process.env.GITHUB_TOKEN;
+  const envKey = label === 'auth' ? 'CONTRACTS_SYNC_AUTH_URL' : 'CONTRACTS_SYNC_FAMILY_URL';
+  const resolvedUrl =
+    process.env[envKey] ??
+    (label === 'auth' ? process.env.CONTRACTS_SYNC_URL : undefined) ??
+    defaultRawUrl;
+
+  if (!token && resolvedUrl.includes('raw.githubusercontent.com')) {
     console.error(
-      'contracts:sync: задайте CONTRACTS_SYNC_URL (URL raw openapi.yaml) или GITHUB_TOKEN для доступа к приватному CarelinkAuth.',
+      `contracts:sync: для ${label} нужен GITHUB_TOKEN / CONTRACTS_SYNC_TOKEN (приватный CarelinkAuth) или явный ${envKey}.`,
     );
     process.exit(1);
   }
@@ -29,20 +43,30 @@ async function main() {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const res = await fetch(url, { headers });
+  const res = await fetch(resolvedUrl, { headers });
   if (!res.ok) {
-    console.error(`contracts:sync: HTTP ${res.status} ${res.statusText} для ${url}`);
+    console.error(`contracts:sync: HTTP ${res.status} ${res.statusText} для ${label} (${resolvedUrl})`);
     process.exit(1);
   }
 
   const body = await res.text();
   if (!body.includes('openapi:')) {
-    console.error('contracts:sync: ответ не похож на OpenAPI YAML');
+    console.error(`contracts:sync: ответ ${label} не похож на OpenAPI YAML`);
     process.exit(1);
   }
+  return body;
+}
 
-  writeFileSync(outPath, body, 'utf8');
-  console.log(`contracts:sync: записано ${outPath}`);
+async function main() {
+  const [authBody, familyBody] = await Promise.all([
+    fetchSpec('auth', defaultAuthRaw),
+    fetchSpec('family', defaultFamilyRaw),
+  ]);
+
+  writeFileSync(authOut, authBody, 'utf8');
+  writeFileSync(familyOut, familyBody, 'utf8');
+  console.log(`contracts:sync: записано ${authOut}`);
+  console.log(`contracts:sync: записано ${familyOut}`);
 }
 
 main().catch((err) => {

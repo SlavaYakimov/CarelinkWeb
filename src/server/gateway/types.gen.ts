@@ -4,492 +4,6 @@
  */
 
 export interface paths {
-    "/healthz": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Liveness probe
-         * @description Returns 200 when the process is up. Does not check dependencies.
-         */
-        get: operations["healthz"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/readyz": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Readiness probe
-         * @description Returns 200 when Postgres and Redis are reachable.
-         */
-        get: operations["readyz"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/workspace/sign-in": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["workspaceSignIn"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/workspace/sign-in/start": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["workspaceSignInStart"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/workspace/sign-in/request-push-verify": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["workspaceSignInRequestPushVerify"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/workspace/sign-in/resend-push-verify": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["workspaceSignInResendPushVerify"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/workspace/sign-in/request-sms": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["workspaceSignInRequestSms"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/workspace/sign-in/verify-sms": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["workspaceSignInVerifySms"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/workspace/sign-in/verify-link": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["workspaceSignInVerifyLink"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/workspace/sign-in/request-otp": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["workspaceSignInRequestOtp"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/workspace/sign-in/verify-phone": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["workspaceSignInVerifyPhone"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/workspace/sign-in/complete": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["workspaceSignInComplete"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/workspace/sign-in/request-delegate-push": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Ask family keeper to approve device for sign-in */
-        post: operations["workspaceSignInRequestDelegatePush"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/workspace/sign-in/delegate-details": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Read-only delegate request details (no side effects) */
-        get: operations["workspaceSignInDelegateDetails"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/workspace/sign-in/delegate-link": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Deep link landing (read-only; may redirect to app) */
-        get: operations["workspaceSignInDelegateLink"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/workspace/sign-in/approve-delegate": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Keeper approves delegate sign-in (authenticated) */
-        post: operations["workspaceSignInApproveDelegate"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/workspace/sign-in/reject-delegate": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["workspaceSignInRejectDelegate"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/workspace/sign-in/delegate-status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Waiting member polls delegation outcome */
-        get: operations["workspaceSignInDelegateStatus"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/personal/sign-in/request-email": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Request OTP on verified personal email */
-        post: operations["personalSignInRequestEmail"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/personal/sign-in/verify-email": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["personalSignInVerifyEmail"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/personal/sign-in/request-phone-otp": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["personalSignInRequestPhoneOtp"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/personal/sign-in/verify-phone": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["personalSignInVerifyPhone"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/personal/sign-in/complete": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["personalSignInComplete"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/sign-in/email/request": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** @deprecated */
-        post: operations["personalSignInRequestEmailLegacy"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/recovery/request": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Request account recovery via family keeper */
-        post: operations["recoveryRequest"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/recovery/confirm": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Confirm recovery with SMS code and set new password */
-        post: operations["recoveryConfirm"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/pair/phone/request-otp": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["pairPhoneRequestOTP"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/pair/phone/verify": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["pairPhoneVerifyOTP"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/devices/register": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Register push token (gateway → notification-service)
-         * @description Public gateway route. Accepts device registration JWT (scope device_register) or family access JWT.
-         *     Proxied to notification-service with service credentials.
-         */
-        post: operations["gatewayRegisterDevice"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/auth/devices": {
         parameters: {
             query?: never;
@@ -522,7 +36,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/workspace/password/change": {
+    "/auth/logout": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["logout"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/onboarding/abandon": {
         parameters: {
             query?: never;
             header?: never;
@@ -532,10 +62,107 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * @description With `challengeId` (temp password flow), requires prior device verification via SMS/push
-         *     and header `X-Device-Session` when device gate is enabled.
+         * @description Cancels an unfinished onboarding after phone verify (BE-27): deletes the workspace shell
+         *     in family-service, the onboarding credentials and the challenge. Idempotent — an unknown
+         *     or expired challenge also returns 204. A finalized workspace is never deleted.
          */
-        post: operations["workspaceChangePassword"];
+        post: operations["onboardingAbandon"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/onboarding/device/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["onboardingConfirmDevice"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/onboarding/device/verify-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["onboardingDeviceVerifyLink"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/onboarding/device/verify/request-push": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["onboardingDeviceVerifyRequestPush"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/onboarding/device/verify/request-sms": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["onboardingDeviceVerifyRequestSms"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/onboarding/device/verify/resend-push": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["onboardingDeviceVerifyResendPush"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/onboarding/device/verify/verify-sms": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["onboardingDeviceVerifyVerifySms"];
         delete?: never;
         options?: never;
         head?: never;
@@ -597,6 +224,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/onboarding/password/setup": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["onboardingSetupPassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/onboarding/phone/request-otp": {
         parameters: {
             query?: never;
@@ -623,139 +266,6 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["onboardingVerifyPhone"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/onboarding/abandon": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * @description Cancels an unfinished onboarding after phone verify (BE-27): deletes the workspace shell
-         *     in family-service, the onboarding credentials and the challenge. Idempotent — an unknown
-         *     or expired challenge also returns 204. A finalized workspace is never deleted.
-         */
-        post: operations["onboardingAbandon"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/onboarding/device/verify/request-push": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["onboardingDeviceVerifyRequestPush"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/onboarding/device/verify/resend-push": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["onboardingDeviceVerifyResendPush"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/onboarding/device/verify/request-sms": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["onboardingDeviceVerifyRequestSms"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/onboarding/device/verify/verify-sms": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["onboardingDeviceVerifyVerifySms"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/onboarding/device/verify-link": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get: operations["onboardingDeviceVerifyLink"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/onboarding/device/confirm": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["onboardingConfirmDevice"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/onboarding/password/setup": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["onboardingSetupPassword"];
         delete?: never;
         options?: never;
         head?: never;
@@ -795,70 +305,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/auth/token/refresh": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["tokenRefresh"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/logout": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["logout"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/pair/resolve": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["pairResolve"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/pair/confirm": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post: operations["pairConfirm"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/auth/pair/approval-status": {
         parameters: {
             query?: never;
@@ -869,23 +315,6 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["pairApprovalStatus"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/pair/reject": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Reject join request (keeper via service token or family access JWT) */
-        post: operations["pairReject"];
         delete?: never;
         options?: never;
         head?: never;
@@ -909,7 +338,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/user/me": {
+    "/auth/pair/confirm": {
         parameters: {
             query?: never;
             header?: never;
@@ -917,15 +346,365 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
+        put?: never;
+        post: operations["pairConfirm"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/pair/phone/request-otp": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["pairPhoneRequestOTP"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/pair/phone/verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["pairPhoneVerifyOTP"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/pair/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Reject join request (keeper via service token or family access JWT) */
+        post: operations["pairReject"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/pair/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["pairResolve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/personal/sign-in/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["personalSignInComplete"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/personal/sign-in/request-email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Request OTP on verified personal email */
+        post: operations["personalSignInRequestEmail"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/personal/sign-in/request-phone-otp": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["personalSignInRequestPhoneOtp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/personal/sign-in/verify-email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["personalSignInVerifyEmail"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/personal/sign-in/verify-phone": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["personalSignInVerifyPhone"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/recovery/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Confirm recovery with SMS code and set new password */
+        post: operations["recoveryConfirm"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/recovery/request": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Request account recovery via family keeper */
+        post: operations["recoveryRequest"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/session/rebuild": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Rebuild session after family membership change (BE-07) */
+        post: operations["rebuildAuthSession"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/sign-in/email/request": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @deprecated */
+        post: operations["personalSignInRequestEmailLegacy"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/token/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["tokenRefresh"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/workspace/password/change": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description With `challengeId` (temp password flow), requires prior device verification via SMS/push
+         *     and header `X-Device-Session` when device gate is enabled.
+         */
+        post: operations["workspaceChangePassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/workspace/sign-in": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["workspaceSignIn"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/workspace/sign-in/approve-delegate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Keeper approves delegate sign-in (authenticated) */
+        post: operations["workspaceSignInApproveDelegate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/workspace/sign-in/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["workspaceSignInComplete"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/workspace/sign-in/delegate-details": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read-only delegate request details (no side effects) */
+        get: operations["workspaceSignInDelegateDetails"];
         put?: never;
         post?: never;
         delete?: never;
         options?: never;
         head?: never;
-        patch: operations["updateMe"];
+        patch?: never;
         trace?: never;
     };
-    "/user/me/avatar": {
+    "/auth/workspace/sign-in/delegate-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Deep link landing (read-only; may redirect to app) */
+        get: operations["workspaceSignInDelegateLink"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/workspace/sign-in/delegate-status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Waiting member polls delegation outcome */
+        get: operations["workspaceSignInDelegateStatus"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/workspace/sign-in/reject-delegate": {
         parameters: {
             query?: never;
             header?: never;
@@ -934,8 +713,173 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Upload avatar (stub CDN URL in MVP) */
-        post: operations["uploadAvatar"];
+        post: operations["workspaceSignInRejectDelegate"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/workspace/sign-in/request-delegate-push": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Ask family keeper to approve device for sign-in */
+        post: operations["workspaceSignInRequestDelegatePush"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/workspace/sign-in/request-otp": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["workspaceSignInRequestOtp"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/workspace/sign-in/request-push-verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["workspaceSignInRequestPushVerify"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/workspace/sign-in/request-sms": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["workspaceSignInRequestSms"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/workspace/sign-in/resend-push-verify": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["workspaceSignInResendPushVerify"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/workspace/sign-in/start": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["workspaceSignInStart"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/workspace/sign-in/verify-link": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["workspaceSignInVerifyLink"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/workspace/sign-in/verify-phone": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["workspaceSignInVerifyPhone"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/workspace/sign-in/verify-sms": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["workspaceSignInVerifySms"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/devices/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Register push token (gateway → notification-service)
+         * @description Public gateway route. Accepts device registration JWT (scope device_register) or family access JWT.
+         *     Proxied to notification-service with service credentials.
+         */
+        post: operations["gatewayRegisterDevice"];
         delete?: never;
         options?: never;
         head?: never;
@@ -963,51 +907,18 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/user/families": {
+    "/families/{familyId}/member-invites": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** List user families (family-service) */
-        get: operations["listUserFamilies"];
+        /** List member invites for a family */
+        get: operations["listFamilyMemberInvites"];
         put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/families/{familyId}/role-templates": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Role templates for member invites */
-        get: operations["listFamilyRoleTemplates"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/families/{familyId}/member-invites/lookup-email": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Check whether personal email is registered (keeper only) */
-        post: operations["lookupMemberInviteEmail"];
+        /** Create member invite (keeper) */
+        post: operations["createMemberInvite"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1031,18 +942,17 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/families/{familyId}/member-invites": {
+    "/families/{familyId}/member-invites/lookup-email": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** List member invites for a family */
-        get: operations["listFamilyMemberInvites"];
+        get?: never;
         put?: never;
-        /** Create member invite (keeper) */
-        post: operations["createMemberInvite"];
+        /** Check whether personal email is registered (keeper only) */
+        post: operations["lookupMemberInviteEmail"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1077,6 +987,113 @@ export interface paths {
         put?: never;
         /** Revoke pending invite (keeper) */
         post: operations["revokeMemberInvite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/families/{familyId}/role-templates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Role templates for member invites */
+        get: operations["listFamilyRoleTemplates"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/healthz": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Liveness probe
+         * @description Returns 200 when the process is up. Does not check dependencies.
+         */
+        get: operations["healthz"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/readyz": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Readiness probe
+         * @description Returns 200 when Postgres and Redis are reachable.
+         */
+        get: operations["readyz"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/families": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List user families (family-service) */
+        get: operations["listUserFamilies"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["updateMe"];
+        trace?: never;
+    };
+    "/user/me/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Upload avatar (stub CDN URL in MVP) */
+        post: operations["uploadAvatar"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1128,23 +1145,6 @@ export interface paths {
         put?: never;
         /** Decline family invite */
         post: operations["declineMemberInvite"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/auth/session/rebuild": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Rebuild session after family membership change (BE-07) */
-        post: operations["rebuildAuthSession"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1610,12 +1610,8 @@ export interface components {
         };
         /** @enum {string} */
         UnionRole: "keeper" | "partner" | "parent";
-        RoleTemplate: {
-            /** Format: uuid */
-            id: string;
-            name: string;
-            description?: string;
-        };
+        /** @enum {string} */
+        TrustTier: "nuclear" | "kin" | "friend" | "advisor" | "guest";
         RoleTemplateListResponse: {
             items: components["schemas"]["RoleTemplate"][];
         };
@@ -1629,6 +1625,9 @@ export interface components {
         MemberInviteAvatarResponse: {
             /** Format: uri */
             avatarUrl: string;
+        };
+        MemberInviteListResponse: {
+            items: components["schemas"]["MemberInviteView"][];
         };
         CreateMemberInviteRequest: {
             /** Format: uuid */
@@ -1648,8 +1647,27 @@ export interface components {
             /** @enum {string} */
             inviteeKind?: "new" | "existing";
         };
-        /** @enum {string} */
-        MemberInviteStatus: "sent" | "pending_accept" | "accepted" | "declined" | "expired" | "revoked";
+        MemberInviteResendResponse: {
+            emailSent: boolean;
+        };
+        MemberInviteRevokeResponse: {
+            revoked: boolean;
+        };
+        PendingMemberInviteListResponse: {
+            items: components["schemas"]["PendingMemberInviteView"][];
+        };
+        MemberInviteAcceptResponse: {
+            accepted: boolean;
+        };
+        MemberInviteDeclineResponse: {
+            declined: boolean;
+        };
+        RoleTemplate: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            description?: string;
+        };
         MemberInviteView: {
             /** Format: uuid */
             id: string;
@@ -1666,9 +1684,6 @@ export interface components {
             /** Format: date-time */
             expiresAt?: string;
         };
-        MemberInviteListResponse: {
-            items: components["schemas"]["MemberInviteView"][];
-        };
         PendingMemberInviteView: {
             /** Format: uuid */
             id: string;
@@ -1680,23 +1695,8 @@ export interface components {
             /** Format: date-time */
             expiresAt: string;
         };
-        PendingMemberInviteListResponse: {
-            items: components["schemas"]["PendingMemberInviteView"][];
-        };
-        MemberInviteAcceptResponse: {
-            accepted: boolean;
-        };
-        MemberInviteDeclineResponse: {
-            declined: boolean;
-        };
-        MemberInviteResendResponse: {
-            emailSent: boolean;
-        };
-        MemberInviteRevokeResponse: {
-            revoked: boolean;
-        };
         /** @enum {string} */
-        TrustTier: "nuclear" | "kin" | "friend" | "advisor" | "guest";
+        MemberInviteStatus: "sent" | "pending_accept" | "accepted" | "declined" | "expired" | "revoked";
     };
     responses: {
         /** @description Error */
@@ -1749,806 +1749,6 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    healthz: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Process healthy */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example ok */
-                        status: string;
-                    };
-                };
-            };
-        };
-    };
-    readyz: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Ready to serve traffic */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example ready */
-                        status: string;
-                    };
-                };
-            };
-            /** @description Dependency unavailable */
-            503: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** @example not_ready */
-                        status?: string;
-                        postgres?: string;
-                        redis?: string;
-                    };
-                };
-            };
-        };
-    };
-    workspaceSignIn: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["WorkspaceSignInRequest"];
-            };
-        };
-        responses: {
-            /** @description Shortcut session or full-flow challenge */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WorkspaceSignInResponse"];
-                };
-            };
-        };
-    };
-    workspaceSignInStart: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["WorkspaceSignInStartRequest"];
-            };
-        };
-        responses: {
-            /** @description Full-flow challenge */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WorkspaceSignInStartResponse"];
-                };
-            };
-        };
-    };
-    workspaceSignInRequestPushVerify: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["DeviceVerifyChallengeRequest"];
-            };
-        };
-        responses: {
-            /** @description Device verify push dispatched */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DeviceVerifySentResponse"];
-                };
-            };
-        };
-    };
-    workspaceSignInResendPushVerify: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["DeviceVerifyChallengeRequest"];
-            };
-        };
-        responses: {
-            /** @description Device verify push resent */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DeviceVerifySentResponse"];
-                };
-            };
-        };
-    };
-    workspaceSignInRequestSms: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["DeviceVerifySmsRequest"];
-            };
-        };
-        responses: {
-            /** @description Opt-in SMS dispatched */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DeviceVerifySentResponse"];
-                };
-            };
-        };
-    };
-    workspaceSignInVerifySms: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["DeviceVerifySmsConfirmRequest"];
-            };
-        };
-        responses: {
-            /** @description SMS verified; device session issued */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DeviceVerifySessionResponse"];
-                };
-            };
-        };
-    };
-    workspaceSignInVerifyLink: {
-        parameters: {
-            query: {
-                token: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Deep link verified; device session issued */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DeviceVerifySessionResponse"];
-                };
-            };
-        };
-    };
-    workspaceSignInRequestOtp: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["WorkspaceSignInRequestOtpRequest"];
-            };
-        };
-        responses: {
-            /** @description OTP dispatched to registered phone */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WorkspaceSignInRequestOtpResponse"];
-                };
-            };
-        };
-    };
-    workspaceSignInVerifyPhone: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["WorkspaceSignInVerifyPhoneRequest"];
-            };
-        };
-        responses: {
-            /** @description Phone bound to challenge */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WorkspaceSignInVerifyPhoneResponse"];
-                };
-            };
-        };
-    };
-    workspaceSignInComplete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["WorkspaceSignInCompleteRequest"];
-            };
-        };
-        responses: {
-            /** @description Session or password change required */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WorkspaceSignInCompleteResponse"];
-                };
-            };
-        };
-    };
-    workspaceSignInRequestDelegatePush: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["WorkspaceDelegatePushRequest"];
-            };
-        };
-        responses: {
-            /** @description Push dispatched to keeper */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DeviceVerifySentResponse"];
-                };
-            };
-            /** @description DELEGATE_NOT_ALLOWED */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    workspaceSignInDelegateDetails: {
-        parameters: {
-            query: {
-                token: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Delegate context for keeper UI */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WorkspaceDelegateDetailsResponse"];
-                };
-            };
-            /** @description BAD_REQUEST (missing token) */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description DELEGATE_EXPIRED (link invalid, expired, or already consumed on read) */
-            410: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    workspaceSignInDelegateLink: {
-        parameters: {
-            query: {
-                token: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description JSON details when Accept prefers application/json */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WorkspaceDelegateDetailsResponse"];
-                };
-            };
-            /** @description Redirect to app delegate screen when Accept includes text/html */
-            302: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description BAD_REQUEST (missing token) */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description DELEGATE_EXPIRED (link invalid, expired, or already consumed on read) */
-            410: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    workspaceSignInApproveDelegate: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["WorkspaceDelegateTokenRequest"];
-            };
-        };
-        responses: {
-            /** @description Approved (deviceSession is not returned to keeper) */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WorkspaceDelegateApproveResponse"];
-                };
-            };
-            /** @description UNAUTHORIZED */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description DELEGATE_NOT_ALLOWED (authenticated user is not keeper of this family) */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description NOT_FOUND (valid token but delegate sidecar/challenge no longer pending) */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description CONFLICT (token already used on approve/reject) */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description DELEGATE_EXPIRED (invalid or expired token) */
-            410: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    workspaceSignInRejectDelegate: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["WorkspaceDelegateTokenRequest"];
-            };
-        };
-        responses: {
-            /** @description Rejected */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WorkspaceDelegateRejectResponse"];
-                };
-            };
-            /** @description UNAUTHORIZED */
-            401: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description DELEGATE_NOT_ALLOWED */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description NOT_FOUND (valid token but delegate sidecar/challenge no longer pending) */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description CONFLICT (token already used on approve/reject) */
-            409: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description DELEGATE_EXPIRED (invalid or expired token) */
-            410: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    workspaceSignInDelegateStatus: {
-        parameters: {
-            query: {
-                challengeId: string;
-                deviceId: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description pending | approved | rejected | expired */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["WorkspaceDelegateStatusResponse"];
-                };
-            };
-        };
-    };
-    personalSignInRequestEmail: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OTP dispatched */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /** @description Personal sign-in disabled (PERSONAL_SIGNIN_ENABLED=false) */
-            501: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    personalSignInVerifyEmail: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Email verified; challenge issued */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    personalSignInRequestPhoneOtp: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Phone OTP dispatched */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    personalSignInVerifyPhone: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Phone verified */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    personalSignInComplete: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Session issued */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    personalSignInRequestEmailLegacy: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Legacy path; prefer /auth/personal/sign-in/request-email */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-        };
-    };
-    recoveryRequest: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RecoveryRequestBody"];
-            };
-        };
-        responses: {
-            /** @description Opaque ticket (always returned to prevent enumeration) */
-            202: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RecoveryAcceptedResponse"];
-                };
-            };
-            501: components["responses"]["NotImplemented"];
-        };
-    };
-    recoveryConfirm: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RecoveryConfirmRequest"];
-            };
-        };
-        responses: {
-            /** @description Full session after password reset */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthSessionResponse"];
-                };
-            };
-            /** @description Recovery code consumed or expired */
-            410: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-        };
-    };
-    pairPhoneRequestOTP: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PairPhoneRequestOTPRequest"];
-            };
-        };
-        responses: {
-            /** @description OTP dispatched */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        sent?: boolean;
-                    };
-                };
-            };
-        };
-    };
-    pairPhoneVerifyOTP: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PairPhoneVerifyRequest"];
-            };
-        };
-        responses: {
-            /** @description Registration token for pair confirm */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PairPhoneVerifyResponse"];
-                };
-            };
-        };
-    };
-    gatewayRegisterDevice: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["GatewayDeviceRegisterRequest"];
-            };
-        };
-        responses: {
-            /** @description Device registered */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": {
-                        /** Format: uuid */
-                        deviceId?: string;
-                    };
-                };
-            };
-            401: components["responses"]["Unauthorized"];
-        };
-    };
     listDevices: {
         parameters: {
             query?: never;
@@ -2597,38 +1797,203 @@ export interface operations {
             };
         };
     };
-    workspaceChangePassword: {
+    logout: {
         parameters: {
             query?: never;
-            header?: {
-                /** @description Opaque device session from verify-sms / verify-link (required for challengeId when DEVICE_GATE_SKIP=false) */
-                "X-Device-Session"?: string;
-            };
+            header?: never;
             path?: never;
             cookie?: never;
         };
-        requestBody: {
+        requestBody?: {
             content: {
-                "application/json": components["schemas"]["WorkspaceChangePasswordRequest"];
+                "application/json": components["schemas"]["LogoutRequest"];
             };
         };
         responses: {
-            /** @description Session after password change */
+            /** @description Logged out */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AuthSessionResponse"];
+                    "application/json": components["schemas"]["OkResponse"];
                 };
             };
-            /** @description Device not verified (missing or invalid X-Device-Session) */
-            403: {
+        };
+    };
+    onboardingAbandon: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OnboardingAbandonRequest"];
+            };
+        };
+        responses: {
+            /** @description Onboarding abandoned (or nothing to abandon) */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /**
+             * @description BAD_REQUEST (no challenge id) or ONBOARDING_STEP_ORDER (challenge is before phone verify
+             *     or the workspace is already finalized)
+             */
+            400: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            429: components["responses"]["RateLimit"];
+        };
+    };
+    onboardingConfirmDevice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OnboardingConfirmDeviceRequest"];
+            };
+        };
+        responses: {
+            /** @description Device gate passed; userRefresh issued */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OnboardingConfirmDeviceResponse"];
+                };
+            };
+        };
+    };
+    onboardingDeviceVerifyLink: {
+        parameters: {
+            query: {
+                token: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deep link verified */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OnboardingDeviceVerifyLinkResponse"];
+                };
+            };
+        };
+    };
+    onboardingDeviceVerifyRequestPush: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OnboardingDeviceVerifyRequest"];
+            };
+        };
+        responses: {
+            /** @description Push dispatched */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeviceVerifySentResponse"];
+                };
+            };
+        };
+    };
+    onboardingDeviceVerifyRequestSms: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OnboardingDeviceVerifySmsRequest"];
+            };
+        };
+        responses: {
+            /** @description Opt-in SMS dispatched */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeviceVerifySentResponse"];
+                };
+            };
+        };
+    };
+    onboardingDeviceVerifyResendPush: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OnboardingDeviceVerifyRequest"];
+            };
+        };
+        responses: {
+            /** @description Push resent */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeviceVerifySentResponse"];
+                };
+            };
+        };
+    };
+    onboardingDeviceVerifyVerifySms: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OnboardingDeviceVerifySmsConfirmRequest"];
+            };
+        };
+        responses: {
+            /** @description SMS verified */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeviceVerifySessionResponse"];
                 };
             };
         };
@@ -2712,6 +2077,30 @@ export interface operations {
             };
         };
     };
+    onboardingSetupPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OnboardingSetupPasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description Workspace password set; family session issued */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OnboardingSetupPasswordResponse"];
+                };
+            };
+        };
+    };
     onboardingRequestPhoneOtp: {
         parameters: {
             query?: never;
@@ -2756,207 +2145,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["OnboardingVerifyPhoneResponse"];
-                };
-            };
-        };
-    };
-    onboardingAbandon: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["OnboardingAbandonRequest"];
-            };
-        };
-        responses: {
-            /** @description Onboarding abandoned (or nothing to abandon) */
-            204: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content?: never;
-            };
-            /**
-             * @description BAD_REQUEST (no challenge id) or ONBOARDING_STEP_ORDER (challenge is before phone verify
-             *     or the workspace is already finalized)
-             */
-            400: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
-                };
-            };
-            429: components["responses"]["RateLimit"];
-        };
-    };
-    onboardingDeviceVerifyRequestPush: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["OnboardingDeviceVerifyRequest"];
-            };
-        };
-        responses: {
-            /** @description Push dispatched */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DeviceVerifySentResponse"];
-                };
-            };
-        };
-    };
-    onboardingDeviceVerifyResendPush: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["OnboardingDeviceVerifyRequest"];
-            };
-        };
-        responses: {
-            /** @description Push resent */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DeviceVerifySentResponse"];
-                };
-            };
-        };
-    };
-    onboardingDeviceVerifyRequestSms: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["OnboardingDeviceVerifySmsRequest"];
-            };
-        };
-        responses: {
-            /** @description Opt-in SMS dispatched */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DeviceVerifySentResponse"];
-                };
-            };
-        };
-    };
-    onboardingDeviceVerifyVerifySms: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["OnboardingDeviceVerifySmsConfirmRequest"];
-            };
-        };
-        responses: {
-            /** @description SMS verified */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["DeviceVerifySessionResponse"];
-                };
-            };
-        };
-    };
-    onboardingDeviceVerifyLink: {
-        parameters: {
-            query: {
-                token: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Deep link verified */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OnboardingDeviceVerifyLinkResponse"];
-                };
-            };
-        };
-    };
-    onboardingConfirmDevice: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["OnboardingConfirmDeviceRequest"];
-            };
-        };
-        responses: {
-            /** @description Device gate passed; userRefresh issued */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OnboardingConfirmDeviceResponse"];
-                };
-            };
-        };
-    };
-    onboardingSetupPassword: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["OnboardingSetupPasswordRequest"];
-            };
-        };
-        responses: {
-            /** @description Workspace password set; family session issued */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OnboardingSetupPasswordResponse"];
                 };
             };
         };
@@ -3011,105 +2199,6 @@ export interface operations {
             409: components["responses"]["Error"];
         };
     };
-    tokenRefresh: {
-        parameters: {
-            query?: never;
-            header?: {
-                "X-Scope"?: components["parameters"]["XScope"];
-            };
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["TokenRefreshRequest"];
-            };
-        };
-        responses: {
-            /** @description New tokens */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FamilyTokenBundle"] | components["schemas"]["UserRefreshResponse"];
-                };
-            };
-        };
-    };
-    logout: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: {
-            content: {
-                "application/json": components["schemas"]["LogoutRequest"];
-            };
-        };
-        responses: {
-            /** @description Logged out */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["OkResponse"];
-                };
-            };
-        };
-    };
-    pairResolve: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PairResolveRequest"];
-            };
-        };
-        responses: {
-            /** @description Family preview */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PairingResolveResult"];
-                };
-            };
-            404: components["responses"]["Error"];
-        };
-    };
-    pairConfirm: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PairConfirmRequest"];
-            };
-        };
-        responses: {
-            /** @description Pending or session */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["PairConfirmPending"] | components["schemas"]["AuthSessionResponse"];
-                };
-            };
-        };
-    };
     pairApprovalStatus: {
         parameters: {
             query?: never;
@@ -3130,30 +2219,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ApprovalPending"] | components["schemas"]["ApprovalApproved"] | components["schemas"]["ApprovalRejected"];
-                };
-            };
-        };
-    };
-    pairReject: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["PairRejectRequest"];
-            };
-        };
-        responses: {
-            /** @description Rejected */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ApprovalRejected"];
                 };
             };
         };
@@ -3185,7 +2250,7 @@ export interface operations {
             };
         };
     };
-    updateMe: {
+    pairConfirm: {
         parameters: {
             query?: never;
             header?: never;
@@ -3194,22 +2259,22 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["UpdateMeRequest"];
+                "application/json": components["schemas"]["PairConfirmRequest"];
             };
         };
         responses: {
-            /** @description Updated profile */
+            /** @description Pending or session */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserProfile"];
+                    "application/json": components["schemas"]["PairConfirmPending"] | components["schemas"]["AuthSessionResponse"];
                 };
             };
         };
     };
-    uploadAvatar: {
+    pairPhoneRequestOTP: {
         parameters: {
             query?: never;
             header?: never;
@@ -3218,22 +2283,867 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "multipart/form-data": {
-                    /** Format: binary */
-                    file: string;
-                };
+                "application/json": components["schemas"]["PairPhoneRequestOTPRequest"];
             };
         };
         responses: {
-            /** @description Profile with placeholder avatarUrl */
+            /** @description OTP dispatched */
             200: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["UserProfile"];
+                    "application/json": {
+                        sent?: boolean;
+                    };
                 };
             };
+        };
+    };
+    pairPhoneVerifyOTP: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PairPhoneVerifyRequest"];
+            };
+        };
+        responses: {
+            /** @description Registration token for pair confirm */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PairPhoneVerifyResponse"];
+                };
+            };
+        };
+    };
+    pairReject: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PairRejectRequest"];
+            };
+        };
+        responses: {
+            /** @description Rejected */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ApprovalRejected"];
+                };
+            };
+        };
+    };
+    pairResolve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PairResolveRequest"];
+            };
+        };
+        responses: {
+            /** @description Family preview */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PairingResolveResult"];
+                };
+            };
+            404: components["responses"]["Error"];
+        };
+    };
+    personalSignInComplete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Session issued */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    personalSignInRequestEmail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OTP dispatched */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Personal sign-in disabled (PERSONAL_SIGNIN_ENABLED=false) */
+            501: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    personalSignInRequestPhoneOtp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Phone OTP dispatched */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    personalSignInVerifyEmail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Email verified; challenge issued */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    personalSignInVerifyPhone: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Phone verified */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    recoveryConfirm: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecoveryConfirmRequest"];
+            };
+        };
+        responses: {
+            /** @description Full session after password reset */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthSessionResponse"];
+                };
+            };
+            /** @description Recovery code consumed or expired */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    recoveryRequest: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RecoveryRequestBody"];
+            };
+        };
+        responses: {
+            /** @description Opaque ticket (always returned to prevent enumeration) */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecoveryAcceptedResponse"];
+                };
+            };
+            501: components["responses"]["NotImplemented"];
+        };
+    };
+    rebuildAuthSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Full session with updated families */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthSessionResponse"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    personalSignInRequestEmailLegacy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Legacy path; prefer /auth/personal/sign-in/request-email */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    tokenRefresh: {
+        parameters: {
+            query?: never;
+            header?: {
+                "X-Scope"?: components["parameters"]["XScope"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["TokenRefreshRequest"];
+            };
+        };
+        responses: {
+            /** @description New tokens */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyTokenBundle"] | components["schemas"]["UserRefreshResponse"];
+                };
+            };
+        };
+    };
+    workspaceChangePassword: {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description Opaque device session from verify-sms / verify-link (required for challengeId when DEVICE_GATE_SKIP=false) */
+                "X-Device-Session"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkspaceChangePasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description Session after password change */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuthSessionResponse"];
+                };
+            };
+            /** @description Device not verified (missing or invalid X-Device-Session) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    workspaceSignIn: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkspaceSignInRequest"];
+            };
+        };
+        responses: {
+            /** @description Shortcut session or full-flow challenge */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceSignInResponse"];
+                };
+            };
+        };
+    };
+    workspaceSignInApproveDelegate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkspaceDelegateTokenRequest"];
+            };
+        };
+        responses: {
+            /** @description Approved (deviceSession is not returned to keeper) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceDelegateApproveResponse"];
+                };
+            };
+            /** @description UNAUTHORIZED */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description DELEGATE_NOT_ALLOWED (authenticated user is not keeper of this family) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description NOT_FOUND (valid token but delegate sidecar/challenge no longer pending) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description CONFLICT (token already used on approve/reject) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description DELEGATE_EXPIRED (invalid or expired token) */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    workspaceSignInComplete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkspaceSignInCompleteRequest"];
+            };
+        };
+        responses: {
+            /** @description Session or password change required */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceSignInCompleteResponse"];
+                };
+            };
+        };
+    };
+    workspaceSignInDelegateDetails: {
+        parameters: {
+            query: {
+                token: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Delegate context for keeper UI */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceDelegateDetailsResponse"];
+                };
+            };
+            /** @description BAD_REQUEST (missing token) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description DELEGATE_EXPIRED (link invalid, expired, or already consumed on read) */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    workspaceSignInDelegateLink: {
+        parameters: {
+            query: {
+                token: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description JSON details when Accept prefers application/json */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceDelegateDetailsResponse"];
+                };
+            };
+            /** @description Redirect to app delegate screen when Accept includes text/html */
+            302: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description BAD_REQUEST (missing token) */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description DELEGATE_EXPIRED (link invalid, expired, or already consumed on read) */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    workspaceSignInDelegateStatus: {
+        parameters: {
+            query: {
+                challengeId: string;
+                deviceId: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description pending | approved | rejected | expired */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceDelegateStatusResponse"];
+                };
+            };
+        };
+    };
+    workspaceSignInRejectDelegate: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkspaceDelegateTokenRequest"];
+            };
+        };
+        responses: {
+            /** @description Rejected */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceDelegateRejectResponse"];
+                };
+            };
+            /** @description UNAUTHORIZED */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description DELEGATE_NOT_ALLOWED */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description NOT_FOUND (valid token but delegate sidecar/challenge no longer pending) */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description CONFLICT (token already used on approve/reject) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description DELEGATE_EXPIRED (invalid or expired token) */
+            410: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    workspaceSignInRequestDelegatePush: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkspaceDelegatePushRequest"];
+            };
+        };
+        responses: {
+            /** @description Push dispatched to keeper */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeviceVerifySentResponse"];
+                };
+            };
+            /** @description DELEGATE_NOT_ALLOWED */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    workspaceSignInRequestOtp: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkspaceSignInRequestOtpRequest"];
+            };
+        };
+        responses: {
+            /** @description OTP dispatched to registered phone */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceSignInRequestOtpResponse"];
+                };
+            };
+        };
+    };
+    workspaceSignInRequestPushVerify: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeviceVerifyChallengeRequest"];
+            };
+        };
+        responses: {
+            /** @description Device verify push dispatched */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeviceVerifySentResponse"];
+                };
+            };
+        };
+    };
+    workspaceSignInRequestSms: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeviceVerifySmsRequest"];
+            };
+        };
+        responses: {
+            /** @description Opt-in SMS dispatched */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeviceVerifySentResponse"];
+                };
+            };
+        };
+    };
+    workspaceSignInResendPushVerify: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeviceVerifyChallengeRequest"];
+            };
+        };
+        responses: {
+            /** @description Device verify push resent */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeviceVerifySentResponse"];
+                };
+            };
+        };
+    };
+    workspaceSignInStart: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkspaceSignInStartRequest"];
+            };
+        };
+        responses: {
+            /** @description Full-flow challenge */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceSignInStartResponse"];
+                };
+            };
+        };
+    };
+    workspaceSignInVerifyLink: {
+        parameters: {
+            query: {
+                token: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deep link verified; device session issued */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeviceVerifySessionResponse"];
+                };
+            };
+        };
+    };
+    workspaceSignInVerifyPhone: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["WorkspaceSignInVerifyPhoneRequest"];
+            };
+        };
+        responses: {
+            /** @description Phone bound to challenge */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["WorkspaceSignInVerifyPhoneResponse"];
+                };
+            };
+        };
+    };
+    workspaceSignInVerifySms: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DeviceVerifySmsConfirmRequest"];
+            };
+        };
+        responses: {
+            /** @description SMS verified; device session issued */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DeviceVerifySessionResponse"];
+                };
+            };
+        };
+    };
+    gatewayRegisterDevice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GatewayDeviceRegisterRequest"];
+            };
+        };
+        responses: {
+            /** @description Device registered */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** Format: uuid */
+                        deviceId?: string;
+                    };
+                };
+            };
+            401: components["responses"]["Unauthorized"];
         };
     };
     createFamily: {
@@ -3259,120 +3169,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CreateFamilyResponse"];
-                };
-            };
-        };
-    };
-    listUserFamilies: {
-        parameters: {
-            query?: {
-                page?: number;
-                limit?: number;
-                sync?: string;
-            };
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Family list or sync delta */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FamilyListResponse"] | components["schemas"]["FamilySyncResponse"];
-                };
-            };
-        };
-    };
-    listFamilyRoleTemplates: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                familyId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Role templates */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RoleTemplateListResponse"];
-                };
-            };
-            404: components["responses"]["Error"];
-        };
-    };
-    lookupMemberInviteEmail: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                familyId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["MemberInviteLookupEmailRequest"];
-            };
-        };
-        responses: {
-            /** @description Lookup result */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MemberInviteLookupEmailResponse"];
-                };
-            };
-            403: components["responses"]["Error"];
-            429: components["responses"]["RateLimit"];
-            501: components["responses"]["NotImplemented"];
-        };
-    };
-    uploadMemberInviteAvatar: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                familyId: string;
-            };
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "multipart/form-data": {
-                    /** Format: binary */
-                    file: string;
-                };
-            };
-        };
-        responses: {
-            /** @description Avatar URL */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["MemberInviteAvatarResponse"];
-                };
-            };
-            /** @description Avatar too large */
-            413: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorResponse"];
                 };
             };
         };
@@ -3447,6 +3243,73 @@ export interface operations {
             };
         };
     };
+    uploadMemberInviteAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Avatar URL */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberInviteAvatarResponse"];
+                };
+            };
+            /** @description Avatar too large */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+        };
+    };
+    lookupMemberInviteEmail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MemberInviteLookupEmailRequest"];
+            };
+        };
+        responses: {
+            /** @description Lookup result */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberInviteLookupEmailResponse"];
+                };
+            };
+            403: components["responses"]["Error"];
+            429: components["responses"]["RateLimit"];
+            501: components["responses"]["NotImplemented"];
+        };
+    };
     resendMemberInvite: {
         parameters: {
             query?: never;
@@ -3507,6 +3370,164 @@ export interface operations {
             403: components["responses"]["Error"];
             404: components["responses"]["Error"];
             409: components["responses"]["Error"];
+        };
+    };
+    listFamilyRoleTemplates: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Role templates */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleTemplateListResponse"];
+                };
+            };
+            404: components["responses"]["Error"];
+        };
+    };
+    healthz: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Process healthy */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example ok */
+                        status: string;
+                    };
+                };
+            };
+        };
+    };
+    readyz: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Ready to serve traffic */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example ready */
+                        status: string;
+                    };
+                };
+            };
+            /** @description Dependency unavailable */
+            503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        /** @example not_ready */
+                        status?: string;
+                        postgres?: string;
+                        redis?: string;
+                    };
+                };
+            };
+        };
+    };
+    listUserFamilies: {
+        parameters: {
+            query?: {
+                page?: number;
+                limit?: number;
+                sync?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Family list or sync delta */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyListResponse"] | components["schemas"]["FamilySyncResponse"];
+                };
+            };
+        };
+    };
+    updateMe: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateMeRequest"];
+            };
+        };
+        responses: {
+            /** @description Updated profile */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserProfile"];
+                };
+            };
+        };
+    };
+    uploadAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description Profile with placeholder avatarUrl */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserProfile"];
+                };
+            };
         };
     };
     listPendingMemberInvites: {
@@ -3595,27 +3616,6 @@ export interface operations {
             400: components["responses"]["Error"];
             403: components["responses"]["Error"];
             404: components["responses"]["Error"];
-        };
-    };
-    rebuildAuthSession: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Full session with updated families */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["AuthSessionResponse"];
-                };
-            };
-            401: components["responses"]["Unauthorized"];
         };
     };
 }

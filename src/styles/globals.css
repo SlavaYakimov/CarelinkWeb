@@ -21,8 +21,8 @@
   --color-destructive: #b3261e;
   --color-destructive-foreground: #ffffff;
   --color-border: #c3ccc7;
-  --color-input: #c3ccc7;
-  --color-ring: #8cc9b0;
+  --color-input: #8a958f;
+  --color-ring: #1f5c4a;
 
   --color-info: #3e5f7a;
   --color-info-foreground: #ffffff;
@@ -30,7 +30,7 @@
   --color-success: #2e7d4f;
   --color-success-foreground: #ffffff;
   --color-warning: #a86200;
-  --color-warning-foreground: #14201b;
+  --color-warning-foreground: #8a5000;
   --color-warning-muted: #fff4e0;
   --color-error-muted: #fce8e6;
 
@@ -56,6 +56,17 @@
   h3,
   h4 {
     font-family: var(--font-heading);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

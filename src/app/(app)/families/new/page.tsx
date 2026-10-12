@@ -1,4 +1,9 @@
+import type { Metadata } from 'next';
 import { CreateFamilyForm } from '@/components/carelink/CreateFamilyForm';
+
+export const metadata: Metadata = {
+  title: 'Создать семью',
+};
 
 export default function CreateFamilyPage() {
   return (

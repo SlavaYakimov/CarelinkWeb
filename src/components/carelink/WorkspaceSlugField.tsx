@@ -25,7 +25,7 @@ export function WorkspaceSlugField({
   id,
   name,
   label,
-  hint = 'Часть workspace-логина до @',
+  hint = 'Часть логина для входа до @',
   error,
   placeholder = 'ivanovy',
   disabled,

@@ -112,7 +112,7 @@ export function OnboardingWorkspaceForm({
       step={5}
       totalSteps={5}
       title="Адрес семьи"
-      description="Выберите короткий адрес — из него соберётся workspace-логин для входа."
+      description="Выберите короткий адрес семьи — из него соберётся логин для входа."
     >
       <form action={formAction} className="space-y-4">
         {state.formError ? <FormAlert message={state.formError} /> : null}
@@ -140,7 +140,7 @@ export function OnboardingWorkspaceForm({
           id="workspaceSlug"
           name="workspaceSlug"
           label="Адрес семьи"
-          hint="Часть workspace-логина до @"
+          hint="Часть логина для входа до @"
           value={slug}
           onChange={setSlug}
           onBlur={() => {

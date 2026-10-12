@@ -5,6 +5,7 @@ declare global {
     interface Chainable {
       fillOtp(code: string, firstInputId?: string): Chainable<void>;
       fillPhoneOtp(code: string): Chainable<void>;
+      acceptPersonalDataConsent(): Chainable<void>;
       onboardingEnterEmail(email: string): Chainable<void>;
       onboardingEnterEmailOtp(code: string): Chainable<void>;
       onboardingEnterPhone(

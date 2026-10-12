@@ -10,7 +10,8 @@ import {
   type OnboardingEmailOtpState,
   type OnboardingEmailState,
 } from '@/server/actions/onboarding';
-import { emailFormSchema } from '@/lib/forms/schemas';
+import Link from 'next/link';
+import { onboardingEmailConsentGateSchema } from '@/lib/forms/schemas';
 import { mergeFieldError } from '@/lib/forms/client-field-error';
 import { useFormGate } from '@/lib/forms/use-form-gate';
 import { OtpInput } from '@/components/carelink/OtpInput';
@@ -18,6 +19,7 @@ import { ResendButton } from '@/components/carelink/ResendButton';
 import { StepShell } from '@/components/carelink/StepShell';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -44,9 +46,15 @@ export function OnboardingEmailForm({ linkInvalid, initialSentAt }: OnboardingEm
   );
   const [code, setCode] = React.useState('');
   const [emailInput, setEmailInput] = React.useState('');
-  const emailGate = useFormGate(emailFormSchema, { email: emailInput }, ['email'], {
-    pending: requesting,
-  });
+  const [personalDataConsent, setPersonalDataConsent] = React.useState(false);
+  const emailGate = useFormGate(
+    onboardingEmailConsentGateSchema,
+    { email: emailInput, personalDataConsent },
+    ['email', 'personalDataConsent'],
+    {
+      pending: requesting,
+    },
+  );
   const sent = emailState.sent || resendState.sent;
   const email = emailState.email ?? resendState.email ?? '';
   const sentAt = emailState.sentAt ?? resendState.sentAt ?? initialSentAt;
@@ -93,6 +101,32 @@ export function OnboardingEmailForm({ linkInvalid, initialSentAt }: OnboardingEm
             {mergeFieldError(emailGate, 'email') ? (
               <p className="text-sm text-destructive" role="alert">
                 {mergeFieldError(emailGate, 'email')}
+              </p>
+            ) : null}
+          </div>
+          <div className="space-y-2">
+            <div className="flex min-h-11 items-start gap-3">
+              <Checkbox
+                id="personalDataConsent"
+                checked={personalDataConsent}
+                onCheckedChange={(checked) => {
+                  setPersonalDataConsent(checked === true);
+                  emailGate.touch('personalDataConsent');
+                }}
+                disabled={requesting}
+                aria-invalid={Boolean(mergeFieldError(emailGate, 'personalDataConsent'))}
+              />
+              <Label htmlFor="personalDataConsent" className="text-sm leading-snug font-normal">
+                Согласен на{' '}
+                <Link href="/privacy" className="text-primary hover:underline">
+                  обработку персональных данных
+                </Link>{' '}
+                в соответствии с 152-ФЗ, включая сведения о здоровье, если я их укажу в сервисе.
+              </Label>
+            </div>
+            {mergeFieldError(emailGate, 'personalDataConsent') ? (
+              <p className="text-sm text-destructive" role="alert">
+                {mergeFieldError(emailGate, 'personalDataConsent')}
               </p>
             ) : null}
           </div>
