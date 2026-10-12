@@ -1,41 +1,21 @@
 import * as React from 'react';
+import { OwlMarkPaths } from '@/components/brand/owl-mark';
 import { cn } from '@/lib/utils';
 
 export type LogoProps = React.SVGProps<SVGSVGElement>;
 
-/** Inline owl mark — uses `currentColor` for theme-aware fills. Final asset: `public/brand/owl.svg`. */
+/** Inline owl — `currentColor`; source asset: `public/brand/owl.svg`. */
 export function Logo({ className, ...props }: LogoProps) {
   return (
     <svg
       role="img"
       aria-label="Carelink"
-      viewBox="0 0 32 32"
-      fill="none"
+      viewBox="0 0 512 512"
       xmlns="http://www.w3.org/2000/svg"
       className={cn('size-full', className)}
       {...props}
     >
-      <path
-        fill="currentColor"
-        d="M16 4c-4.2 0-7.5 3.1-7.5 7.2 0 1.8.7 3.5 1.9 4.8L16 28l5.6-11.9c1.2-1.3 1.9-3 1.9-4.8C23.5 7.1 20.2 4 16 4Z"
-        opacity="0.15"
-      />
-      <path
-        fill="currentColor"
-        d="M10.5 8.5c-1.2 0-2.2 1-2.2 2.2v1.1c0 .6.2 1.1.6 1.5l1.6 1.6V8.5Zm13 0v6.4l1.6-1.6c.4-.4.6-.9.6-1.5v-1.1c0-1.2-1-2.2-2.2-2.2h-.1Z"
-      />
-      <ellipse cx="12.2" cy="13.8" rx="2.2" ry="2.4" fill="currentColor" />
-      <ellipse cx="19.8" cy="13.8" rx="2.2" ry="2.4" fill="currentColor" />
-      <circle cx="12.6" cy="13.4" r="0.9" className="fill-primary-foreground" />
-      <circle cx="20.2" cy="13.4" r="0.9" className="fill-primary-foreground" />
-      <path
-        fill="currentColor"
-        d="M16 17.2c-1.4 0-2.5.4-2.5 1s1.1 1 2.5 1 2.5-.4 2.5-1-1.1-1-2.5-1Z"
-      />
-      <path
-        fill="currentColor"
-        d="M16 2c-5.5 0-9.5 4-9.5 9.2 0 2.2.9 4.2 2.4 5.7L16 30l7.1-13.1c1.5-1.5 2.4-3.5 2.4-5.7C25.5 6 21.5 2 16 2Zm0 2.5c3.8 0 6.5 2.7 6.5 6.7 0 1.5-.6 2.9-1.6 4L16 25.6 11.1 15.2c-1-1.1-1.6-2.5-1.6-4 0-4 2.7-6.7 6.5-6.7Z"
-      />
+      <OwlMarkPaths fill="currentColor" stroke="currentColor" />
     </svg>
   );
 }

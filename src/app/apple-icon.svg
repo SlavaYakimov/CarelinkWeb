@@ -1,9 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" fill="none">
-  <rect width="180" height="180" rx="40" fill="#1f5c4a"/>
-  <path fill="#fff" d="M90 38c-17 0-30 12.5-30 29 0 7.5 3 14.5 8.5 20L90 135l31.5-48c5.5-5.5 8.5-12.5 8.5-20 0-16.5-13-29-30-29Z" opacity="0.35"/>
-  <ellipse cx="72" cy="78" rx="9" ry="10" fill="#fff"/>
-  <ellipse cx="108" cy="78" rx="9" ry="10" fill="#fff"/>
-  <circle cx="75" cy="75" r="3.5" fill="#1f5c4a"/>
-  <circle cx="111" cy="75" r="3.5" fill="#1f5c4a"/>
-  <path fill="#fff" d="M90 94c-5 0-9 1.5-9 3.5s4 3.5 9 3.5 9-1.5 9-3.5-4-3.5-9-3.5Z"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#1f5c4a" />
+  <path
+    fill="#fff"
+    fill-rule="evenodd"
+    d="M132 60 L196 132 Q256 116 316 132 L380 60 L392 168 Q440 226 440 300 Q440 410 352 456 Q306 480 256 480 Q206 480 160 456 Q72 410 72 300 Q72 226 120 168 Z M190 168 a70 70 0 1 0 0.1 0 Z M322 168 a70 70 0 1 0 0.1 0 Z M256 270 L238 300 L256 336 L274 300 Z M214 372 q14 18 28 0 q-14 8 -28 0 Z M270 372 q14 18 28 0 q-14 8 -28 0 Z M242 404 q14 18 28 0 q-14 8 -28 0 Z M186 404 q14 18 28 0 q-14 8 -28 0 Z M298 404 q14 18 28 0 q-14 8 -28 0 Z"
+  />
+  <circle fill="#fff" cx="190" cy="238" r="34" />
+  <circle fill="#fff" cx="322" cy="238" r="34" />
+  <circle fill="none" stroke="#fff" stroke-width="10" cx="190" cy="238" r="50" />
+  <circle fill="none" stroke="#fff" stroke-width="10" cx="322" cy="238" r="50" />
 </svg>
