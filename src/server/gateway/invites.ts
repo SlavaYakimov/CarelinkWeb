@@ -28,7 +28,7 @@ type DeclineResponse = components['schemas']['MemberInviteDeclineResponse'];
 type ResendResponse = components['schemas']['MemberInviteResendResponse'];
 type RevokeResponse = components['schemas']['MemberInviteRevokeResponse'];
 type AvatarResponse = components['schemas']['MemberInviteAvatarResponse'];
-type AuthSessionResponse = components['schemas']['AuthSessionResponse'];
+type AuthSessionRebuildResponse = components['schemas']['AuthSessionRebuildResponse'];
 
 function familyPath(familyId: string, suffix: string): string {
   return `/v1/families/${familyId}${suffix}`;
@@ -135,8 +135,8 @@ export async function declineMemberInvite(
   );
 }
 
-export async function rebuildAuthSession(ctx: UserSessionCtx): Promise<AuthSessionResponse> {
-  return gatewayFetch<AuthSessionResponse>(
+export async function rebuildAuthSession(ctx: UserSessionCtx): Promise<AuthSessionRebuildResponse> {
+  return gatewayFetch<AuthSessionRebuildResponse>(
     { method: 'POST', path: '/v1/auth/session/rebuild', body: {} },
     {
       ...ctx,

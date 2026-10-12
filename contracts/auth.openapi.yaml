@@ -1238,18 +1238,19 @@ paths:
     post:
       tags:
         - auth
-      operationId: rebuildAuthSession
+      operationId: sessionRebuild
       summary: Rebuild session after family membership change (BE-07)
+      parameters:
+        - $ref: "#/components/parameters/XUserRefresh"
       security:
         - bearerAuth: []
-        - userRefreshAuth: []
       responses:
         "200":
           description: Full session with updated families
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AuthSessionResponse"
+                $ref: "#/components/schemas/AuthSessionRebuildResponse"
         "401":
           $ref: "#/components/responses/Unauthorized"
 components:
@@ -1269,6 +1270,13 @@ components:
       name: X-Service-Token
       description: Internal service token (INTERNAL_SERVICE_TOKEN) for keeper/backend reject.
   parameters:
+    XUserRefresh:
+      name: X-User-Refresh
+      in: header
+      required: false
+      schema:
+        type: string
+      description: Opaque user-scoped refresh token (required when no family Bearer JWT is sent).
     XScope:
       name: X-Scope
       in: header
@@ -2117,6 +2125,13 @@ components:
           type: integer
           format: int64
           description: Unix timestamp milliseconds
+    AuthSessionRebuildResponse:
+      type: object
+      required:
+        - session
+      properties:
+        session:
+          $ref: "#/components/schemas/AuthSessionResponse"
     AuthSessionResponse:
       type: object
       required:

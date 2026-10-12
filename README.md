@@ -156,7 +156,7 @@ curl -s http://localhost:3000/api/health
 ## Контракт gateway
 
 - `contracts/auth.openapi.yaml` — auth (CarelinkAuth `docs/backend/auth/openapi.yaml`)
-- `contracts/family.openapi.yaml` — family / member invites (`docs/backend/family/openapi.yaml`)
+- `contracts/family.openapi.yaml` — member invites / role templates (**vendored in CarelinkWeb**; `contracts:sync` does not overwrite — upstream family OpenAPI is incomplete; TODO BE-20)
 - `pnpm contracts:merge` → `contracts/gateway.openapi.yaml` (gitignored)
 - `pnpm contracts:generate` → `src/server/gateway/types.gen.ts`
 

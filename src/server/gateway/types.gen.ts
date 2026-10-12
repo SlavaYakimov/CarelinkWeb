@@ -544,7 +544,7 @@ export interface paths {
         get?: never;
         put?: never;
         /** Rebuild session after family membership change (BE-07) */
-        post: operations["rebuildAuthSession"];
+        post: operations["sessionRebuild"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1494,6 +1494,9 @@ export interface components {
              */
             expiresAt: number;
         };
+        AuthSessionRebuildResponse: {
+            session: components["schemas"]["AuthSessionResponse"];
+        };
         AuthSessionResponse: {
             /** Format: uuid */
             defaultFamilyId: string;
@@ -1739,6 +1742,8 @@ export interface components {
         };
     };
     parameters: {
+        /** @description Opaque user-scoped refresh token (required when no family Bearer JWT is sent). */
+        XUserRefresh: string;
         XScope: string;
         XDeviceSession: string;
         XDeviceId: string;
@@ -2528,10 +2533,13 @@ export interface operations {
             501: components["responses"]["NotImplemented"];
         };
     };
-    rebuildAuthSession: {
+    sessionRebuild: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /** @description Opaque user-scoped refresh token (required when no family Bearer JWT is sent). */
+                "X-User-Refresh"?: components["parameters"]["XUserRefresh"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -2543,7 +2551,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["AuthSessionResponse"];
+                    "application/json": components["schemas"]["AuthSessionRebuildResponse"];
                 };
             };
             401: components["responses"]["Unauthorized"];

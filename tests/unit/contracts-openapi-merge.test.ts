@@ -7,7 +7,7 @@ describe('mergeOpenApiDocuments', () => {
       openapi: '3.1.0',
       info: { title: 'Auth', version: '1.0.0' },
       paths: {
-        '/auth/session/rebuild': { post: { operationId: 'rebuildAuthSession' } },
+        '/auth/session/rebuild': { post: { operationId: 'sessionRebuild' } },
       },
       components: { schemas: { AuthSessionResponse: { type: 'object' } } },
     };
