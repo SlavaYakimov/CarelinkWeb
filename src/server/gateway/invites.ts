@@ -102,7 +102,7 @@ export async function listPendingMemberInvites(ctx: UserSessionCtx): Promise<Pen
     {
       ...ctx,
       userScopedRequest: true,
-      userRefreshHeader: true,
+      bearerOnlyUserRoute: true,
     },
   );
 }
@@ -116,7 +116,7 @@ export async function acceptMemberInvite(
     {
       ...ctx,
       userScopedRequest: true,
-      userRefreshHeader: true,
+      bearerOnlyUserRoute: true,
     },
   );
 }
@@ -130,7 +130,7 @@ export async function declineMemberInvite(
     {
       ...ctx,
       userScopedRequest: true,
-      userRefreshHeader: true,
+      bearerOnlyUserRoute: true,
     },
   );
 }

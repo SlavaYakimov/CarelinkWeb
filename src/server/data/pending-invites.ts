@@ -6,7 +6,6 @@ import {
 } from '@/lib/invites/normalize-pending-invite';
 import { GatewayError } from '@/server/gateway/errors';
 import { listPendingMemberInvites } from '@/server/gateway/invites';
-import { sessionHasUserRefresh } from '@/server/gateway/user-scope';
 import { getLogger } from '@/server/log/logger';
 import { getSession } from '@/server/session/get-session';
 
@@ -16,10 +15,6 @@ export async function fetchPendingInvites(): Promise<PendingMemberInvite[] | nul
   const sessionCtx = await getSession();
   if (!sessionCtx) return null;
   const log = getLogger();
-  if (!sessionHasUserRefresh(sessionCtx.session)) {
-    log.warn({ reason: 'missing_user_refresh' }, 'fetchPendingInvites skipped gateway call');
-    return null;
-  }
   const { clientIp, deviceId } = await gatewayActionContext();
   try {
     const res = await listPendingMemberInvites({

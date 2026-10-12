@@ -27,4 +27,42 @@ describe('normalizeFamilyMemberInviteList', () => {
     expect(list[0]?.status).toBe('sent');
     expect(list[0]?.emailMasked).toBe('e2***@example.com');
   });
+
+  it('keeps camelCase rows with only inviteId and optional fields omitted', () => {
+    const list = normalizeFamilyMemberInviteList({
+      items: [
+        {
+          inviteId: 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',
+          displayName: 'E2E Resend',
+          roleName: 'Member',
+          status: 'sent',
+        },
+      ],
+    });
+    expect(list).toHaveLength(1);
+    expect(list[0]?.id).toBe('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb');
+    expect(list[0]?.createdAt).toBeTruthy();
+  });
+
+  it('accepts top-level array shape', () => {
+    const list = normalizeFamilyMemberInviteList([
+      {
+        id: 'cccccccc-cccc-4ccc-8ccc-cccccccccccc',
+        displayName: 'Row',
+        roleName: 'R',
+        status: 'pending_accept',
+      },
+    ]);
+    expect(list).toHaveLength(1);
+  });
+
+  it('drops only rows without id and reports via callback', () => {
+    const dropped: string[] = [];
+    const list = normalizeFamilyMemberInviteList(
+      { items: [{ displayName: 'no id' }] },
+      { onDropped: (reason) => dropped.push(reason) },
+    );
+    expect(list).toHaveLength(0);
+    expect(dropped).toEqual(['missing_id']);
+  });
 });

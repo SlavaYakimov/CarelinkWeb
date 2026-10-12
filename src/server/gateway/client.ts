@@ -12,6 +12,7 @@ import {
 } from '@/server/session/session-ended';
 import { loadSession, saveSession } from '@/server/session/store';
 import type { SessionRecord } from '@/server/session/types';
+import { buildGatewayRequestHeaders } from '@/server/gateway/build-request-headers';
 import { pickFamilyIdForBearer } from '@/server/gateway/user-scope';
 
 export type GatewayRequestContext = {
@@ -30,8 +31,10 @@ export type GatewayRequestContext = {
   deviceSession?: string;
   /** Bearer token when no Redis session is loaded (e.g. logout). */
   accessToken?: string;
-  /** /v1/user/* — skip proactive family refresh; resolve Bearer from any family bundle. */
+  /** Resolve Bearer family from any bundle (family HTTP /v1/user/member-invites/*). */
   userScopedRequest?: boolean;
+  /** Family-service user routes: Bearer JWT only — do not send X-User-Refresh. */
+  bearerOnlyUserRoute?: boolean;
 };
 
 export type GatewayRequestInit = {
@@ -51,11 +54,6 @@ export function setRefreshHandler(fn: RefreshFn | undefined): void {
 function joinUrl(base: string, path: string): string {
   const p = path.startsWith('/') ? path : `/${path}`;
   return `${base.replace(/\/$/, '')}${p}`;
-}
-
-function pickAccessToken(session: SessionRecord, familyId?: string): string | undefined {
-  const id = familyId ?? session.activeFamilyId;
-  return session.families[id]?.access;
 }
 
 async function defaultRefresh(args: {
@@ -183,46 +181,41 @@ async function gatewayFetchInner<T = unknown>(
   const traceId = ctx.traceId ?? randomUUID();
   let session = ctx.session;
 
-  if (ctx.sid && session && !ctx.userScopedRequest) {
-    session = await refreshFamilyTokens(ctx.sid, ctx.familyId ?? session.activeFamilyId, session);
+  const preferredFamilyId = ctx.familyId ?? session?.activeFamilyId;
+  const refreshFamilyId =
+    ctx.userScopedRequest && session
+      ? pickFamilyIdForBearer(session, preferredFamilyId)
+      : preferredFamilyId;
+
+  if (ctx.sid && session && refreshFamilyId) {
+    session = await refreshFamilyTokens(ctx.sid, refreshFamilyId, session);
   }
 
   const familyId = ctx.userScopedRequest
     ? session
-      ? pickFamilyIdForBearer(session, ctx.familyId ?? session.activeFamilyId)
+      ? pickFamilyIdForBearer(session, preferredFamilyId)
       : undefined
-    : (ctx.familyId ?? session?.activeFamilyId);
+    : preferredFamilyId;
   const url = joinUrl(env.GATEWAY_URL, init.path);
   const method = init.method ?? 'GET';
 
-  const buildHeaders = (): Record<string, string> => {
-    const headers: Record<string, string> = {
-      Accept: 'application/json',
-      'X-Trace-Id': traceId,
-      'X-Forwarded-For': ctx.clientIp,
-      'X-Real-IP': ctx.clientIp,
-      ...init.headers,
-    };
-    if (ctx.accessToken) {
-      headers.Authorization = `Bearer ${ctx.accessToken}`;
-    } else if (session && familyId) {
-      const access = pickAccessToken(session, familyId);
-      if (access) headers.Authorization = `Bearer ${access}`;
-    }
-    const userRefresh =
-      ctx.userRefresh ?? (ctx.userRefreshHeader ? session?.userRefresh : undefined);
-    if (userRefresh) {
-      headers['X-User-Refresh'] = userRefresh;
-    }
-    const deviceSession =
-      ctx.deviceSession ?? (ctx.deviceSessionHeader ? session?.deviceSession : undefined);
-    if (deviceSession) {
-      headers['X-Device-Session'] = deviceSession;
-    }
-    if (ctx.deviceId) headers['X-Device-Id'] = ctx.deviceId;
-    if (ctx.idempotencyKey) headers['Idempotency-Key'] = ctx.idempotencyKey;
-    return headers;
-  };
+  const buildHeaders = (): Record<string, string> =>
+    buildGatewayRequestHeaders({
+      session,
+      familyId,
+      traceId,
+      clientIp: ctx.clientIp,
+      deviceId: ctx.deviceId,
+      accessToken: ctx.accessToken,
+      userRefresh: ctx.userRefresh,
+      userRefreshHeader: ctx.userRefreshHeader,
+      deviceSession: ctx.deviceSession,
+      deviceSessionHeader: ctx.deviceSessionHeader,
+      idempotencyKey: ctx.idempotencyKey,
+      bearerOnlyUserRoute: ctx.bearerOnlyUserRoute,
+      userScopedRequest: ctx.userScopedRequest,
+      extraHeaders: init.headers,
+    });
 
   const doFetch = async () => {
     const headers = buildHeaders();

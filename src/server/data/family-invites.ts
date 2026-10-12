@@ -7,6 +7,7 @@ import {
 } from '@/lib/invites/normalize-family-invite';
 import { listFamilyMemberInvites, listFamilyRoleTemplates } from '@/server/gateway/invites';
 import { GatewayError } from '@/server/gateway/errors';
+import { getLogger } from '@/server/log/logger';
 import { getSession } from '@/server/session/get-session';
 import type { components } from '@/server/gateway/types.gen';
 
@@ -26,7 +27,12 @@ export async function fetchFamilyInvites(familyId: string): Promise<MemberInvite
       deviceId,
       familyId,
     });
-    return normalizeFamilyMemberInviteList(res);
+    const log = getLogger();
+    return normalizeFamilyMemberInviteList(res, {
+      onDropped: (reason) => {
+        log.warn({ reason }, 'family member invite row dropped during normalize');
+      },
+    });
   } catch (err) {
     if (err instanceof GatewayError && err.code === 'FORBIDDEN') {
       redirect('/forbidden');
