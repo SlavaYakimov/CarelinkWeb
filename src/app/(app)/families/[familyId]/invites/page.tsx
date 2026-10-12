@@ -1,6 +1,10 @@
 import { redirect } from 'next/navigation';
 import { FamilyInvitesList } from '@/components/carelink/FamilyInvitesList';
-import { fetchFamilyInvites, isFamilyKeeper } from '@/server/data/family-invites';
+import {
+  fetchFamilyInvites,
+  isFamilyKeeper,
+  requireFamilyInviteKeeper,
+} from '@/server/data/family-invites';
 import { getSession } from '@/server/session/get-session';
 
 type PageProps = { params: Promise<{ familyId: string }> };
@@ -10,6 +14,7 @@ export default async function FamilyInvitesPage({ params }: PageProps) {
   const sessionCtx = await getSession();
   if (!sessionCtx) redirect('/session-ended');
   if (!sessionCtx.session.families[familyId]) redirect('/families');
+  await requireFamilyInviteKeeper(familyId);
 
   const [invites, isKeeper] = await Promise.all([
     fetchFamilyInvites(familyId),

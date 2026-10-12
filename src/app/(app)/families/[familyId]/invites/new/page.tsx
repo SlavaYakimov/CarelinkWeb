@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 import { InviteMemberForm } from '@/components/carelink/InviteMemberForm';
-import { fetchFamilyRoleTemplates } from '@/server/data/family-invites';
+import { fetchFamilyRoleTemplates, requireFamilyInviteKeeper } from '@/server/data/family-invites';
 import { getSession } from '@/server/session/get-session';
 
 type PageProps = { params: Promise<{ familyId: string }> };
@@ -10,6 +10,7 @@ export default async function InviteMemberNewPage({ params }: PageProps) {
   const sessionCtx = await getSession();
   if (!sessionCtx) redirect('/session-ended');
   if (!sessionCtx.session.families[familyId]) redirect('/families');
+  await requireFamilyInviteKeeper(familyId);
 
   const roles = await fetchFamilyRoleTemplates(familyId);
   if (!roles || roles.length === 0) {

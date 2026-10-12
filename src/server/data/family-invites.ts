@@ -70,3 +70,11 @@ export async function isFamilyKeeper(familyId: string): Promise<boolean> {
   if (!family) return false;
   return family.role === 'keeper' || family.isOwner === true;
 }
+
+/** Keeper-only invite management (list, new, sent, resend/revoke). */
+export async function requireFamilyInviteKeeper(familyId: string): Promise<void> {
+  const keeper = await isFamilyKeeper(familyId);
+  if (!keeper) {
+    redirect('/forbidden');
+  }
+}
