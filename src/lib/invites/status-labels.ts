@@ -1,8 +1,8 @@
 import type { components } from '@/server/gateway/types.gen';
 
-type Status = components['schemas']['MemberInviteStatus'];
+export type MemberInviteStatus = components['schemas']['MemberInviteStatus'];
 
-const LABELS: Record<Status, string> = {
+const LABELS: Record<MemberInviteStatus, string> = {
   sent: 'Отправлено',
   pending_accept: 'Ожидает принятия',
   accepted: 'Принято',
@@ -11,16 +11,41 @@ const LABELS: Record<Status, string> = {
   revoked: 'Отозвано',
 };
 
-export function memberInviteStatusLabel(status: Status): string {
-  return LABELS[status] ?? status;
+const CANONICAL: MemberInviteStatus[] = [
+  'sent',
+  'pending_accept',
+  'accepted',
+  'declined',
+  'expired',
+  'revoked',
+];
+
+/** Map family-service status strings to OpenAPI MemberInviteStatus. */
+export function normalizeMemberInviteStatus(raw: string | undefined): MemberInviteStatus {
+  const value = (raw ?? 'sent').trim().toLowerCase();
+  if (value === 'pending') return 'sent';
+  if (CANONICAL.includes(value as MemberInviteStatus)) {
+    return value as MemberInviteStatus;
+  }
+  return 'sent';
 }
 
-export function inviteTerminalStatus(status: Status): boolean {
+export function memberInviteStatusLabel(status: MemberInviteStatus | string): string {
+  const normalized = typeof status === 'string' ? normalizeMemberInviteStatus(status) : status;
+  return LABELS[normalized] ?? normalized;
+}
+
+export function inviteTerminalStatus(status: MemberInviteStatus | string): boolean {
+  const normalized = typeof status === 'string' ? normalizeMemberInviteStatus(status) : status;
   return (
-    status === 'accepted' || status === 'declined' || status === 'expired' || status === 'revoked'
+    normalized === 'accepted' ||
+    normalized === 'declined' ||
+    normalized === 'expired' ||
+    normalized === 'revoked'
   );
 }
 
-export function inviteCanResendOrRevoke(status: Status): boolean {
-  return status === 'sent' || status === 'pending_accept';
+export function inviteCanResendOrRevoke(status: MemberInviteStatus | string): boolean {
+  const normalized = typeof status === 'string' ? normalizeMemberInviteStatus(status) : status;
+  return normalized === 'sent' || normalized === 'pending_accept';
 }

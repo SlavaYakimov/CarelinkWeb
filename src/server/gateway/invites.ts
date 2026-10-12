@@ -101,7 +101,7 @@ export async function listPendingMemberInvites(ctx: UserSessionCtx): Promise<Pen
     { method: 'GET', path: '/v1/user/member-invites/pending' },
     {
       ...ctx,
-      familyId: ctx.session.activeFamilyId,
+      userScopedRequest: true,
       userRefreshHeader: true,
     },
   );
@@ -115,7 +115,7 @@ export async function acceptMemberInvite(
     { method: 'POST', path: `/v1/user/member-invites/${inviteId}/accept`, body: {} },
     {
       ...ctx,
-      familyId: ctx.session.activeFamilyId,
+      userScopedRequest: true,
       userRefreshHeader: true,
     },
   );
@@ -129,7 +129,7 @@ export async function declineMemberInvite(
     { method: 'POST', path: `/v1/user/member-invites/${inviteId}/decline`, body: {} },
     {
       ...ctx,
-      familyId: ctx.session.activeFamilyId,
+      userScopedRequest: true,
       userRefreshHeader: true,
     },
   );
@@ -140,7 +140,7 @@ export async function rebuildAuthSession(ctx: UserSessionCtx): Promise<AuthSessi
     { method: 'POST', path: '/v1/auth/session/rebuild', body: {} },
     {
       ...ctx,
-      familyId: ctx.session.activeFamilyId,
+      userScopedRequest: true,
       userRefreshHeader: true,
     },
   );

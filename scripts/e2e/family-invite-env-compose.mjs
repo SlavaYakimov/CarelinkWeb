@@ -8,6 +8,7 @@ import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import { assertCarelinkAuthRoot, resolveCarelinkAuthRoot } from './carelink-auth-compose.mjs';
+import { waitComposeGatewayAndFamilyReady } from './compose-health-wait.mjs';
 
 const execFileAsync = promisify(execFile);
 
@@ -50,4 +51,17 @@ export async function recreateFamilyServiceInviteEmailEnabled(enabled) {
   });
 
   return { ok: true, mode: 'env', enabled };
+}
+
+/**
+ * @param {boolean} enabled
+ * @param {{ keeper?: object; email?: string }} [waitOpts]
+ */
+export async function recreateFamilyServiceInviteEmailEnabledAndWait(enabled, waitOpts = {}) {
+  const result = await recreateFamilyServiceInviteEmailEnabled(enabled);
+  await waitComposeGatewayAndFamilyReady({
+    keeper: waitOpts.keeper,
+    email: waitOpts.email,
+  });
+  return result;
 }

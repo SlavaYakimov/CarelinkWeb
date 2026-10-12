@@ -4,7 +4,10 @@ import {
   normalizePendingMemberInviteList,
   type PendingMemberInvite,
 } from '@/lib/invites/normalize-pending-invite';
+import { GatewayError } from '@/server/gateway/errors';
 import { listPendingMemberInvites } from '@/server/gateway/invites';
+import { sessionHasUserRefresh } from '@/server/gateway/user-scope';
+import { getLogger } from '@/server/log/logger';
 import { getSession } from '@/server/session/get-session';
 
 export type { PendingMemberInvite };
@@ -12,6 +15,11 @@ export type { PendingMemberInvite };
 export async function fetchPendingInvites(): Promise<PendingMemberInvite[] | null> {
   const sessionCtx = await getSession();
   if (!sessionCtx) return null;
+  const log = getLogger();
+  if (!sessionHasUserRefresh(sessionCtx.session)) {
+    log.warn({ reason: 'missing_user_refresh' }, 'fetchPendingInvites skipped gateway call');
+    return null;
+  }
   const { clientIp, deviceId } = await gatewayActionContext();
   try {
     const res = await listPendingMemberInvites({
@@ -21,7 +29,18 @@ export async function fetchPendingInvites(): Promise<PendingMemberInvite[] | nul
       deviceId,
     });
     return normalizePendingMemberInviteList(res);
-  } catch {
+  } catch (err) {
+    log.warn(
+      {
+        reason:
+          err instanceof GatewayError
+            ? err.code
+            : err instanceof Error
+              ? err.name
+              : 'unknown',
+      },
+      'fetchPendingInvites failed',
+    );
     return null;
   }
 }

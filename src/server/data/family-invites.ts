@@ -1,12 +1,16 @@
 import 'server-only';
 import { redirect } from 'next/navigation';
 import { gatewayActionContext } from '@/server/actions/request-context';
+import {
+  normalizeFamilyMemberInviteList,
+  type MemberInviteView,
+} from '@/lib/invites/normalize-family-invite';
 import { listFamilyMemberInvites, listFamilyRoleTemplates } from '@/server/gateway/invites';
 import { GatewayError } from '@/server/gateway/errors';
 import { getSession } from '@/server/session/get-session';
 import type { components } from '@/server/gateway/types.gen';
 
-export type MemberInviteView = components['schemas']['MemberInviteView'];
+export type { MemberInviteView };
 export type RoleTemplate = components['schemas']['RoleTemplate'];
 
 export async function fetchFamilyInvites(familyId: string): Promise<MemberInviteView[] | null> {
@@ -22,7 +26,7 @@ export async function fetchFamilyInvites(familyId: string): Promise<MemberInvite
       deviceId,
       familyId,
     });
-    return res.items;
+    return normalizeFamilyMemberInviteList(res);
   } catch (err) {
     if (err instanceof GatewayError && err.code === 'FORBIDDEN') {
       redirect('/forbidden');

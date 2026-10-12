@@ -12,6 +12,7 @@ import {
 } from '@/server/session/session-ended';
 import { loadSession, saveSession } from '@/server/session/store';
 import type { SessionRecord } from '@/server/session/types';
+import { pickFamilyIdForBearer } from '@/server/gateway/user-scope';
 
 export type GatewayRequestContext = {
   sid?: string;
@@ -29,6 +30,8 @@ export type GatewayRequestContext = {
   deviceSession?: string;
   /** Bearer token when no Redis session is loaded (e.g. logout). */
   accessToken?: string;
+  /** /v1/user/* — skip proactive family refresh; resolve Bearer from any family bundle. */
+  userScopedRequest?: boolean;
 };
 
 export type GatewayRequestInit = {
@@ -180,11 +183,15 @@ async function gatewayFetchInner<T = unknown>(
   const traceId = ctx.traceId ?? randomUUID();
   let session = ctx.session;
 
-  if (ctx.sid && session) {
+  if (ctx.sid && session && !ctx.userScopedRequest) {
     session = await refreshFamilyTokens(ctx.sid, ctx.familyId ?? session.activeFamilyId, session);
   }
 
-  const familyId = ctx.familyId ?? session?.activeFamilyId;
+  const familyId = ctx.userScopedRequest
+    ? session
+      ? pickFamilyIdForBearer(session, ctx.familyId ?? session.activeFamilyId)
+      : undefined
+    : (ctx.familyId ?? session?.activeFamilyId);
   const url = joinUrl(env.GATEWAY_URL, init.path);
   const method = init.method ?? 'GET';
 

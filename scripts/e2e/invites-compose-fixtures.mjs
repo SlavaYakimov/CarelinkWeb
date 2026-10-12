@@ -5,7 +5,11 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { composeFamilyPostgresExecArgv } from './carelink-auth-compose.mjs';
-import { recreateFamilyServiceInviteEmailEnabled } from './family-invite-env-compose.mjs';
+import {
+  recreateFamilyServiceInviteEmailEnabled,
+  recreateFamilyServiceInviteEmailEnabledAndWait,
+} from './family-invite-env-compose.mjs';
+import { waitComposeGatewayAndFamilyReady } from './compose-health-wait.mjs';
 import {
   acceptMemberInviteGateway,
   createMemberInviteGateway,
@@ -114,14 +118,26 @@ async function trySqlFamilyInviteFlag(args) {
 }
 
 /**
- * @param {{ familyId: string; enabled: boolean }} args
+ * @param {{ familyId: string; enabled: boolean; keeper?: object; email?: string; waitHealth?: boolean }} args
  */
 export async function setFamilyMemberInvitesEnabled(args) {
+  const waitOpts = args.waitHealth
+    ? { keeper: args.keeper, email: args.email }
+    : undefined;
+  const recreate = waitOpts
+    ? (enabled) => recreateFamilyServiceInviteEmailEnabledAndWait(enabled, waitOpts)
+    : recreateFamilyServiceInviteEmailEnabled;
+
   if (args.enabled) {
     const sqlResult = await trySqlFamilyInviteFlag(args);
-    if (sqlResult.ok) return sqlResult;
+    if (sqlResult.ok) {
+      if (args.waitHealth && args.keeper) {
+        await waitComposeGatewayAndFamilyReady({ keeper: args.keeper, email: args.email });
+      }
+      return sqlResult;
+    }
     try {
-      return await recreateFamilyServiceInviteEmailEnabled(true);
+      return await recreate(true);
     } catch (err) {
       return {
         ok: false,
@@ -132,10 +148,15 @@ export async function setFamilyMemberInvitesEnabled(args) {
   }
 
   const sqlResult = await trySqlFamilyInviteFlag(args);
-  if (sqlResult.ok) return sqlResult;
+  if (sqlResult.ok) {
+    if (args.waitHealth && args.keeper) {
+      await waitComposeGatewayAndFamilyReady({ keeper: args.keeper, email: args.email });
+    }
+    return sqlResult;
+  }
 
   try {
-    return await recreateFamilyServiceInviteEmailEnabled(false);
+    return await recreate(false);
   } catch (err) {
     return {
       ok: false,
@@ -199,6 +220,9 @@ export async function setFamilyMemberInvitesEnabledAndVerify(args) {
   const flagResult = await setFamilyMemberInvitesEnabled({
     familyId: args.familyId,
     enabled: args.enabled,
+    keeper: args.keeper,
+    email: args.email,
+    waitHealth: Boolean(args.waitHealth ?? args.keeper),
   });
   if (!flagResult.ok) {
     return { ...flagResult, gatewayStatus: null };

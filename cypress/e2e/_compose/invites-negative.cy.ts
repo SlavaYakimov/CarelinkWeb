@@ -22,8 +22,17 @@ function seedKeeper(ts: number): Cypress.Chainable<KeeperBundle> {
 }
 
 describe('invites compose negative and infra', () => {
+  const familiesNeedingInviteFlagRestore: string[] = [];
+
   before(function () {
     cy.skipUnlessCompose();
+  });
+
+  after(function () {
+    if (!Cypress.env('COMPOSE')) return;
+    for (const familyId of familiesNeedingInviteFlagRestore) {
+      cy.task('invitesSetFlag', { familyId, enabled: true, waitHealth: true });
+    }
   });
 
   it('E7: wrong user cannot accept — gateway 403 and screen 22', () => {
@@ -134,10 +143,12 @@ describe('invites compose negative and infra', () => {
     const probeEmail = `e2e.flag.${ts}@example.com`;
 
     seedKeeper(ts).then((keeper) => {
+      familiesNeedingInviteFlagRestore.push(keeper.familyId);
       cy.task('invitesSetFlag', {
         familyId: keeper.familyId,
         enabled: false,
         verify: true,
+        waitHealth: true,
         keeper,
         email: probeEmail,
       }).then((flag: { ok: boolean; message?: string }) => {
@@ -148,7 +159,6 @@ describe('invites compose negative and infra', () => {
         cy.contains('Приглашения по почте временно недоступны', { timeout: 30_000 }).should(
           'be.visible',
         );
-        cy.task('invitesSetFlag', { familyId: keeper.familyId, enabled: true });
       });
     });
   });
