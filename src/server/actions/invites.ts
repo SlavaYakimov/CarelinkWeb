@@ -124,6 +124,7 @@ async function lookupMemberInviteEmailActionImpl(
       }
       const mapped = toFormState(err, INVITE_FIELD_MAP, getInviteErrorMessage);
       return {
+        registered: undefined,
         error: mapped.formError ?? mapped.fieldErrors?.personalEmail,
         retryAfter: mapped.retryAfter,
       };
@@ -177,16 +178,17 @@ async function createMemberInviteActionImpl(
   }
 
   try {
-    const created = await createMemberInvite(
-      {
-        roleTemplateId: parsed.data.roleTemplateId,
-        displayName: parsed.data.displayName,
-        phone: phoneE164,
-        personalEmail: parsed.data.personalEmail,
-        avatarUrl,
-      },
-      { ...ctx, idempotencyKey: randomUUID() },
-    );
+    const createBody: Parameters<typeof createMemberInvite>[0] = {
+      roleTemplateId: parsed.data.roleTemplateId,
+      displayName: parsed.data.displayName,
+      phone: phoneE164,
+      personalEmail: parsed.data.personalEmail,
+    };
+    if (avatarUrl) {
+      createBody.avatarUrl = avatarUrl;
+    }
+
+    const created = await createMemberInvite(createBody, { ...ctx, idempotencyKey: randomUUID() });
 
     const kind =
       created.inviteeKind ??

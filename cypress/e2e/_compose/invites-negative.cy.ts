@@ -118,13 +118,14 @@ describe('invites compose negative and infra', () => {
         access: keeper.access,
         count: 32,
         email: hammerEmail,
+        clientIp: '127.0.0.1',
       }).then((last: { status: number }) => {
         expect(last.status).to.eq(429);
       });
       cy.invitesSignInShortcut(keeper.workspaceEmail, keeper.password);
       cy.invitesOpenNewForm(keeper.familyId);
-      cy.get('#personalEmail').clear().type(`${hammerEmail}.ui@example.com`);
-      cy.contains(/Слишком много|429|Попробуйте позже/i, { timeout: 30_000 }).should('be.visible');
+      cy.get('#personalEmail').clear().type(hammerEmail);
+      cy.contains('Слишком много проверок почты', { timeout: 30_000 }).should('be.visible');
     });
   });
 
@@ -147,6 +148,7 @@ describe('invites compose negative and infra', () => {
         cy.contains('Приглашения по почте временно недоступны', { timeout: 30_000 }).should(
           'be.visible',
         );
+        cy.task('invitesSetFlag', { familyId: keeper.familyId, enabled: true });
       });
     });
   });

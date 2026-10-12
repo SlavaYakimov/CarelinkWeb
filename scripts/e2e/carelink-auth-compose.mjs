@@ -111,7 +111,7 @@ export function composeFamilyPostgresExecArgv(psqlArgs) {
   const root = resolveCarelinkAuthRoot();
   assertCarelinkAuthRoot(root);
 
-  const service = process.env.E2E_FAMILY_POSTGRES_SERVICE?.trim() || 'postgres';
+  const service = process.env.E2E_FAMILY_POSTGRES_SERVICE?.trim() || 'family-postgres';
   const args = ['compose'];
   for (const file of COMPOSE_FILES) {
     args.push('-f', path.join(root, file));

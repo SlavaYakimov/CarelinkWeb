@@ -217,13 +217,18 @@ async function gatewayFetchInner<T = unknown>(
     return headers;
   };
 
-  const doFetch = async () =>
-    fetch(url, {
+  const doFetch = async () => {
+    const headers = buildHeaders();
+    if (init.body !== undefined) {
+      headers['Content-Type'] = 'application/json';
+    }
+    return fetch(url, {
       method,
-      headers: buildHeaders(),
+      headers,
       body: init.body !== undefined ? JSON.stringify(init.body) : undefined,
       signal: AbortSignal.timeout(env.GATEWAY_TIMEOUT_MS),
     });
+  };
 
   let res = await doFetch();
 

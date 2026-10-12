@@ -98,12 +98,25 @@ export async function listRoleTemplates(gatewayUrl, familyId, access) {
  * @param {string} access
  * @param {string} email
  */
-export async function lookupInviteEmail(gatewayUrl, familyId, access, email) {
+/**
+ * @param {string} gatewayUrl
+ * @param {string} familyId
+ * @param {string} access
+ * @param {string} email
+ * @param {{ clientIp?: string }} [opts]
+ */
+export async function lookupInviteEmail(gatewayUrl, familyId, access, email, opts = {}) {
+  const headers = { Authorization: `Bearer ${access}` };
+  const clientIp = opts.clientIp?.trim();
+  if (clientIp) {
+    headers['X-Forwarded-For'] = clientIp;
+    headers['X-Real-IP'] = clientIp;
+  }
   const { res, data } = await requestJson(
     `${gatewayUrl}/v1/families/${familyId}/member-invites/lookup-email`,
     {
       method: 'POST',
-      headers: { Authorization: `Bearer ${access}` },
+      headers,
       json: { email },
     },
   );

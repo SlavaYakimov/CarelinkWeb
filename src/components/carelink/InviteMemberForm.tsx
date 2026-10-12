@@ -96,6 +96,7 @@ export function InviteMemberForm({ familyId, roleTemplates }: InviteMemberFormPr
         </p>
       </div>
 
+      {lookupState.error ? <FormAlert message={lookupState.error} /> : null}
       {state.formError ? <FormAlert message={state.formError} /> : null}
 
       <div className="space-y-2">

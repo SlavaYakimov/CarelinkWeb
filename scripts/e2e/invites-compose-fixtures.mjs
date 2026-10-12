@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 /**
- * Compose fixtures for invites E2E matrix (gateway + optional family DB).
+ * Compose fixtures for invites E2E matrix (gateway + family DB on family-postgres).
  */
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { composeFamilyPostgresExecArgv } from './carelink-auth-compose.mjs';
+import { recreateFamilyServiceInviteEmailEnabled } from './family-invite-env-compose.mjs';
 import {
   acceptMemberInviteGateway,
   createMemberInviteGateway,
@@ -17,18 +18,28 @@ import { loadEnvLocal } from './load-env-local.mjs';
 
 const execFileAsync = promisify(execFile);
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+/** family-service DSN: postgres://family:family@family-postgres:5432/family */
+const FAMILY_PG = {
+  service: () => process.env.E2E_FAMILY_POSTGRES_SERVICE?.trim() || 'family-postgres',
+  user: () => process.env.E2E_FAMILY_POSTGRES_USER?.trim() || 'family',
+  database: () => process.env.E2E_FAMILY_DATABASE?.trim() || 'family',
+};
+
 /**
  * @param {string} sql
  */
 async function execFamilySql(sql) {
   loadEnvLocal();
-  const database = process.env.E2E_FAMILY_DATABASE?.trim() || 'family';
   const argv = composeFamilyPostgresExecArgv([
     'psql',
     '-U',
-    'carelink',
+    FAMILY_PG.user(),
     '-d',
-    database,
+    FAMILY_PG.database(),
     '-t',
     '-A',
     '-c',
@@ -51,6 +62,90 @@ function sqlFamilyIdLiteral(familyId) {
 }
 
 /**
+ * @param {string} inviteId
+ */
+function sqlInviteIdLiteral(inviteId) {
+  const trimmed = String(inviteId ?? '').trim();
+  if (!/^[0-9a-f-]{36}$/i.test(trimmed)) {
+    throw new Error(`invalid inviteId for SQL: ${trimmed.slice(0, 8)}…`);
+  }
+  return `'${trimmed}'::uuid`;
+}
+
+async function familyInviteFlagColumnExists() {
+  try {
+    const row = await execFamilySql(
+      "SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'families' AND column_name = 'workspace_member_invite_email_enabled' LIMIT 1",
+    );
+    return row === '1';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * @param {{ familyId: string; enabled: boolean }} args
+ */
+async function trySqlFamilyInviteFlag(args) {
+  const hasColumn = await familyInviteFlagColumnExists();
+  if (!hasColumn) {
+    return { ok: false, mode: 'sql', missingColumn: true };
+  }
+  const flag = args.enabled ? 'TRUE' : 'FALSE';
+  const familyLiteral = sqlFamilyIdLiteral(args.familyId);
+  const sql = `UPDATE families SET workspace_member_invite_email_enabled = ${flag} WHERE id = ${familyLiteral} RETURNING workspace_member_invite_email_enabled`;
+  const readback = await execFamilySql(sql);
+  if (!readback) {
+    return {
+      ok: false,
+      mode: 'sql',
+      message: 'UPDATE families returned no row for family id',
+    };
+  }
+  const enabled = readback === 't' || readback === 'true' || readback === '1';
+  if (enabled !== Boolean(args.enabled)) {
+    return {
+      ok: false,
+      mode: 'sql',
+      message: `workspace_member_invite_email_enabled readback mismatch: expected ${args.enabled}, got ${readback}`,
+    };
+  }
+  return { ok: true, mode: 'sql', enabled: args.enabled };
+}
+
+/**
+ * @param {{ familyId: string; enabled: boolean }} args
+ */
+export async function setFamilyMemberInvitesEnabled(args) {
+  if (args.enabled) {
+    const sqlResult = await trySqlFamilyInviteFlag(args);
+    if (sqlResult.ok) return sqlResult;
+    try {
+      return await recreateFamilyServiceInviteEmailEnabled(true);
+    } catch (err) {
+      return {
+        ok: false,
+        mode: 'env',
+        message: err instanceof Error ? err.message : String(err),
+      };
+    }
+  }
+
+  const sqlResult = await trySqlFamilyInviteFlag(args);
+  if (sqlResult.ok) return sqlResult;
+
+  try {
+    return await recreateFamilyServiceInviteEmailEnabled(false);
+  } catch (err) {
+    return {
+      ok: false,
+      mode: 'env',
+      message: err instanceof Error ? err.message : String(err),
+    };
+  }
+}
+
+/**
  * @param {{ keeper: object; inviteeEmail: string; inviteePhoneDigits: string; displayName?: string }} args
  */
 export async function seedPendingExistingInvite(args) {
@@ -67,8 +162,11 @@ export async function seedPendingExistingInvite(args) {
       personalEmail: args.inviteeEmail,
     },
   });
-  if (created.status !== 201) {
+  if (created.status < 200 || created.status >= 300) {
     throw new Error(`create invite failed: ${created.status} ${JSON.stringify(created.data)}`);
+  }
+  if (!created.data?.inviteId) {
+    throw new Error(`create invite missing inviteId: ${JSON.stringify(created.data)}`);
   }
   return {
     ...ctx,
@@ -81,42 +179,11 @@ export async function seedPendingExistingInvite(args) {
  * @param {{ inviteId: string }} args
  */
 export async function expireMemberInvite(args) {
-  const sql = `UPDATE member_invites SET expires_at = NOW() - INTERVAL '1 day', status = 'expired' WHERE id = '${args.inviteId}'`;
+  const idLiteral = sqlInviteIdLiteral(args.inviteId);
+  const sql = `UPDATE member_invite_intents SET expires_at = NOW() - INTERVAL '1 day', status = 'expired' WHERE id = ${idLiteral}`;
   try {
     await execFamilySql(sql);
     return { ok: true };
-  } catch (err) {
-    return {
-      ok: false,
-      message: err instanceof Error ? err.message : String(err),
-    };
-  }
-}
-
-/**
- * @param {{ familyId: string; enabled: boolean }} args
- */
-export async function setFamilyMemberInvitesEnabled(args) {
-  const flag = args.enabled ? 'TRUE' : 'FALSE';
-  const familyLiteral = sqlFamilyIdLiteral(args.familyId);
-  const sql = `UPDATE families SET workspace_member_invite_email_enabled = ${flag} WHERE id = ${familyLiteral} RETURNING workspace_member_invite_email_enabled`;
-  try {
-    const readback = await execFamilySql(sql);
-    if (!readback) {
-      return {
-        ok: false,
-        message:
-          'UPDATE families returned no row (unknown family id or missing workspace_member_invite_email_enabled column)',
-      };
-    }
-    const enabled = readback === 't' || readback === 'true' || readback === '1';
-    if (enabled !== Boolean(args.enabled)) {
-      return {
-        ok: false,
-        message: `workspace_member_invite_email_enabled readback mismatch: expected ${args.enabled}, got ${readback}`,
-      };
-    }
-    return { ok: true, enabled };
   } catch (err) {
     return {
       ok: false,
@@ -139,7 +206,7 @@ export async function setFamilyMemberInvitesEnabledAndVerify(args) {
 
   const ctx = await resolveKeeperGatewayContext(args.keeper);
   const email = args.email?.trim() || `e2e.flag.verify.${Date.now()}@example.com`;
-  const lookup = await lookupInviteEmail(ctx.gatewayUrl, args.familyId, ctx.access, email);
+  const lookup = await lookupInviteEmail(ctx.gatewayUrl, ctx.familyId, ctx.access, email);
   const expectDisabled = !args.enabled;
   const gatewayOk = expectDisabled ? lookup.status === 501 : lookup.status === 200;
   if (!gatewayOk) {
@@ -150,23 +217,22 @@ export async function setFamilyMemberInvitesEnabledAndVerify(args) {
         : `gateway lookup-email expected 200 after flag on, got ${lookup.status}`,
       gatewayStatus: lookup.status,
       gatewayCode: lookup.data?.code,
+      mode: flagResult.mode,
     };
   }
-  return { ok: true, enabled: args.enabled, gatewayStatus: lookup.status };
+  return { ok: true, enabled: args.enabled, gatewayStatus: lookup.status, mode: flagResult.mode };
 }
 
 /**
- * @param {{ gatewayUrl: string; familyId: string; access: string; count: number; email: string }} args
+ * @param {{ gatewayUrl: string; familyId: string; access: string; count: number; email: string; clientIp?: string }} args
  */
 export async function hammerLookupEmail(args) {
+  const clientIp = args.clientIp?.trim() || '127.0.0.1';
   let last;
   for (let i = 0; i < args.count; i += 1) {
-    last = await lookupInviteEmail(
-      args.gatewayUrl,
-      args.familyId,
-      args.access,
-      `${args.email}.${i}@example.com`,
-    );
+    last = await lookupInviteEmail(args.gatewayUrl, args.familyId, args.access, args.email, {
+      clientIp,
+    });
     if (last.status === 429) break;
   }
   return last;
@@ -222,7 +288,8 @@ export async function createInviteAsMember(args) {
  * @param {string} [familyId]
  */
 export async function fetchMemberUserIdForFamily(familyId) {
-  const sql = `SELECT user_id FROM family_members WHERE family_id = '${familyId}' AND role != 'keeper' ORDER BY created_at DESC LIMIT 1`;
+  const familyLiteral = sqlFamilyIdLiteral(familyId);
+  const sql = `SELECT user_id FROM memberships WHERE family_id = ${familyLiteral} AND role <> 'keeper' ORDER BY created_at DESC LIMIT 1`;
   try {
     const id = await execFamilySql(sql);
     return id || null;
