@@ -63,7 +63,7 @@ export function RecoveryRequestForm() {
       </SubmitButton>
 
       <p className="text-center text-sm">
-        <Link href="/login" className="text-primary hover:underline">
+        <Link href="/login" className="inline-flex min-h-11 items-center text-primary hover:underline">
           Вернуться ко входу
         </Link>
       </p>

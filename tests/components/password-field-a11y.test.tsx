@@ -26,6 +26,12 @@ describe('PasswordField a11y', () => {
     expect(input?.getAttribute('aria-describedby')).toContain('pwd-error');
   });
 
+  it('toggle meets 44px touch target', () => {
+    render(<PasswordField id="pwd" value="secret" onChange={() => {}} showRequirements={false} />);
+    const toggle = screen.getByRole('button', { name: 'Показать пароль' });
+    expect(toggle.className).toMatch(/size-11|min-h-11/);
+  });
+
   it('toggle exposes aria-pressed for visibility', async () => {
     const user = userEvent.setup();
     render(<PasswordField id="pwd" value="secret" onChange={() => {}} showRequirements={false} />);

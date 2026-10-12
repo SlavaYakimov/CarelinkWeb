@@ -121,7 +121,7 @@ function BrandMark() {
       </div>
       <div>
         <p className="font-heading text-lg font-semibold leading-tight text-primary">Carelink</p>
-        <p className="text-[10px] font-medium uppercase tracking-wider text-secondary">
+        <p className="text-xs font-medium uppercase tracking-wider text-secondary">
           Спокойная забота
         </p>
       </div>
@@ -154,11 +154,11 @@ function AuthFooter({ className }: { className?: string }) {
         className,
       )}
     >
-      <Link href="/login" className="hover:text-foreground">
+      <Link href="/login" className="inline-flex min-h-11 items-center hover:text-foreground">
         Конфиденциальность
       </Link>
       <span aria-hidden>·</span>
-      <Link href="/login" className="hover:text-foreground">
+      <Link href="/login" className="inline-flex min-h-11 items-center hover:text-foreground">
         Помощь
       </Link>
       <span aria-hidden>·</span>

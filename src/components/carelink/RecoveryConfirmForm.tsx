@@ -125,7 +125,10 @@ export function RecoveryConfirmForm({ phoneMasked }: RecoveryConfirmFormProps) {
       </SubmitButton>
 
       <p className="text-center text-sm">
-        <Link href="/login/recovery" className="text-primary hover:underline">
+        <Link
+          href="/login/recovery"
+          className="inline-flex min-h-11 items-center text-primary hover:underline"
+        >
           Запросить восстановление заново
         </Link>
       </p>

@@ -25,7 +25,7 @@ export function AppSidebarNav({ onNavigate, className }: AppSidebarNavProps) {
           return (
             <span
               key={item.label}
-              className="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground/70"
+              className="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground"
               title="Скоро"
             >
               <Icon className="size-5 shrink-0 opacity-60" aria-hidden />

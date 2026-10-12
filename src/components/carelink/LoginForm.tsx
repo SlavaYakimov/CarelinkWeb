@@ -103,13 +103,13 @@ export function LoginForm({ nextPath, defaultEmail = '', notice }: LoginFormProp
           )}
           <input type="hidden" name="password" value={password} />
 
-          <label className="flex cursor-pointer items-center gap-2 text-sm">
+          <label className="flex min-h-11 cursor-pointer items-center gap-3 text-sm">
             <input
               type="checkbox"
               name="trustDevice"
               defaultChecked
               disabled={pending}
-              className="size-4 rounded border border-primary accent-primary"
+              className="size-5 shrink-0 rounded border border-primary accent-primary"
             />
             Доверять этому устройству
           </label>
@@ -126,13 +126,19 @@ export function LoginForm({ nextPath, defaultEmail = '', notice }: LoginFormProp
           </SubmitButton>
 
           <p className="text-center text-sm">
-            <Link href="/login/recovery" className="text-primary hover:underline">
+            <Link
+              href="/login/recovery"
+              className="inline-flex min-h-11 items-center text-primary hover:underline"
+            >
               Забыли пароль? Восстановить через семью
             </Link>
           </p>
 
           <p className="text-center text-sm text-muted-foreground">
-            <Link href="/onboarding/email" className="text-primary hover:underline">
+            <Link
+              href="/onboarding/email"
+              className="inline-flex min-h-11 items-center text-primary hover:underline"
+            >
               + Создать новую семью
             </Link>
           </p>

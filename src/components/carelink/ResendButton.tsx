@@ -58,7 +58,7 @@ export function ResendButton({
         >
           <button
             type="submit"
-            className="text-primary underline-offset-2 hover:underline disabled:opacity-50"
+            className="inline-flex min-h-11 items-center text-primary underline-offset-2 hover:underline disabled:opacity-50"
             disabled={!canResend}
           >
             {pending ? 'Отправляем…' : children}
