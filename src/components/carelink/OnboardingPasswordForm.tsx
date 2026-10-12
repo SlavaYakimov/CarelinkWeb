@@ -35,7 +35,7 @@ export function OnboardingPasswordForm() {
       step={4}
       totalSteps={5}
       title="Пароль семьи"
-      description="Этот пароль вы будете использовать вместе с workspace-логином семьи."
+      description="Этот пароль вы будете использовать вместе с логином семьи для входа."
     >
       <form action={formAction} className="space-y-4" onSubmit={() => gate.touchAll()}>
         {state.formError ? (

@@ -10,12 +10,14 @@ describe('Form gating (client schema)', () => {
     cy.contains('button', 'Войти').should('not.be.disabled');
   });
 
-  it('disables onboarding email send until valid email', () => {
+  it('disables onboarding email send until valid email and PD consent', () => {
     cy.visit('/onboarding/email');
     cy.contains('button', 'Отправить код').should('be.disabled');
     cy.get('#email').type('not-an-email');
     cy.contains('button', 'Отправить код').should('be.disabled');
     cy.get('#email').clear().type('user@example.com');
+    cy.contains('button', 'Отправить код').should('be.disabled');
+    cy.get('#personalDataConsent').click({ force: true });
     cy.contains('button', 'Отправить код').should('not.be.disabled');
   });
 

@@ -12,7 +12,7 @@ export type PublicAuthLayoutProps = {
 export function PublicAuthLayout({
   children,
   showTopNav = false,
-  gatewayBadge = true,
+  gatewayBadge = process.env.NODE_ENV === 'development',
 }: PublicAuthLayoutProps) {
   return (
     <div className="min-h-screen bg-background">
@@ -27,7 +27,7 @@ export function PublicAuthLayout({
               <Link href="/login" className="hover:text-foreground">
                 Безопасность
               </Link>
-              <Link href="/login" className="hover:text-foreground">
+              <Link href="/help" className="hover:text-foreground">
                 Помощь
               </Link>
             </nav>
@@ -154,11 +154,15 @@ function AuthFooter({ className }: { className?: string }) {
         className,
       )}
     >
-      <Link href="/login" className="inline-flex min-h-11 items-center hover:text-foreground">
+      <Link href="/privacy" className="inline-flex min-h-11 items-center hover:text-foreground">
         Конфиденциальность
       </Link>
       <span aria-hidden>·</span>
-      <Link href="/login" className="inline-flex min-h-11 items-center hover:text-foreground">
+      <Link href="/terms" className="inline-flex min-h-11 items-center hover:text-foreground">
+        Условия
+      </Link>
+      <span aria-hidden>·</span>
+      <Link href="/help" className="inline-flex min-h-11 items-center hover:text-foreground">
         Помощь
       </Link>
       <span aria-hidden>·</span>

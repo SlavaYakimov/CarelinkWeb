@@ -51,7 +51,7 @@ export function LoginForm({ nextPath, defaultEmail = '', notice }: LoginFormProp
     <Card className="mx-auto w-full max-w-[440px] shadow-card">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl">Вход в Carelink</CardTitle>
-        <CardDescription>Войдите с логином Carelink Workspace вашей семьи</CardDescription>
+        <CardDescription>Войдите с адресом семьи и паролем, которые задали при создании семьи</CardDescription>
       </CardHeader>
       <CardContent>
         <form action={formAction} className="space-y-4" onSubmit={() => gate.touchAll()}>
@@ -144,7 +144,8 @@ export function LoginForm({ nextPath, defaultEmail = '', notice }: LoginFormProp
           </p>
 
           <div className="rounded-lg bg-muted/80 p-3 text-xs text-muted-foreground">
-            Вход только через Carelink Workspace. Личная почта используется лишь для приглашений.
+            Вход выполняется по адресу семьи. Личная почта используется только при регистрации новой
+            семьи.
           </div>
         </form>
       </CardContent>
