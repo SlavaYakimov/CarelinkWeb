@@ -1,5 +1,6 @@
 describe('Brand logo', () => {
   it('shows owl brand mark on login without house glyph', () => {
+    cy.viewport(390, 844);
     cy.visit('/login');
     cy.injectAxe();
     cy.contains('Спокойная забота').should('be.visible');

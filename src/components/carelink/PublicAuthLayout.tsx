@@ -89,6 +89,9 @@ export function PublicAuthLayout({
         </aside>
 
         <section className="flex flex-col">
+          <div className="mb-6 lg:hidden">
+            <BrandMark compact />
+          </div>
           {gatewayBadge ? (
             <div className="mb-4 flex items-center justify-between text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
