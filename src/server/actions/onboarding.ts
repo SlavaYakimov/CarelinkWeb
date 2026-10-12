@@ -1,6 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+import { rethrowNextNavigation } from '@/server/actions/rethrow-navigation';
 import { z } from 'zod';
 import { getErrorMessage } from '@/lib/messages';
 import {
@@ -142,6 +143,7 @@ async function requestOnboardingEmailActionImpl(
     const sentAt = new Date().toISOString();
     return { sent: true, email, sentAt };
   } catch (err) {
+    rethrowNextNavigation(err);
     await clearOnboardingFlow(fid);
     if (err instanceof GatewayError) {
       if (err.code === 'RATE_LIMIT') {
@@ -166,6 +168,7 @@ async function resendOnboardingEmailActionImpl(
     await onboardingRequestEmail({ email }, { clientIp, deviceId });
     return { sent: true, email, sentAt: new Date().toISOString() };
   } catch (err) {
+    rethrowNextNavigation(err);
     if (err instanceof GatewayError) {
       if (err.code === 'RATE_LIMIT') {
         return {
@@ -217,6 +220,7 @@ async function verifyOnboardingEmailActionImpl(
     await persistOnboardingFlow(fid, flow);
     redirect('/onboarding/phone');
   } catch (err) {
+    rethrowNextNavigation(err);
     if (err instanceof GatewayError) {
       if (err.code === 'RATE_LIMIT') {
         redirect(`/login/too-many?retryAfter=${err.retryAfter ?? 60}`);
@@ -251,6 +255,7 @@ async function verifyOnboardingEmailLinkActionImpl(token: string): Promise<void>
     await persistOnboardingFlow(fid, flow);
     redirect('/onboarding/phone');
   } catch (err) {
+    rethrowNextNavigation(err);
     if (err instanceof GatewayError) {
       if (err.code === 'RATE_LIMIT') {
         redirect(`/login/too-many?retryAfter=${err.retryAfter ?? 60}`);
@@ -299,6 +304,7 @@ async function sendOnboardingPhoneOtpActionImpl(
     const sentAt = new Date().toISOString();
     return { smsSent: true, phoneMasked: maskRuPhoneE164(phoneE164), sentAt };
   } catch (err) {
+    rethrowNextNavigation(err);
     if (err instanceof GatewayError) {
       if (err.code === 'RATE_LIMIT') {
         redirect(`/login/too-many?retryAfter=${err.retryAfter ?? 60}`);
@@ -328,6 +334,7 @@ async function resendOnboardingPhoneOtpActionImpl(
     await persistOnboardingFlow(fid, { ...flow, smsSentAt: sentAt });
     return { smsSent: true, phoneMasked: maskRuPhoneE164(phoneE164), sentAt };
   } catch (err) {
+    rethrowNextNavigation(err);
     if (err instanceof GatewayError) {
       if (err.code === 'RATE_LIMIT') {
         return {
@@ -394,6 +401,7 @@ async function confirmOnboardingPhoneOtpActionImpl(
     await persistOnboardingFlow(fid, updated);
     redirect(verified.existingUser ? '/onboarding/existing' : '/onboarding/device');
   } catch (err) {
+    rethrowNextNavigation(err);
     if (err instanceof GatewayError) {
       if (err.code === 'RATE_LIMIT') {
         redirect(`/login/too-many?retryAfter=${err.retryAfter ?? 60}`);
@@ -444,6 +452,7 @@ async function leaveOnboardingToLoginActionImpl(formData?: FormData): Promise<vo
         { clientIp, deviceId },
       );
     } catch (err) {
+      rethrowNextNavigation(err);
       if (!(err instanceof GatewayError)) throw err;
       getLogger().warn({ code: err.code }, 'onboarding abandon failed');
     }
@@ -479,6 +488,7 @@ async function sendOnboardingDeviceSmsActionImpl(
     await persistOnboardingFlow(fid, { ...flow, deviceSmsSentAt: sentAt });
     return { smsSent: true, sentAt };
   } catch (err) {
+    rethrowNextNavigation(err);
     if (err instanceof GatewayError) {
       if (err.code === 'RATE_LIMIT') {
         redirect(`/login/too-many?retryAfter=${err.retryAfter ?? 60}`);
@@ -545,6 +555,7 @@ async function confirmOnboardingDeviceSmsActionImpl(
     await persistOnboardingFlow(fid, updated);
     redirect('/onboarding/password');
   } catch (err) {
+    rethrowNextNavigation(err);
     if (err instanceof GatewayError) {
       if (err.code === 'RATE_LIMIT') {
         redirect(`/login/too-many?retryAfter=${err.retryAfter ?? 60}`);
@@ -617,6 +628,7 @@ async function setupOnboardingPasswordActionImpl(
     }
     redirect('/onboarding/done');
   } catch (err) {
+    rethrowNextNavigation(err);
     if (err instanceof GatewayError) {
       if (err.code === 'RATE_LIMIT') {
         redirect(`/login/too-many?retryAfter=${err.retryAfter ?? 60}`);
@@ -667,6 +679,7 @@ async function checkOnboardingWorkspaceSlugImpl(
     }
     return { status: 'available', workspaceSlug: result.workspaceSlug };
   } catch (err) {
+    rethrowNextNavigation(err);
     if (err instanceof GatewayError) {
       if (err.code === 'RATE_LIMIT') {
         redirect(`/login/too-many?retryAfter=${err.retryAfter ?? 60}`);
@@ -763,6 +776,7 @@ async function finalizeOnboardingWorkspaceActionImpl(
     await persistOnboardingFlow(fid, updated);
     redirect('/onboarding/done');
   } catch (err) {
+    rethrowNextNavigation(err);
     if (err instanceof GatewayError) {
       if (err.code === 'RATE_LIMIT') {
         redirect(`/login/too-many?retryAfter=${err.retryAfter ?? 60}`);

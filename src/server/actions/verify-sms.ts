@@ -1,6 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+import { rethrowNextNavigation } from '@/server/actions/rethrow-navigation';
 import { getErrorMessage } from '@/lib/messages';
 import { otpFormSchema, phoneFormSchema } from '@/lib/forms/schemas';
 import { maskRuPhoneE164, normalizeRuPhone } from '@/lib/phone';
@@ -57,6 +58,7 @@ async function sendSignInSmsActionImpl(
     const sentAt = new Date().toISOString();
     return { smsSent: true, phoneMasked: maskRuPhoneE164(phoneE164), sentAt };
   } catch (err) {
+    rethrowNextNavigation(err);
     if (err instanceof GatewayError) {
       if (err.code === 'RATE_LIMIT') {
         redirect(`/login/too-many?retryAfter=${err.retryAfter ?? 60}`);
@@ -86,6 +88,7 @@ async function resendSignInSmsActionImpl(): Promise<VerifySmsPhoneState> {
       sentAt: new Date().toISOString(),
     };
   } catch (err) {
+    rethrowNextNavigation(err);
     if (err instanceof GatewayError && err.code === 'RATE_LIMIT') {
       return {
         error: getErrorMessage(err.code),
@@ -140,6 +143,7 @@ async function confirmSignInSmsActionImpl(
     });
     return {};
   } catch (err) {
+    rethrowNextNavigation(err);
     if (err instanceof GatewayError) {
       if (err.code === 'RATE_LIMIT') {
         redirect(`/login/too-many?retryAfter=${err.retryAfter ?? 60}`);

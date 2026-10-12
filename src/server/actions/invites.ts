@@ -2,6 +2,7 @@
 
 import { randomUUID } from 'node:crypto';
 import { redirect } from 'next/navigation';
+import { rethrowNextNavigation } from '@/server/actions/rethrow-navigation';
 import {
   inviteIdSchema,
   lookupInviteEmailSchema,
@@ -123,6 +124,7 @@ async function lookupMemberInviteEmailActionImpl(
     const res = await lookupMemberInviteEmail(parsed.data, ctx);
     return { registered: res.registered };
   } catch (err) {
+    rethrowNextNavigation(err);
     if (err instanceof GatewayError) {
       if (err.code === 'FORBIDDEN' || err.code === 'NOT_FOUND') {
         redirect('/forbidden');
@@ -171,6 +173,7 @@ async function createMemberInviteActionImpl(
       const uploaded = await uploadMemberInviteAvatar(avatarFile, ctx);
       avatarUrl = uploaded.avatarUrl;
     } catch (err) {
+      rethrowNextNavigation(err);
       if (err instanceof GatewayError) {
         const mapped = toFormState(err, INVITE_FIELD_MAP, getInviteErrorMessage);
         return {
@@ -200,6 +203,7 @@ async function createMemberInviteActionImpl(
       (registeredHint === 'true' ? 'existing' : registeredHint === 'false' ? 'new' : 'new');
     redirect(`/families/${familyId}/invites/sent?kind=${kind === 'existing' ? 'existing' : 'new'}`);
   } catch (err) {
+    rethrowNextNavigation(err);
     if (err instanceof GatewayError) {
       if (err.code === 'FORBIDDEN' || err.code === 'NOT_FOUND') {
         redirect('/forbidden');
@@ -230,6 +234,7 @@ async function resendMemberInviteActionImpl(
     await resendMemberInvite(inviteParsed.data, ctx);
     return { ok: true };
   } catch (err) {
+    rethrowNextNavigation(err);
     if (err instanceof GatewayError) {
       if (err.code === 'FORBIDDEN') redirect('/forbidden');
       return {
@@ -255,6 +260,7 @@ async function revokeMemberInviteActionImpl(
     await revokeMemberInvite(inviteParsed.data, ctx);
     return { ok: true };
   } catch (err) {
+    rethrowNextNavigation(err);
     if (err instanceof GatewayError) {
       if (err.code === 'FORBIDDEN') redirect('/forbidden');
       return {
@@ -277,21 +283,8 @@ async function acceptMemberInviteActionImpl(
   const ctx = await requireSessionUser();
   try {
     await acceptMemberInvite(inviteParsed.data, ctx);
-    try {
-      await mergeSessionFromRebuild(ctx.sid, ctx.session, ctx.clientIp, ctx.deviceId);
-    } catch (mergeErr) {
-      if (mergeErr instanceof InvalidAuthSessionPayloadError) {
-        return { formError: 'Не удалось обновить сессию после принятия. Войдите снова.' };
-      }
-      if (mergeErr instanceof GatewayError) {
-        return {
-          formError: toFormState(mergeErr, INVITE_FIELD_MAP, getInviteErrorMessage).formError,
-        };
-      }
-      return { formError: 'Не удалось обновить сессию после принятия.' };
-    }
-    redirect('/families');
   } catch (err) {
+    rethrowNextNavigation(err);
     if (err instanceof GatewayError) {
       if (err.code === 'FORBIDDEN') redirect('/invites/unavailable?reason=not_invitee');
       if (err.code === 'ALREADY_EXISTS' || err.status === 409) {
@@ -306,6 +299,23 @@ async function acceptMemberInviteActionImpl(
     }
     return { formError: 'Не удалось принять приглашение' };
   }
+
+  try {
+    await mergeSessionFromRebuild(ctx.sid, ctx.session, ctx.clientIp, ctx.deviceId);
+  } catch (mergeErr) {
+    rethrowNextNavigation(mergeErr);
+    if (mergeErr instanceof InvalidAuthSessionPayloadError) {
+      return { formError: 'Не удалось обновить сессию после принятия. Войдите снова.' };
+    }
+    if (mergeErr instanceof GatewayError) {
+      return {
+        formError: toFormState(mergeErr, INVITE_FIELD_MAP, getInviteErrorMessage).formError,
+      };
+    }
+    return { formError: 'Не удалось обновить сессию после принятия.' };
+  }
+
+  redirect('/families');
 }
 
 export const acceptMemberInviteAction = withServerAction(acceptMemberInviteActionImpl);
@@ -322,6 +332,7 @@ async function declineMemberInviteActionImpl(
     await declineMemberInvite(inviteParsed.data, ctx);
     return { ok: true };
   } catch (err) {
+    rethrowNextNavigation(err);
     if (err instanceof GatewayError) {
       if (err.code === 'FORBIDDEN') redirect('/invites/unavailable?reason=not_invitee');
       if (err.status === 400) redirect('/invites/unavailable?reason=not_pending');

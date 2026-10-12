@@ -50,7 +50,7 @@ describe('session handler coverage', () => {
 
   it('no extra unwrapped action modules under server/actions', () => {
     const files = readdirSync(join(ROOT, 'server/actions')).filter((f) => f.endsWith('.ts'));
-    const allowed = new Set([...ACTION_FILES, 'request-context.ts']);
+    const allowed = new Set([...ACTION_FILES, 'request-context.ts', 'rethrow-navigation.ts']);
     for (const file of files) {
       expect(allowed.has(file), `add ${file} to session wrapper list or exempt`).toBe(true);
     }

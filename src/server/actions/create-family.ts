@@ -2,6 +2,7 @@
 
 import { randomUUID } from 'node:crypto';
 import { redirect } from 'next/navigation';
+import { rethrowNextNavigation } from '@/server/actions/rethrow-navigation';
 
 import { createFamilyFormSchema } from '@/lib/forms/schemas';
 import { zodFieldErrors } from '@/lib/forms/to-form-state';
@@ -64,6 +65,7 @@ async function createFamilyActionImpl(
     await saveSession(sessionCtx.sid, merged);
     redirect('/families');
   } catch (err) {
+    rethrowNextNavigation(err);
     if (err instanceof GatewayError) {
       if (err.code === 'RATE_LIMIT') {
         return { formError: 'Слишком много попыток. Попробуйте позже.' };

@@ -2,6 +2,7 @@
 
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
+import { rethrowNextNavigation } from '@/server/actions/rethrow-navigation';
 import { signInFormSchema, normalizeSlugInput } from '@/lib/forms/schemas';
 import { toFormState, zodFieldErrors } from '@/lib/forms/to-form-state';
 import { normalizeWorkspaceEmail } from '@/lib/workspace-email';
@@ -154,6 +155,7 @@ async function signInActionImpl(
       workspaceSlug,
     };
   } catch (err) {
+    rethrowNextNavigation(err);
     if (err instanceof GatewayError) {
       if (err.code === 'RATE_LIMIT') {
         const retry = err.retryAfter ?? 60;
