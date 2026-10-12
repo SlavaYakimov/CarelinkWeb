@@ -23,6 +23,16 @@ const otpScriptPath = path.join(__dirname, 'scripts/e2e/fetch-onboarding-otp.mjs
 const flushRedisScriptPath = path.join(__dirname, 'scripts/e2e/flush-redis.mjs');
 const approveRecoveryScriptPath = path.join(__dirname, 'scripts/e2e/approve-recovery-compose.mjs');
 const seedRecoveryFlowScriptPath = path.join(__dirname, 'scripts/e2e/seed-recovery-sent-flow.mjs');
+const runInvitesTaskScriptPath = path.join(__dirname, 'scripts/e2e/run-invites-task.mjs');
+
+async function runInvitesTask<T>(taskName: string, args: unknown): Promise<T> {
+  const { stdout } = await execFileAsync(
+    process.execPath,
+    [runInvitesTaskScriptPath, taskName, JSON.stringify(args ?? {})],
+    { env: process.env },
+  );
+  return JSON.parse(stdout.trim()) as T;
+}
 
 type ApproveRecoveryRequestArgs = {
   phoneDigits: string;
@@ -99,6 +109,102 @@ export default defineConfig({
             cachedAxeSource = fs.readFileSync(axeMinJsPath, 'utf8');
           }
           return cachedAxeSource;
+        },
+        invitesResolveKeeperContext(keeper: {
+          workspaceEmail: string;
+          password: string;
+          phoneDigits: string;
+        }) {
+          return runInvitesTask('invitesResolveKeeperContext', keeper);
+        },
+        invitesSeedPendingExisting(args: {
+          keeper: { workspaceEmail: string; password: string; phoneDigits: string };
+          inviteeEmail: string;
+          inviteePhoneDigits: string;
+          displayName?: string;
+        }) {
+          return runInvitesTask('invitesSeedPendingExisting', args);
+        },
+        invitesFetchMemberEmail(args: {
+          to: string;
+          skipPriorMatches?: number;
+          bodyIncludes?: string;
+        }) {
+          return runInvitesTask('invitesFetchMemberEmail', args);
+        },
+        invitesHammerLookup(args: {
+          gatewayUrl: string;
+          familyId: string;
+          access: string;
+          count: number;
+          email: string;
+        }) {
+          return runInvitesTask('invitesHammerLookup', args);
+        },
+        invitesExpire(args: { inviteId: string }) {
+          return runInvitesTask('invitesExpire', args);
+        },
+        invitesSetFlag(args: { familyId: string; enabled: boolean }) {
+          return runInvitesTask('invitesSetFlag', args);
+        },
+        invitesAcceptWrongUser(args: {
+          keeper: { workspaceEmail: string; password: string; phoneDigits: string };
+          member: { workspaceEmail: string; password: string; phoneDigits: string };
+          inviteId: string;
+        }) {
+          return runInvitesTask('invitesAcceptWrongUser', args);
+        },
+        invitesRevoke(args: {
+          keeper: { workspaceEmail: string; password: string; phoneDigits: string };
+          inviteId: string;
+        }) {
+          return runInvitesTask('invitesRevoke', args);
+        },
+        invitesGatewayLookup(args: {
+          keeper: { workspaceEmail: string; password: string; phoneDigits: string };
+          email: string;
+        }) {
+          return runInvitesTask('invitesGatewayLookup', args);
+        },
+        invitesGatewayCreateAsMember(args: {
+          member: { workspaceEmail: string; password: string; phoneDigits: string };
+          familyId: string;
+          body: Record<string, unknown>;
+        }) {
+          return runInvitesTask('invitesGatewayCreateAsMember', args);
+        },
+        invitesGatewayAccept(args: { gatewayUrl: string; access: string; inviteId: string }) {
+          return runInvitesTask('invitesGatewayAccept', args);
+        },
+        invitesGatewayAcceptAsInvitee(args: {
+          invitee: { workspaceEmail: string; password: string; phoneDigits: string };
+          inviteId: string;
+        }) {
+          return runInvitesTask('invitesGatewayAcceptAsInvitee', args);
+        },
+        invitesGatewayLookupRaw(args: {
+          gatewayUrl: string;
+          familyId: string;
+          access: string;
+          email: string;
+        }) {
+          return runInvitesTask('invitesGatewayLookupRaw', args);
+        },
+        invitesGatewayCreate(args: {
+          gatewayUrl: string;
+          familyId: string;
+          access: string;
+          body: Record<string, unknown>;
+        }) {
+          return runInvitesTask('invitesGatewayCreate', args);
+        },
+        invitesGatewayResend(args: {
+          gatewayUrl: string;
+          familyId: string;
+          access: string;
+          inviteId: string;
+        }) {
+          return runInvitesTask('invitesGatewayResend', args);
         },
       });
       return config;

@@ -186,4 +186,23 @@ export function normalizeSlugInput(raw: string): string {
   return normalizeWorkspaceSlug(raw);
 }
 
+export const inviteIdSchema = z.string().uuid('Неверный идентификатор приглашения');
+
+export const memberInviteFormSchema = z.object({
+  displayName: displayNameSchema,
+  personalEmail: emailFieldSchema,
+  phone: phoneRawSchema,
+  roleTemplateId: z.string().uuid('Выберите роль'),
+  avatarUrl: z.string().url().optional().or(z.literal('')),
+});
+
+export const memberInviteClientSchema = memberInviteFormSchema.refine(
+  (v) => Boolean(phoneRawToE164(v.phone)),
+  { message: getValidationMessage('phoneInvalid'), path: ['phone'] },
+);
+
+export const lookupInviteEmailSchema = z.object({
+  email: emailFieldSchema,
+});
+
 export { isValidWorkspaceSlug, normalizeWorkspaceSlug };

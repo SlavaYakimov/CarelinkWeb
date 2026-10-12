@@ -9,9 +9,14 @@ import { Button } from '@/components/ui/button';
 export type OnboardingDonePanelProps = {
   workspaceEmail: string;
   displayName: string;
+  familyId?: string;
 };
 
-export function OnboardingDonePanel({ workspaceEmail, displayName }: OnboardingDonePanelProps) {
+export function OnboardingDonePanel({
+  workspaceEmail,
+  displayName,
+  familyId,
+}: OnboardingDonePanelProps) {
   const [copied, setCopied] = React.useState(false);
 
   const copyLogin = async () => {
@@ -53,7 +58,9 @@ export function OnboardingDonePanel({ workspaceEmail, displayName }: OnboardingD
           <Link href="/families">На главную</Link>
         </Button>
         <Button asChild variant="secondary" className="flex-1">
-          <Link href="/families">Пригласить участников позже</Link>
+          <Link href={familyId ? `/families/${familyId}/invites/new` : '/families'}>
+            Пригласить участника
+          </Link>
         </Button>
       </div>
     </StepShell>

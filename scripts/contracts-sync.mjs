@@ -1,25 +1,51 @@
 #!/usr/bin/env node
 /**
- * Pulls contracts/auth.openapi.yaml from CarelinkAuth (private repo).
- * Set CONTRACTS_SYNC_URL (raw file URL) or GITHUB_TOKEN to fetch from GitHub API.
+ * Pulls auth OpenAPI from CarelinkAuth (private repo) → contracts/auth.openapi.yaml.
+ *
+ * Family member-invite / role-template routes: **not** synced — CarelinkAuth
+ * `docs/backend/family/openapi.yaml` is too sparse; `contracts/family.openapi.yaml`
+ * in this repo is the source of truth until BE moves full schemas to the server doc.
+ * TODO(BE-20): replace family.openapi.yaml vendoring with upstream sync once complete.
+ *
+ * Set GITHUB_TOKEN (or CONTRACTS_SYNC_TOKEN) for GitHub API raw fetch.
+ * Optional: CONTRACTS_SYNC_AUTH_URL, CONTRACTS_SYNC_REF (default main).
  */
 import { writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { dumpYaml, parseYaml } from './contracts-openapi-utils.mjs';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const outPath = join(root, 'contracts', 'auth.openapi.yaml');
+const authOut = join(root, 'contracts', 'auth.openapi.yaml');
 
-const defaultRaw =
-  'https://raw.githubusercontent.com/SlavaYakimov/CarelinkAuth/main/docs/backend/auth/openapi.yaml';
+const repo = process.env.CONTRACTS_SYNC_REPO ?? 'SlavaYakimov/CarelinkAuth';
+const ref = process.env.CONTRACTS_SYNC_REF ?? 'main';
+const authPath = process.env.CONTRACTS_SYNC_AUTH_PATH ?? 'docs/backend/auth/openapi.yaml';
 
-async function main() {
-  const url = process.env.CONTRACTS_SYNC_URL ?? defaultRaw;
-  const token = process.env.GITHUB_TOKEN;
+const defaultAuthRaw = `https://raw.githubusercontent.com/${repo}/${ref}/${authPath}`;
 
-  if (!process.env.CONTRACTS_SYNC_URL && !token) {
+/** CarelinkAuth OpenAPI still documents 4-digit OTP; e2e and staging use 6 digits (doc bug). */
+function patchWorkspaceVerifyPhoneCodeLength(authDoc) {
+  const schema = authDoc.components?.schemas?.WorkspaceSignInVerifyPhoneRequest;
+  if (!schema?.properties?.code || typeof schema.properties.code !== 'object') {
+    return authDoc;
+  }
+  const code = schema.properties.code;
+  code.minLength = 6;
+  code.maxLength = 6;
+  if (code.example === '1234') {
+    delete code.example;
+  }
+  return authDoc;
+}
+
+async function fetchAuthSpec() {
+  const token = process.env.CONTRACTS_SYNC_TOKEN ?? process.env.GITHUB_TOKEN;
+  const resolvedUrl = process.env.CONTRACTS_SYNC_AUTH_URL ?? process.env.CONTRACTS_SYNC_URL ?? defaultAuthRaw;
+
+  if (!token && resolvedUrl.includes('raw.githubusercontent.com')) {
     console.error(
-      'contracts:sync: задайте CONTRACTS_SYNC_URL (URL raw openapi.yaml) или GITHUB_TOKEN для доступа к приватному CarelinkAuth.',
+      'contracts:sync: нужен GITHUB_TOKEN / CONTRACTS_SYNC_TOKEN (приватный CarelinkAuth) или CONTRACTS_SYNC_AUTH_URL.',
     );
     process.exit(1);
   }
@@ -29,20 +55,29 @@ async function main() {
     headers.Authorization = `Bearer ${token}`;
   }
 
-  const res = await fetch(url, { headers });
+  const res = await fetch(resolvedUrl, { headers });
   if (!res.ok) {
-    console.error(`contracts:sync: HTTP ${res.status} ${res.statusText} для ${url}`);
+    console.error(`contracts:sync: HTTP ${res.status} ${res.statusText} для auth (${resolvedUrl})`);
     process.exit(1);
   }
 
   const body = await res.text();
   if (!body.includes('openapi:')) {
-    console.error('contracts:sync: ответ не похож на OpenAPI YAML');
+    console.error('contracts:sync: ответ auth не похож на OpenAPI YAML');
     process.exit(1);
   }
+  return body;
+}
 
-  writeFileSync(outPath, body, 'utf8');
-  console.log(`contracts:sync: записано ${outPath}`);
+async function main() {
+  const authBody = await fetchAuthSpec();
+  let authDoc = parseYaml(authBody);
+  authDoc = patchWorkspaceVerifyPhoneCodeLength(authDoc);
+  writeFileSync(authOut, dumpYaml(authDoc), 'utf8');
+  console.log(`contracts:sync: записано ${authOut}`);
+  console.log(
+    'contracts:sync: contracts/family.openapi.yaml не обновлялся (web — source of truth для invites; см. TODO BE-20).',
+  );
 }
 
 main().catch((err) => {

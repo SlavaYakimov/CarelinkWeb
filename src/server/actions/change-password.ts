@@ -1,6 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+import { rethrowNextNavigation } from '@/server/actions/rethrow-navigation';
 import { getErrorMessage } from '@/lib/messages';
 import { changePasswordFormSchema } from '@/lib/forms/schemas';
 import { GatewayError } from '@/server/gateway/errors';
@@ -78,6 +79,7 @@ async function changePasswordActionImpl(
     await clearSignInFlow(fid);
     redirect(next);
   } catch (err) {
+    rethrowNextNavigation(err);
     if (err instanceof GatewayError) {
       if (err.code === 'RATE_LIMIT') {
         redirect(`/login/too-many?retryAfter=${err.retryAfter ?? 60}`);

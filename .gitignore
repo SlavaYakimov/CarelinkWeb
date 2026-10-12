@@ -42,5 +42,6 @@ yarn-error.log*
 # vitest
 vitest.config.ts.timestamp-*
 tmp/
+contracts/gateway.openapi.yaml
 docs/stitch-ref/
 dump.rdb

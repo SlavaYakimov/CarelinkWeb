@@ -1,6 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+import { rethrowNextNavigation } from '@/server/actions/rethrow-navigation';
 import {
   phoneRawToE164,
   recoveryConfirmFormSchema,
@@ -63,6 +64,7 @@ async function recoveryRequestActionImpl(
       { clientIp, deviceId },
     );
   } catch (err) {
+    rethrowNextNavigation(err);
     if (err instanceof GatewayError) {
       if (err.code === 'RATE_LIMIT') {
         return { formError: 'Слишком много запросов. Попробуйте позже.' };
@@ -130,6 +132,7 @@ async function recoveryConfirmActionImpl(
     await setSessionCookie(sid);
     redirect(next);
   } catch (err) {
+    rethrowNextNavigation(err);
     if (err instanceof GatewayError) {
       if (err.code === 'RATE_LIMIT') {
         redirect('/login/too-many');

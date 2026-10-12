@@ -155,15 +155,18 @@ docker run --rm -p 3000:3000 \
 curl -s http://localhost:3000/api/health
 ```
 
-## Контракт auth
+## Контракт gateway
 
-Файл: `contracts/auth.openapi.yaml`. Типы: `pnpm contracts:generate` → `src/server/gateway/types.gen.ts`.
+- `contracts/auth.openapi.yaml` — auth (CarelinkAuth `docs/backend/auth/openapi.yaml`)
+- `contracts/family.openapi.yaml` — member invites / role templates (**vendored in CarelinkWeb**; `contracts:sync` does not overwrite — upstream family OpenAPI is incomplete; TODO BE-20)
+- `pnpm contracts:merge` → `contracts/gateway.openapi.yaml` (gitignored)
+- `pnpm contracts:generate` → `src/server/gateway/types.gen.ts`
 
 Синхронизация из CarelinkAuth:
 
 ```bash
 export GITHUB_TOKEN=...   # read access к CarelinkAuth
-pnpm contracts:sync
+pnpm contracts:sync && pnpm contracts:generate
 ```
 
 ## Staging gateway (ручные проверки)
