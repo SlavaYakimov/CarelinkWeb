@@ -377,7 +377,7 @@ export async function readFamilyListRoleForKeeper(args) {
 }
 
 /**
- * Gateway probe for owner-not-keeper (E18): documents family-service auth vs web BFF.
+ * Gateway probe for owner-not-keeper (E18): keeper or owner may mutate invites on family-service.
  *
  * @param {{ keeper: object; familyId: string; roleTemplateId: string; inviteId: string; inviteEmail: string; invitePhoneDigits: string }} args
  */
@@ -415,12 +415,6 @@ export async function probeOwnerNotKeeperInviteMutations(args) {
     access: ctx.access,
     inviteId: args.inviteId,
   });
-  const revoke = await revokeInviteGateway({
-    gatewayUrl: ctx.gatewayUrl,
-    familyId: args.familyId,
-    access: ctx.access,
-    inviteId: args.inviteId,
-  });
 
   return {
     ok: true,
@@ -432,8 +426,6 @@ export async function probeOwnerNotKeeperInviteMutations(args) {
     roleTemplatesStatus,
     resendStatus: resend.status,
     resendCode: resend.data?.code,
-    revokeStatus: revoke.status,
-    revokeCode: revoke.data?.code,
   };
 }
 

@@ -24,19 +24,19 @@ vi.mock('@/server/session/get-session', () => ({
   getSession: vi.fn(),
 }));
 
-describe('requireFamilyInviteKeeper', () => {
+describe('requireCanManageInvites', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('redirects to /forbidden when user is not keeper', async () => {
+  it('redirects to /forbidden when user is a plain member', async () => {
     fetchUserFamilies.mockResolvedValue([
       { id: familyId, role: 'member', isOwner: false, name: 'Fam' },
     ]);
 
-    const { requireFamilyInviteKeeper } = await import('@/server/data/family-invites');
+    const { requireCanManageInvites } = await import('@/server/data/family-invites');
 
-    await expect(requireFamilyInviteKeeper(familyId)).rejects.toMatchObject({
+    await expect(requireCanManageInvites(familyId)).rejects.toMatchObject({
       digest: expect.stringContaining('/forbidden'),
     });
   });
@@ -46,9 +46,9 @@ describe('requireFamilyInviteKeeper', () => {
       { id: familyId, role: 'keeper', isOwner: false, name: 'Fam' },
     ]);
 
-    const { requireFamilyInviteKeeper } = await import('@/server/data/family-invites');
+    const { requireCanManageInvites } = await import('@/server/data/family-invites');
 
-    await expect(requireFamilyInviteKeeper(familyId)).resolves.toBeUndefined();
+    await expect(requireCanManageInvites(familyId)).resolves.toBeUndefined();
   });
 
   it('allows family owner even when role is not keeper', async () => {
@@ -56,8 +56,8 @@ describe('requireFamilyInviteKeeper', () => {
       { id: familyId, role: 'member', isOwner: true, name: 'Fam' },
     ]);
 
-    const { requireFamilyInviteKeeper } = await import('@/server/data/family-invites');
+    const { requireCanManageInvites } = await import('@/server/data/family-invites');
 
-    await expect(requireFamilyInviteKeeper(familyId)).resolves.toBeUndefined();
+    await expect(requireCanManageInvites(familyId)).resolves.toBeUndefined();
   });
 });

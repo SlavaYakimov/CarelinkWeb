@@ -1,9 +1,9 @@
 import { redirect } from 'next/navigation';
 import { FamilyInvitesList } from '@/components/carelink/FamilyInvitesList';
 import {
+  canManageInvites,
   fetchFamilyInvites,
-  isFamilyKeeper,
-  requireFamilyInviteKeeper,
+  requireCanManageInvites,
 } from '@/server/data/family-invites';
 import { getSession } from '@/server/session/get-session';
 
@@ -14,11 +14,11 @@ export default async function FamilyInvitesPage({ params }: PageProps) {
   const sessionCtx = await getSession();
   if (!sessionCtx) redirect('/session-ended');
   if (!sessionCtx.session.families[familyId]) redirect('/families');
-  await requireFamilyInviteKeeper(familyId);
+  await requireCanManageInvites(familyId);
 
-  const [invites, isKeeper] = await Promise.all([
+  const [invites, canManage] = await Promise.all([
     fetchFamilyInvites(familyId),
-    isFamilyKeeper(familyId),
+    canManageInvites(familyId),
   ]);
 
   return (
@@ -32,7 +32,7 @@ export default async function FamilyInvitesPage({ params }: PageProps) {
       {invites === null ? (
         <p className="text-sm text-muted-foreground">Не удалось загрузить список.</p>
       ) : (
-        <FamilyInvitesList familyId={familyId} invites={invites} isKeeper={isKeeper} />
+        <FamilyInvitesList familyId={familyId} invites={invites} canManageInvites={canManage} />
       )}
     </div>
   );
