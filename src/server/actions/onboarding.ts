@@ -68,11 +68,28 @@ async function ensureOnboardingDeviceRegistered(
 }
 import { withServerAction } from '@/server/session/with-session-handler';
 
-export type OnboardingEmailState = { error?: string; sent?: boolean; email?: string };
+export type OnboardingEmailState = {
+  error?: string;
+  sent?: boolean;
+  email?: string;
+  sentAt?: string;
+  retryAfter?: number;
+};
 export type OnboardingEmailOtpState = { error?: string };
-export type OnboardingPhoneState = { error?: string; smsSent?: boolean; phoneMasked?: string };
+export type OnboardingPhoneState = {
+  error?: string;
+  smsSent?: boolean;
+  phoneMasked?: string;
+  sentAt?: string;
+  retryAfter?: number;
+};
 export type OnboardingPhoneOtpState = { error?: string; attemptsHint?: string };
-export type OnboardingDeviceState = { error?: string; smsSent?: boolean };
+export type OnboardingDeviceState = {
+  error?: string;
+  smsSent?: boolean;
+  sentAt?: string;
+  retryAfter?: number;
+};
 export type OnboardingDeviceOtpState = { error?: string };
 export type OnboardingPasswordState = {
   fieldErrors?: { newPassword?: string; confirmPassword?: string };
@@ -122,7 +139,8 @@ async function requestOnboardingEmailActionImpl(
       step: 'email',
     };
     await persistOnboardingFlow(fid, flow);
-    return { sent: true, email };
+    const sentAt = new Date().toISOString();
+    return { sent: true, email, sentAt };
   } catch (err) {
     await clearOnboardingFlow(fid);
     if (err instanceof GatewayError) {
@@ -130,6 +148,34 @@ async function requestOnboardingEmailActionImpl(
         redirect(`/login/too-many?retryAfter=${err.retryAfter ?? 60}`);
       }
       return { error: getErrorMessage(err.code), email };
+    }
+    throw err;
+  }
+}
+
+async function resendOnboardingEmailActionImpl(
+  ..._args: [OnboardingEmailState, FormData?]
+): Promise<OnboardingEmailState> {
+  void _args;
+  const { flow } = await requireOnboardingFlow('email');
+  const email = flow.personalEmail?.trim().toLowerCase();
+  if (!email) redirect('/onboarding/email');
+
+  const { clientIp, deviceId } = await gatewayActionContext();
+  try {
+    await onboardingRequestEmail({ email }, { clientIp, deviceId });
+    return { sent: true, email, sentAt: new Date().toISOString() };
+  } catch (err) {
+    if (err instanceof GatewayError) {
+      if (err.code === 'RATE_LIMIT') {
+        return {
+          error: getErrorMessage(err.code),
+          email,
+          sent: true,
+          retryAfter: err.retryAfter ?? 60,
+        };
+      }
+      return { error: getErrorMessage(err.code), email, sent: true };
     }
     throw err;
   }
@@ -250,13 +296,52 @@ async function sendOnboardingPhoneOtpActionImpl(
       keeperDisplayName: parsed.data.displayName.trim(),
       smsSentAt: new Date().toISOString(),
     });
-    return { smsSent: true, phoneMasked: maskRuPhoneE164(phoneE164) };
+    const sentAt = new Date().toISOString();
+    return { smsSent: true, phoneMasked: maskRuPhoneE164(phoneE164), sentAt };
   } catch (err) {
     if (err instanceof GatewayError) {
       if (err.code === 'RATE_LIMIT') {
         redirect(`/login/too-many?retryAfter=${err.retryAfter ?? 60}`);
       }
       return { error: getErrorMessage(err.code) };
+    }
+    throw err;
+  }
+}
+
+async function resendOnboardingPhoneOtpActionImpl(
+  ..._args: [OnboardingPhoneState, FormData?]
+): Promise<OnboardingPhoneState> {
+  void _args;
+  const { fid, flow } = await requireOnboardingFlow('phone');
+  const phoneE164 = flow.phoneE164;
+  const onboardingChallengeId = flow.onboardingChallengeId;
+  if (!phoneE164 || !onboardingChallengeId) redirect('/onboarding/phone');
+
+  const { clientIp, deviceId } = await gatewayActionContext();
+  try {
+    await onboardingRequestPhoneOtp(
+      { onboardingChallengeId, phone: phoneE164 },
+      { clientIp, deviceId },
+    );
+    const sentAt = new Date().toISOString();
+    await persistOnboardingFlow(fid, { ...flow, smsSentAt: sentAt });
+    return { smsSent: true, phoneMasked: maskRuPhoneE164(phoneE164), sentAt };
+  } catch (err) {
+    if (err instanceof GatewayError) {
+      if (err.code === 'RATE_LIMIT') {
+        return {
+          error: getErrorMessage(err.code),
+          smsSent: true,
+          phoneMasked: maskRuPhoneE164(phoneE164),
+          retryAfter: err.retryAfter ?? 60,
+        };
+      }
+      return {
+        error: getErrorMessage(err.code),
+        smsSent: true,
+        phoneMasked: maskRuPhoneE164(phoneE164),
+      };
     }
     throw err;
   }
@@ -390,8 +475,9 @@ async function sendOnboardingDeviceSmsActionImpl(
       { onboardingChallengeId, userId, deviceId, phone: phoneE164 },
       { clientIp, deviceId },
     );
-    await persistOnboardingFlow(fid, { ...flow, deviceSmsSentAt: new Date().toISOString() });
-    return { smsSent: true };
+    const sentAt = new Date().toISOString();
+    await persistOnboardingFlow(fid, { ...flow, deviceSmsSentAt: sentAt });
+    return { smsSent: true, sentAt };
   } catch (err) {
     if (err instanceof GatewayError) {
       if (err.code === 'RATE_LIMIT') {
@@ -401,6 +487,12 @@ async function sendOnboardingDeviceSmsActionImpl(
     }
     throw err;
   }
+}
+
+async function resendOnboardingDeviceSmsActionImpl(
+  ...args: Parameters<typeof sendOnboardingDeviceSmsActionImpl>
+): Promise<OnboardingDeviceState> {
+  return sendOnboardingDeviceSmsActionImpl(...args);
 }
 
 async function confirmOnboardingDeviceSmsActionImpl(
@@ -691,11 +783,13 @@ async function finalizeOnboardingWorkspaceActionImpl(
 }
 
 export const requestOnboardingEmailAction = withServerAction(requestOnboardingEmailActionImpl);
+export const resendOnboardingEmailAction = withServerAction(resendOnboardingEmailActionImpl);
 export const verifyOnboardingEmailAction = withServerAction(verifyOnboardingEmailActionImpl);
 export const verifyOnboardingEmailLinkAction = withServerAction(
   verifyOnboardingEmailLinkActionImpl,
 );
 export const sendOnboardingPhoneOtpAction = withServerAction(sendOnboardingPhoneOtpActionImpl);
+export const resendOnboardingPhoneOtpAction = withServerAction(resendOnboardingPhoneOtpActionImpl);
 export const confirmOnboardingPhoneOtpAction = withServerAction(
   confirmOnboardingPhoneOtpActionImpl,
 );
@@ -704,6 +798,9 @@ export const continueOnboardingAsNewFamilyAction = withServerAction(
 );
 export const leaveOnboardingToLoginAction = withServerAction(leaveOnboardingToLoginActionImpl);
 export const sendOnboardingDeviceSmsAction = withServerAction(sendOnboardingDeviceSmsActionImpl);
+export const resendOnboardingDeviceSmsAction = withServerAction(
+  resendOnboardingDeviceSmsActionImpl,
+);
 export const confirmOnboardingDeviceSmsAction = withServerAction(
   confirmOnboardingDeviceSmsActionImpl,
 );

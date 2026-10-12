@@ -12,8 +12,8 @@ import {
 } from '@/server/actions/verify-phone';
 import { OtpInput } from '@/components/carelink/OtpInput';
 import { PhoneInput } from '@/components/carelink/PhoneInput';
+import { ResendButton } from '@/components/carelink/ResendButton';
 import { usePhoneField } from '@/components/carelink/use-phone-field';
-import { useResendCountdown } from '@/components/carelink/use-resend-countdown';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,12 +24,14 @@ const otpInitial: VerifyPhoneOtpState = {};
 export type VerifyPhoneFormProps = {
   initialPhoneMasked?: string;
   otpAlreadySent?: boolean;
+  initialSentAt?: string;
   workspaceEmail?: string;
 };
 
 export function VerifyPhoneForm({
   initialPhoneMasked,
   otpAlreadySent = false,
+  initialSentAt,
   workspaceEmail,
 }: VerifyPhoneFormProps) {
   const [phoneState, sendOtp, sending] = useActionState(sendSignInPhoneOtpAction, phoneInitial);
@@ -37,13 +39,16 @@ export function VerifyPhoneForm({
     confirmSignInPhoneOtpAction,
     otpInitial,
   );
-  const [, resendOtp, resending] = useActionState(resendSignInPhoneOtpAction, phoneInitial);
+  const [resendState, resendOtp, resending] = useActionState(
+    resendSignInPhoneOtpAction,
+    phoneInitial,
+  );
   const phone = usePhoneField();
   const [code, setCode] = React.useState('');
-  const resend = useResendCountdown({ startOnMount: otpAlreadySent, trigger: phoneState.otpSent });
 
-  const otpSent = otpAlreadySent || phoneState.otpSent;
-  const phoneMasked = phoneState.phoneMasked ?? initialPhoneMasked;
+  const otpSent = otpAlreadySent || phoneState.otpSent || resendState.otpSent;
+  const phoneMasked = phoneState.phoneMasked ?? resendState.phoneMasked ?? initialPhoneMasked;
+  const sentAt = phoneState.sentAt ?? resendState.sentAt ?? initialSentAt;
 
   return (
     <Card className="mx-auto w-full max-w-[440px] shadow-card">
@@ -63,7 +68,12 @@ export function VerifyPhoneForm({
                 <AlertDescription>{phoneState.error}</AlertDescription>
               </Alert>
             ) : null}
-            <PhoneInput value={phone.display} onChange={phone.onChange} disabled={sending} />
+            <PhoneInput
+              value={phone.display}
+              onChange={phone.onChange}
+              disabled={sending}
+              error={phoneState.error}
+            />
             <input type="hidden" name="phone" value={phone.submitValue} />
             <Button type="submit" className="w-full" disabled={sending || !phone.e164}>
               Отправить код
@@ -72,50 +82,40 @@ export function VerifyPhoneForm({
           </form>
         ) : (
           <div className="space-y-4">
-            <form action={confirmOtp} className="space-y-4">
+            <form id="verify-phone-otp-form" action={confirmOtp} className="space-y-4">
               {otpState.error ? (
                 <Alert variant="destructive">
                   <AlertDescription>{otpState.error}</AlertDescription>
                 </Alert>
               ) : null}
-              {otpState.attemptsHint ? (
-                <p className="text-xs text-muted-foreground">{otpState.attemptsHint}</p>
-              ) : null}
               <p className="text-sm text-muted-foreground">
                 {phoneMasked ? `Код из SMS отправлен на ${phoneMasked}.` : 'Введите 6-значный код.'}
               </p>
-              <input type="hidden" name="code" value={code} />
               <OtpInput
                 id="verify-phone-otp"
                 labelText="Код из SMS"
-                length={6}
+                name="code"
+                formId="verify-phone-otp-form"
                 value={code}
                 onChange={setCode}
                 disabled={confirming}
                 error={otpState.error}
+                attemptsHint={otpState.attemptsHint}
               />
               <Button type="submit" className="w-full" disabled={confirming || code.length < 6}>
                 Продолжить
                 <ArrowRight className="size-4" aria-hidden />
               </Button>
             </form>
-            {resend.secondsLeft > 0 ? (
-              <p className="text-center text-sm text-muted-foreground">
-                Отправить снова через {resend.secondsLeft} с
-              </p>
-            ) : (
-              <form action={resendOtp}>
-                <Button
-                  type="submit"
-                  variant="ghost"
-                  className="w-full"
-                  disabled={resending}
-                  onClick={resend.restart}
-                >
-                  Отправить код повторно
-                </Button>
-              </form>
-            )}
+            <ResendButton
+              action={resendOtp}
+              pending={resending}
+              successAt={sentAt}
+              startOnMount={otpAlreadySent}
+              retryAfter={resendState.retryAfter}
+              error={resendState.error}
+              onResendSuccess={() => setCode('')}
+            />
           </div>
         )}
       </CardContent>

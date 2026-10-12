@@ -9,23 +9,13 @@ Cypress.Commands.add('fillPhoneOtp', (code: string) => {
   }
 });
 
-Cypress.Commands.add('fillOtp', (code: string, firstInputId?: string) => {
+Cypress.Commands.add('fillOtp', (code: string, inputId?: string) => {
   const digits = code.replace(/\D/g, '').slice(0, 6);
   expect(digits).to.have.length(6);
 
-  if (firstInputId) {
-    cy.get(`#${firstInputId}`).click().type(digits[0]!);
-    for (let i = 1; i < 6; i += 1) {
-      cy.get(`[aria-label="Цифра ${i + 1} из 6"]`).type(digits[i]!);
-    }
-    return;
-  }
-
-  for (let i = 0; i < 6; i += 1) {
-    cy.get(`[aria-label="Цифра ${i + 1} из 6"]`)
-      .click()
-      .type(digits[i]!);
-  }
+  const selector = inputId ? `#${inputId}` : '[data-otp-input]';
+  cy.get(selector).first().click().clear().type(digits, { delay: 0 });
+  cy.get(selector).first().should('have.value', digits);
 });
 
 Cypress.Commands.add('onboardingEnterEmail', (email: string) => {
@@ -171,7 +161,7 @@ Cypress.Commands.add(
       if (pathname === '/login/verify-phone') {
         cy.get('#phone').clear().type(phoneDigits);
         cy.contains('button', 'Отправить код').click();
-        cy.get('[aria-label="Цифра 1 из 6"]', { timeout: 30_000 }).should('be.visible');
+        cy.get('[data-otp-input]', { timeout: 30_000 }).should('be.visible');
         cy.task<string>('fetchOnboardingOtp', {
           channel: 'sms',
           to: phoneDigits,

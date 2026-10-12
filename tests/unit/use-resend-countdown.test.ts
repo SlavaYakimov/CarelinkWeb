@@ -17,18 +17,14 @@ describe('useResendCountdown', () => {
   afterEach(() => vi.useRealTimers());
 
   it('is idle when not started on mount', () => {
-    const { result } = renderHook(() =>
-      useResendCountdown({ startOnMount: false, trigger: undefined }),
-    );
+    const { result } = renderHook(() => useResendCountdown({ startOnMount: false }));
     expect(result.current.secondsLeft).toBe(0);
     act(() => vi.advanceTimersByTime(3000));
     expect(result.current.secondsLeft).toBe(0);
   });
 
   it('counts down from mount and stops at zero', () => {
-    const { result } = renderHook(() =>
-      useResendCountdown({ startOnMount: true, trigger: undefined, seconds: 3 }),
-    );
+    const { result } = renderHook(() => useResendCountdown({ startOnMount: true, seconds: 3 }));
     expect(result.current.secondsLeft).toBe(3);
     act(() => vi.advanceTimersByTime(1000));
     expect(result.current.secondsLeft).toBe(2);
@@ -37,28 +33,22 @@ describe('useResendCountdown', () => {
     expect(result.current.secondsLeft).toBe(0);
   });
 
-  it('starts when trigger becomes true', () => {
+  it('starts when successAt changes', () => {
     const { result, rerender } = renderHook(
-      ({ trigger }: { trigger: boolean | undefined }) =>
-        useResendCountdown({ startOnMount: false, trigger, seconds: 60 }),
-      { initialProps: { trigger: undefined as boolean | undefined } },
+      ({ successAt }: { successAt?: string }) =>
+        useResendCountdown({ startOnMount: false, successAt, seconds: 60 }),
+      { initialProps: { successAt: undefined as string | undefined } },
     );
     expect(result.current.secondsLeft).toBe(0);
-    rerender({ trigger: true });
+    rerender({ successAt: '2024-01-01T00:00:00.000Z' });
     expect(result.current.secondsLeft).toBe(60);
     act(() => vi.advanceTimersByTime(1000));
     expect(result.current.secondsLeft).toBe(59);
   });
 
-  it('restart resets to full duration', () => {
-    const { result } = renderHook(() =>
-      useResendCountdown({ startOnMount: true, trigger: undefined, seconds: 10 }),
-    );
-    act(() => vi.advanceTimersByTime(10_000));
-    expect(result.current.secondsLeft).toBe(0);
-    act(() => result.current.restart());
-    expect(result.current.secondsLeft).toBe(10);
-    act(() => vi.advanceTimersByTime(1000));
-    expect(result.current.secondsLeft).toBe(9);
+  it('applyRetryAfter sets cooldown from server', () => {
+    const { result } = renderHook(() => useResendCountdown({ startOnMount: false, seconds: 60 }));
+    act(() => result.current.applyRetryAfter(25));
+    expect(result.current.secondsLeft).toBe(25);
   });
 });

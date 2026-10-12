@@ -14,6 +14,8 @@ export type VerifyPhoneState = {
   error?: string;
   phoneMasked?: string;
   otpSent?: boolean;
+  sentAt?: string;
+  retryAfter?: number;
 };
 
 export type VerifyPhoneOtpState = {
@@ -58,7 +60,11 @@ async function sendSignInPhoneOtpActionImpl(
       phoneE164,
       smsSentAt: new Date().toISOString(),
     });
-    return { otpSent: true, phoneMasked: maskRuPhoneE164(phoneE164) };
+    return {
+      otpSent: true,
+      phoneMasked: maskRuPhoneE164(phoneE164),
+      sentAt: new Date().toISOString(),
+    };
   } catch (err) {
     if (err instanceof GatewayError) {
       if (err.code === 'RATE_LIMIT') {
@@ -84,12 +90,27 @@ async function resendSignInPhoneOtpActionImpl(
   try {
     await workspaceSignInRequestOtp({ challengeId, phone: phoneE164 }, { clientIp, deviceId });
     await persistSignInFlow(fid, { ...flow, smsSentAt: new Date().toISOString() });
-    return { otpSent: true, phoneMasked: maskRuPhoneE164(phoneE164) };
+    return {
+      otpSent: true,
+      phoneMasked: maskRuPhoneE164(phoneE164),
+      sentAt: new Date().toISOString(),
+    };
   } catch (err) {
     if (err instanceof GatewayError && err.code === 'RATE_LIMIT') {
-      redirect(`/login/too-many?retryAfter=${err.retryAfter ?? 60}`);
+      return {
+        error: getErrorMessage(err.code),
+        otpSent: true,
+        phoneMasked: maskRuPhoneE164(phoneE164),
+        retryAfter: err.retryAfter ?? 60,
+      };
     }
-    if (err instanceof GatewayError) return { error: getErrorMessage(err.code) };
+    if (err instanceof GatewayError) {
+      return {
+        error: getErrorMessage(err.code),
+        otpSent: true,
+        phoneMasked: maskRuPhoneE164(phoneE164),
+      };
+    }
     throw err;
   }
 }

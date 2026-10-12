@@ -12,8 +12,8 @@ import {
 } from '@/server/actions/verify-sms';
 import { OtpInput } from '@/components/carelink/OtpInput';
 import { PhoneInput } from '@/components/carelink/PhoneInput';
+import { ResendButton } from '@/components/carelink/ResendButton';
 import { usePhoneField } from '@/components/carelink/use-phone-field';
-import { useResendCountdown } from '@/components/carelink/use-resend-countdown';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -24,6 +24,7 @@ export type VerifySmsFormProps = {
   nextPath: string;
   initialPhoneMasked?: string;
   smsAlreadySent?: boolean;
+  initialSentAt?: string;
   bannerMessage?: string;
 };
 
@@ -31,20 +32,20 @@ export function VerifySmsForm({
   nextPath,
   initialPhoneMasked,
   smsAlreadySent = false,
+  initialSentAt,
   bannerMessage,
 }: VerifySmsFormProps) {
   const [phoneState, sendSms, sending] = useActionState(sendSignInSmsAction, phoneInitial);
   const [otpState, confirmOtp, confirming] = useActionState(confirmSignInSmsAction, otpInitial);
-  const [, resendSms, resending] = useActionState(
-    async () => resendSignInSmsAction(),
-    phoneInitial,
-  );
+  const [resendState, resendSms, resending] = useActionState(resendSignInSmsAction, phoneInitial);
   const phone = usePhoneField();
   const [code, setCode] = React.useState('');
-  const resend = useResendCountdown({ startOnMount: smsAlreadySent, trigger: phoneState.smsSent });
 
-  const smsSent = smsAlreadySent || phoneState.smsSent;
-  const phoneMasked = phoneState.phoneMasked ?? initialPhoneMasked;
+  const smsSent = smsAlreadySent || phoneState.smsSent || resendState.smsSent;
+  const phoneMasked = phoneState.phoneMasked ?? resendState.phoneMasked ?? initialPhoneMasked;
+  const sentAt = phoneState.sentAt ?? resendState.sentAt ?? initialSentAt;
+  const resendError = resendState.error;
+  const retryAfter = resendState.retryAfter;
 
   return (
     <Card className="mx-auto w-full max-w-[440px] shadow-card">
@@ -77,9 +78,8 @@ export function VerifySmsForm({
           </form>
         ) : (
           <div className="space-y-4">
-            <form action={confirmOtp} className="space-y-4">
+            <form id="verify-sms-otp-form" action={confirmOtp} className="space-y-4">
               <input type="hidden" name="next" value={nextPath} />
-              <input type="hidden" name="code" value={code} />
               <div>
                 <p
                   id="otp-label"
@@ -88,37 +88,31 @@ export function VerifySmsForm({
                   Код из SMS
                 </p>
                 <OtpInput
+                  id="otp"
                   labelledBy="otp-label"
+                  name="code"
+                  formId="verify-sms-otp-form"
                   value={code}
                   onChange={setCode}
                   disabled={confirming}
                   error={otpState.error}
+                  attemptsHint={otpState.attemptsHint}
                 />
-                {otpState.attemptsHint ? (
-                  <p className="mt-2 text-xs text-muted-foreground">{otpState.attemptsHint}</p>
-                ) : null}
               </div>
               <Button type="submit" className="w-full" disabled={confirming || code.length < 6}>
                 Подтвердить
                 <ArrowRight className="size-4" aria-hidden />
               </Button>
             </form>
-            <div className="text-center text-sm text-muted-foreground">
-              {resend.secondsLeft > 0 ? (
-                <span>Отправить код повторно через {resend.label}</span>
-              ) : (
-                <form action={resendSms} className="inline">
-                  <button
-                    type="submit"
-                    className="text-primary underline-offset-2 hover:underline"
-                    disabled={resending}
-                    onClick={resend.restart}
-                  >
-                    Отправить код повторно
-                  </button>
-                </form>
-              )}
-            </div>
+            <ResendButton
+              action={resendSms}
+              pending={resending}
+              successAt={sentAt}
+              startOnMount={smsAlreadySent}
+              retryAfter={retryAfter}
+              error={resendError}
+              onResendSuccess={() => setCode('')}
+            />
           </div>
         )}
       </CardContent>
