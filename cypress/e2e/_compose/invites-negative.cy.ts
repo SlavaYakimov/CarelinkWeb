@@ -252,6 +252,80 @@ describe('invites compose negative and infra', () => {
     });
   });
 
+  it('E18: owner-not-keeper — web isOwner gate vs family-service keeper-only mutations', () => {
+    const ts = Date.now();
+    const inviteEmail = `e2e.owner.${ts}@example.com`;
+    const invitePhone = `906${String(ts).slice(-7)}`;
+
+    seedKeeper(ts).then((keeper) => {
+      cy.task('invitesSeedPendingExisting', {
+        keeper,
+        inviteeEmail: inviteEmail,
+        inviteePhoneDigits: invitePhone,
+        displayName: 'E18 Seed',
+      }).then((seed) => {
+        cy.task('invitesSeedOwnerNotKeeper', { keeper, familyId: keeper.familyId }).then(
+          (demote: { ok: boolean; role?: string; isOwner?: boolean; message?: string }) => {
+            expect(demote.ok, demote.message ?? 'seed owner-not-keeper').to.eq(true);
+            expect(demote.role).to.not.eq('keeper');
+            expect(demote.isOwner).to.eq(true);
+          },
+        );
+
+        cy.task('invitesProbeOwnerNotKeeper', {
+          keeper,
+          familyId: keeper.familyId,
+          roleTemplateId: keeper.roleTemplateId,
+          inviteId: seed.inviteId,
+          inviteEmail: `e2e.owner.probe.${ts}@example.com`,
+          invitePhoneDigits: `907${String(ts).slice(-7)}`,
+        }).then(
+          (probe: {
+            ok: boolean;
+            createStatus: number;
+            resendStatus: number;
+            revokeStatus: number;
+            listStatus: number;
+            roleTemplatesStatus: number;
+          }) => {
+            expect(probe.ok).to.eq(true);
+            expect(probe.listStatus).to.eq(200);
+            expect(probe.roleTemplatesStatus).to.eq(200);
+            expect(probe.createStatus).to.be.oneOf([403, 401]);
+            expect(probe.resendStatus).to.be.oneOf([403, 401]);
+            expect(probe.revokeStatus).to.be.oneOf([403, 401]);
+          },
+        );
+
+        cy.clearAllCookies();
+        cy.invitesSignInShortcut(keeper.workspaceEmail, keeper.password);
+        cy.visit(`/families/${keeper.familyId}/invites/new`);
+        cy.location('pathname', { timeout: 30_000 }).should(
+          'eq',
+          `/families/${keeper.familyId}/invites/new`,
+        );
+        cy.contains('h1', 'Пригласить участника').should('be.visible');
+
+        cy.invitesFillForm({
+          displayName: 'E18 Owner UI',
+          personalEmail: `e2e.owner.ui.${ts}@example.com`,
+          phoneDigits: `908${String(ts).slice(-7)}`,
+          waitLookup: 'new',
+        });
+        cy.invitesSubmitForm();
+        cy.location('pathname', { timeout: 45_000 }).should('eq', '/forbidden');
+
+        cy.visit(`/families/${keeper.familyId}/invites`);
+        cy.contains('E18 Seed', { timeout: 30_000 }).should('be.visible');
+        cy.contains('button', 'Отправить снова').click();
+        cy.location('pathname', { timeout: 20_000 }).should('eq', '/forbidden');
+        cy.visit(`/families/${keeper.familyId}/invites`);
+        cy.contains('button', 'Отозвать').click();
+        cy.location('pathname', { timeout: 20_000 }).should('eq', '/forbidden');
+      });
+    });
+  });
+
   it('E17: non-keeper create returns 403 not 500 (BE-02 regression)', () => {
     const ts = Date.now();
     const inviteeTs = ts + 60;

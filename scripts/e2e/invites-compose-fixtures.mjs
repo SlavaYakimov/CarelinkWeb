@@ -13,11 +13,15 @@ import { waitComposeGatewayAndFamilyReady } from './compose-health-wait.mjs';
 import {
   acceptMemberInviteGateway,
   createMemberInviteGateway,
+  listFamilyMemberInvitesGateway,
+  listRoleTemplates,
   lookupInviteEmail,
   phoneE164FromDigits,
   resolveKeeperGatewayContext,
+  resendInviteGateway,
   revokeInviteGateway,
 } from './invites-gateway.mjs';
+import { getKeeperAccessToken } from './keeper-gateway-session.mjs';
 import { loadEnvLocal } from './load-env-local.mjs';
 
 const execFileAsync = promisify(execFile);
@@ -74,6 +78,17 @@ function sqlInviteIdLiteral(inviteId) {
     throw new Error(`invalid inviteId for SQL: ${trimmed.slice(0, 8)}…`);
   }
   return `'${trimmed}'::uuid`;
+}
+
+async function membershipsColumnExists(column) {
+  try {
+    const row = await execFamilySql(
+      `SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'memberships' AND column_name = '${column}' LIMIT 1`,
+    );
+    return row === '1';
+  } catch {
+    return false;
+  }
 }
 
 async function familyInviteFlagColumnExists() {
@@ -311,6 +326,147 @@ export async function createInviteAsMember(args) {
 /**
  * @param {string} [familyId]
  */
+/**
+ * Demote the family keeper to role=member while keeping workspace ownership (isOwner).
+ * Used for E18 owner-not-keeper matrix.
+ *
+ * @param {{ familyId: string }} args
+ */
+export async function demoteKeeperToOwnerMember(args) {
+  const familyLiteral = sqlFamilyIdLiteral(args.familyId);
+  const hasIsOwner = await membershipsColumnExists('is_owner');
+  const setOwner = hasIsOwner ? ', is_owner = TRUE' : '';
+  const sql = `UPDATE memberships SET role = 'member'${setOwner} WHERE family_id = ${familyLiteral} AND role = 'keeper' RETURNING user_id`;
+  const userId = await execFamilySql(sql);
+  if (!userId) {
+    return { ok: false, message: 'no keeper membership row updated' };
+  }
+  return { ok: true, userId };
+}
+
+/**
+ * @param {{ keeper: object; familyId: string }} args
+ */
+export async function readFamilyListRoleForKeeper(args) {
+  loadEnvLocal();
+  const gatewayUrl = process.env.GATEWAY_URL?.replace(/\/$/, '');
+  if (!gatewayUrl) throw new Error('GATEWAY_URL is not set');
+  const access = await getKeeperAccessToken({
+    workspaceEmail: args.keeper.workspaceEmail,
+    password: args.keeper.password,
+    phoneDigits: args.keeper.phoneDigits,
+  });
+  const { res, data } = await fetch(`${gatewayUrl}/v1/user/families?limit=24`, {
+    headers: { Authorization: `Bearer ${access}`, Accept: 'application/json' },
+    signal: AbortSignal.timeout(15_000),
+  }).then(async (r) => ({ res: r, data: await r.json().catch(() => ({})) }));
+  if (!res.ok) {
+    return { ok: false, status: res.status, message: 'list families failed' };
+  }
+  const family = (data.items ?? []).find((f) => f.id === args.familyId);
+  if (!family) {
+    return { ok: false, message: 'family not in list' };
+  }
+  return {
+    ok: true,
+    role: family.role,
+    isOwner: Boolean(family.isOwner),
+    access,
+    gatewayUrl,
+  };
+}
+
+/**
+ * Gateway probe for owner-not-keeper (E18): documents family-service auth vs web BFF.
+ *
+ * @param {{ keeper: object; familyId: string; roleTemplateId: string; inviteId: string; inviteEmail: string; invitePhoneDigits: string }} args
+ */
+export async function probeOwnerNotKeeperInviteMutations(args) {
+  const ctx = await readFamilyListRoleForKeeper({ keeper: args.keeper, familyId: args.familyId });
+  if (!ctx.ok) return { ok: false, ...ctx };
+
+  const phone = phoneE164FromDigits(args.invitePhoneDigits);
+  const create = await createMemberInviteGateway({
+    gatewayUrl: ctx.gatewayUrl,
+    familyId: args.familyId,
+    access: ctx.access,
+    body: {
+      roleTemplateId: args.roleTemplateId,
+      displayName: 'E18 Probe',
+      phone,
+      personalEmail: args.inviteEmail,
+    },
+  });
+  const list = await listFamilyMemberInvitesGateway({
+    gatewayUrl: ctx.gatewayUrl,
+    familyId: args.familyId,
+    access: ctx.access,
+  });
+  let roleTemplatesStatus = 500;
+  try {
+    await listRoleTemplates(ctx.gatewayUrl, args.familyId, ctx.access);
+    roleTemplatesStatus = 200;
+  } catch {
+    roleTemplatesStatus = 403;
+  }
+  const resend = await resendInviteGateway({
+    gatewayUrl: ctx.gatewayUrl,
+    familyId: args.familyId,
+    access: ctx.access,
+    inviteId: args.inviteId,
+  });
+  const revoke = await revokeInviteGateway({
+    gatewayUrl: ctx.gatewayUrl,
+    familyId: args.familyId,
+    access: ctx.access,
+    inviteId: args.inviteId,
+  });
+
+  return {
+    ok: true,
+    familyRole: ctx.role,
+    isOwner: ctx.isOwner,
+    createStatus: create.status,
+    createCode: create.data?.code,
+    listStatus: list.status,
+    roleTemplatesStatus,
+    resendStatus: resend.status,
+    resendCode: resend.data?.code,
+    revokeStatus: revoke.status,
+    revokeCode: revoke.data?.code,
+  };
+}
+
+/**
+ * @param {{ keeper: object; familyId: string }} args
+ */
+export async function seedOwnerNotKeeperState(args) {
+  const demote = await demoteKeeperToOwnerMember({ familyId: args.familyId });
+  if (!demote.ok) return demote;
+  const listCtx = await readFamilyListRoleForKeeper({
+    keeper: args.keeper,
+    familyId: args.familyId,
+  });
+  if (!listCtx.ok) {
+    return { ok: false, message: listCtx.message ?? 'family list after demote failed' };
+  }
+  if (listCtx.role === 'keeper') {
+    return { ok: false, message: 'gateway still reports keeper role after SQL demote' };
+  }
+  if (!listCtx.isOwner) {
+    return {
+      ok: false,
+      message: `expected isOwner=true after demote, got role=${listCtx.role} isOwner=${listCtx.isOwner}`,
+    };
+  }
+  return {
+    ok: true,
+    userId: demote.userId,
+    role: listCtx.role,
+    isOwner: listCtx.isOwner,
+  };
+}
+
 export async function fetchMemberUserIdForFamily(familyId) {
   const familyLiteral = sqlFamilyIdLiteral(familyId);
   const sql = `SELECT user_id FROM memberships WHERE family_id = ${familyLiteral} AND role <> 'keeper' ORDER BY created_at DESC LIMIT 1`;

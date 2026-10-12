@@ -206,6 +206,22 @@ export default defineConfig({
         }) {
           return runInvitesTask('invitesGatewayResend', args);
         },
+        invitesSeedOwnerNotKeeper(args: {
+          keeper: { workspaceEmail: string; password: string; phoneDigits: string };
+          familyId: string;
+        }) {
+          return runInvitesTask('invitesSeedOwnerNotKeeper', args);
+        },
+        invitesProbeOwnerNotKeeper(args: {
+          keeper: { workspaceEmail: string; password: string; phoneDigits: string };
+          familyId: string;
+          roleTemplateId: string;
+          inviteId: string;
+          inviteEmail: string;
+          invitePhoneDigits: string;
+        }) {
+          return runInvitesTask('invitesProbeOwnerNotKeeper', args);
+        },
       });
       return config;
     },

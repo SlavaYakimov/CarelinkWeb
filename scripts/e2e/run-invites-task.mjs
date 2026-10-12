@@ -6,10 +6,13 @@
 import { fetchMemberInviteEmail } from './fetch-member-invite-email.mjs';
 import {
   acceptInviteAsWrongUser,
+  createInviteAsMember,
   expireMemberInvite,
   gatewayLookupSmoke,
   hammerLookupEmail,
+  probeOwnerNotKeeperInviteMutations,
   revokeInviteFixture,
+  seedOwnerNotKeeperState,
   seedPendingExistingInvite,
   setFamilyMemberInvitesEnabled,
   setFamilyMemberInvitesEnabledAndVerify,
@@ -21,7 +24,6 @@ import {
   resolveKeeperGatewayContext,
   resendInviteGateway,
 } from './invites-gateway.mjs';
-import { createInviteAsMember } from './invites-compose-fixtures.mjs';
 
 const task = process.argv[2];
 const args = process.argv[3] ? JSON.parse(process.argv[3]) : {};
@@ -67,6 +69,10 @@ async function main() {
       return createMemberInviteGateway(args);
     case 'invitesGatewayResend':
       return resendInviteGateway(args);
+    case 'invitesSeedOwnerNotKeeper':
+      return seedOwnerNotKeeperState(args);
+    case 'invitesProbeOwnerNotKeeper':
+      return probeOwnerNotKeeperInviteMutations(args);
     default:
       throw new Error(`Unknown invites task: ${task}`);
   }
