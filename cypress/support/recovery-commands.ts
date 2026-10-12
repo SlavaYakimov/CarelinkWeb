@@ -39,11 +39,23 @@ Cypress.Commands.add(
   'submitRecoveryConfirm',
   (requestId: string, otpCode: string, newPassword: string) => {
     cy.get('#requestId').clear().type(requestId);
-    cy.fillOtp(otpCode, 'recovery-otp');
     cy.get('#newPassword').clear().type(newPassword, { log: false });
     cy.get('#confirmPassword').clear().type(newPassword, { log: false });
+    cy.get('#requestId').then(($el) => {
+      $el[0].focus();
+      $el[0].blur();
+    });
+    cy.get('#newPassword').then(($el) => {
+      $el[0].focus();
+      $el[0].blur();
+    });
+    cy.get('#confirmPassword').then(($el) => {
+      $el[0].focus();
+      $el[0].blur();
+    });
+    cy.fillOtp(otpCode, 'recovery-otp');
     cy.get('input[name="code"]').should('have.value', otpCode.replace(/\D/g, '').slice(0, 6));
-    cy.contains('button', 'Сохранить и войти').click();
+    cy.clickSubmitWhenEnabled('Сохранить и войти');
   },
 );
 

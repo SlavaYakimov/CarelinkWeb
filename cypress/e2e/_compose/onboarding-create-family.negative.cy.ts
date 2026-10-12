@@ -208,10 +208,13 @@ describe('onboarding create family — negative (compose BE-21)', () => {
     const email = uniqueEmail();
     advanceToPasswordStep(email, displayName, uniquePhoneDigits());
     cy.onboardingEnterPassword(password);
+    cy.get('#displayName').clear().type(displayName);
     cy.get('#workspaceSlug').clear().type('ab');
-    cy.get('#workspaceSlug').focus().trigger('blur');
-    cy.contains('Адрес семьи не короче 3 символов', { timeout: 10_000 }).should('be.visible');
-    cy.contains('button', 'Создать семью').should('be.disabled');
+    cy.assertGatedValidation({
+      submitLabel: 'Создать семью',
+      blurSelector: '#workspaceSlug',
+      errorText: 'Не короче 3 символов',
+    });
   });
 
   it('keeps workspace submit disabled until slug debounce check completes', () => {

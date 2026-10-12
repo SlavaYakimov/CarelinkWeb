@@ -159,7 +159,11 @@ Cypress.Commands.add(
       if (pathname === '/login/verify-phone') {
         cy.get('#phone').clear().type(phoneDigits);
         cy.clickSubmitWhenEnabled('Отправить код');
-        cy.get('[data-otp-input]', { timeout: 30_000 }).should('be.visible');
+        cy.get('#verify-phone-otp', { timeout: 30_000 }).should('exist');
+        cy.get('#verify-phone-otp')
+          .closest('[role="group"]')
+          .find('.flex.gap-2')
+          .should('be.visible');
         cy.task<string>('fetchOnboardingOtp', {
           channel: 'sms',
           to: phoneDigits,

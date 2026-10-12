@@ -95,8 +95,8 @@ export function OnboardingWorkspaceForm({
   }, [slug, runSlugCheck]);
 
   const workspaceSlugError =
-    slugFieldError(state.fieldErrors?.workspaceSlug, slugCheck) ??
-    mergeFieldError(gate, 'workspaceSlug');
+    mergeFieldError(gate, 'workspaceSlug') ??
+    slugFieldError(state.fieldErrors?.workspaceSlug, slugCheck);
 
   const slugFooter =
     slugCheck.phase === 'checking' ? (
