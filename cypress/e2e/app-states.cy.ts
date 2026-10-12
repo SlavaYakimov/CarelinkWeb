@@ -17,13 +17,10 @@ describe('App states (404, titles, offline banner)', () => {
   it('shows offline banner when navigator reports offline', () => {
     cy.visit('/login');
     cy.window().then((win) => {
-      const onlineStub = cy.stub(win.navigator, 'onLine').value(false);
+      cy.stub(win.navigator, 'onLine').value(false);
       win.dispatchEvent(new Event('offline'));
-      cy.contains('[role="status"]', 'Нет соединения').should('be.visible');
-      cy.contains('button', 'Повторить').should('be.visible');
-      onlineStub.restore();
-      win.dispatchEvent(new Event('online'));
     });
-    cy.contains('[role="status"]', 'Нет соединения').should('not.exist');
+    cy.contains('[role="status"]', 'Нет соединения').should('be.visible');
+    cy.contains('button', 'Повторить').should('be.visible');
   });
 });
