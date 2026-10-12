@@ -21,9 +21,12 @@ export function RecoveryRequestForm() {
   const phoneField = usePhoneField('+7');
   const [familySlug, setFamilySlug] = React.useState('');
 
+  const phoneDigits = phoneField.display.replace(/\D/g, '');
+  const phoneForGate =
+    phoneField.e164 || (phoneDigits.length > 1 ? phoneField.display : phoneDigits);
   const gate = useFormGate(
     recoveryRequestClientSchema,
-    { familySlug, phone: phoneField.submitValue },
+    { familySlug, phone: phoneForGate },
     ['familySlug', 'phone'],
     { pending },
   );

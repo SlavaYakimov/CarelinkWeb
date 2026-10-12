@@ -23,9 +23,9 @@ describe('Forms a11y (axe)', () => {
   it('password field toggle has aria-pressed and describedby checklist', () => {
     cy.get('#password')
       .should('have.attr', 'aria-describedby')
-      .and('include', 'password-requirements');
-    cy.contains('button', 'Показать пароль').should('have.attr', 'aria-pressed', 'false');
-    cy.contains('button', 'Показать пароль').click();
-    cy.contains('button', 'Скрыть пароль').should('have.attr', 'aria-pressed', 'true');
+      .and('include', 'password-format-hint');
+    cy.get('button[aria-label="Показать пароль"]').should('have.attr', 'aria-pressed', 'false');
+    cy.get('button[aria-label="Показать пароль"]').click();
+    cy.get('button[aria-label="Скрыть пароль"]').should('have.attr', 'aria-pressed', 'true');
   });
 });

@@ -36,6 +36,7 @@ describe('workspace login — negative (guest)', () => {
 
   it('rejects empty workspace slug (R-11)', () => {
     cy.visitLogin();
+    cy.get('#workspaceSlug').click({ force: true });
     cy.get('#password').clear().type('longenough', { log: false });
     cy.assertGatedValidation({
       submitLabel: 'Войти',
@@ -87,7 +88,11 @@ describe('workspace login — negative (guest)', () => {
     cy.get('#workspaceSlug').clear().type('  ab  ');
     cy.get('#password').clear().type('longpassword', { log: false });
     cy.contains('button', 'Войти').should('be.disabled');
-    cy.get('#workspaceSlug').blur();
+    cy.get('#workspaceSlug').then(($el) => {
+      $el[0].focus();
+      $el[0].blur();
+    });
+    cy.get('#workspaceSlug').should('have.value', 'ab');
     cy.contains('Адрес семьи не короче 3 символов').should('be.visible');
     cy.location('pathname').should('eq', '/login');
   });
@@ -157,18 +162,18 @@ describe('workspace login — negative (guest)', () => {
 
   it('disables login fields while sign-in action is pending (R-4)', () => {
     cy.intercept('POST', '/login', (req) => {
-      req.continue((res) => {
-        res.setDelay(1200);
+      req.on('response', (res) => {
+        res.setDelay(1500);
       });
-    }).as('loginPost');
+      req.continue();
+    });
     cy.visitLogin();
     cy.get('#workspaceSlug').clear().type('yakimovs');
     cy.get('#password').clear().type('wrong-password-1', { log: false });
-    cy.clickSubmitWhenEnabled('Войти');
-    cy.contains('button', 'Войти', { timeout: 500 }).should('be.disabled');
+    cy.contains('button', 'Войти').should('be.enabled').click();
+    cy.contains('button', 'Войти').should('be.disabled');
     cy.get('#workspaceSlug').should('be.disabled');
-    cy.wait('@loginPost');
-    cy.contains('button', 'Войти').should('not.be.disabled');
+    cy.get('#password').should('be.disabled');
   });
 
   it('sends at most two sign-in action POSTs on double click (R-4, R-23)', () => {

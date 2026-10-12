@@ -52,7 +52,7 @@ function advanceToPhoneOtpPhase(email: string, displayName: string, phoneDigits:
 function advanceToPasswordStep(email: string, displayName: string, phoneDigits: string): void {
   advanceToPhoneOtpPhase(email, displayName, phoneDigits);
   cy.task<string>('fetchOnboardingOtp', { channel: 'sms', to: phoneDigits }).then((phoneOtp) => {
-    cy.fillOtp(phoneOtp);
+    cy.fillOtp(phoneOtp, 'phone-otp');
     cy.location('pathname', { timeout: 30_000 }).should('eq', '/onboarding/device');
     cy.onboardingEnterDeviceSms(phoneDigits);
     cy.location('pathname', { timeout: 30_000 }).should('eq', '/onboarding/password');
@@ -139,7 +139,7 @@ describe('onboarding create family — negative (compose BE-21)', () => {
   it('shows INVALID_OTP alert on wrong phone SMS code', () => {
     const email = uniqueEmail();
     advanceToPhoneOtpPhase(email, displayName, uniquePhoneDigits());
-    cy.fillOtp('000000');
+    cy.fillOtp('000000', 'phone-otp');
     cy.location('pathname', { timeout: 30_000 }).should('eq', '/onboarding/phone');
     cy.contains('Неверный код').should('be.visible');
   });
@@ -179,7 +179,7 @@ describe('onboarding create family — negative (compose BE-21)', () => {
     cy.onboardingEnterPassword(password);
     cy.location('pathname', { timeout: 30_000 }).should('eq', '/onboarding/workspace');
     cy.get('#workspaceSlug').clear().type(slug);
-    cy.get('#workspaceSlug').blur();
+    cy.get('#workspaceSlug').focus().trigger('blur');
     cy.contains('Проверяем, свободен ли адрес', { timeout: 15_000 }).should('not.exist');
     cy.contains('button', 'Создать семью', { timeout: 15_000 }).should('not.be.disabled');
     cy.clearCarelinkCookie('cl_sid');
@@ -200,7 +200,7 @@ describe('onboarding create family — negative (compose BE-21)', () => {
     cy.get('#newPassword').clear().type(password);
     cy.get('#confirmPassword').clear().type('Otherpass1');
     cy.contains('button', 'Сохранить пароль').should('be.disabled');
-    cy.get('#confirmPassword').blur();
+    cy.get('#confirmPassword').focus().trigger('blur');
     cy.contains('Пароли не совпадают').should('be.visible');
   });
 
@@ -209,7 +209,7 @@ describe('onboarding create family — negative (compose BE-21)', () => {
     advanceToPasswordStep(email, displayName, uniquePhoneDigits());
     cy.onboardingEnterPassword(password);
     cy.get('#workspaceSlug').clear().type('ab');
-    cy.get('#workspaceSlug').blur();
+    cy.get('#workspaceSlug').focus().trigger('blur');
     cy.contains('Адрес семьи не короче 3 символов', { timeout: 10_000 }).should('be.visible');
     cy.contains('button', 'Создать семью').should('be.disabled');
   });

@@ -3,7 +3,11 @@ Cypress.Commands.add(
   'assertGatedValidation',
   (options: { submitLabel: string; errorText: string; blurSelector: string }) => {
     cy.contains('button', options.submitLabel).should('be.disabled');
-    cy.get(options.blurSelector).blur();
+    cy.get(options.blurSelector).then(($el) => {
+      const el = $el[0];
+      el.focus();
+      el.blur();
+    });
     cy.contains(options.errorText).should('be.visible');
   },
 );

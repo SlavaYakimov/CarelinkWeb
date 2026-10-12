@@ -75,10 +75,10 @@ describe('login and forgot password — negative (compose BE-21)', () => {
   it('rejects confirm field validation without gateway success (R-12)', () => {
     withRecoveryFamilyCtx(({ familySlug, phoneDigits }) => {
       advanceToRecoveryConfirm(familySlug, phoneDigits);
-      cy.get('#requestId').clear().type('bad id!').blur();
-      cy.fillOtp('123456');
-      cy.get('#newPassword').clear().type('short7', { log: false }).blur();
-      cy.get('#confirmPassword').clear().type('short7', { log: false }).blur();
+      cy.get('#requestId').clear().type('bad id!').focus().trigger('blur');
+      cy.fillOtp('123456', 'recovery-otp');
+      cy.get('#newPassword').clear().type('short7', { log: false }).focus().trigger('blur');
+      cy.get('#confirmPassword').clear().type('short7', { log: false }).focus().trigger('blur');
       cy.contains('button', 'Сохранить и войти').should('be.disabled');
       cy.location('pathname').should('eq', '/login/recovery/confirm');
       cy.contains('Неверный формат идентификатора').should('be.visible');
@@ -92,9 +92,9 @@ describe('login and forgot password — negative (compose BE-21)', () => {
 
       advanceToRecoveryConfirm(familySlug, phoneDigits);
       cy.get('#requestId').clear().type(requestId);
-      cy.fillOtp('123456');
+      cy.fillOtp('123456', 'recovery-otp');
       cy.get('#newPassword').clear().type('Testpass1', { log: false });
-      cy.get('#confirmPassword').clear().type('Testpass2', { log: false }).blur();
+      cy.get('#confirmPassword').clear().type('Testpass2', { log: false }).focus().trigger('blur');
       cy.contains('button', 'Сохранить и войти').should('be.disabled');
       cy.location('pathname').should('eq', '/login/recovery/confirm');
       cy.contains('Пароли не совпадают').should('be.visible');
@@ -121,7 +121,7 @@ describe('login and forgot password — negative (compose BE-21)', () => {
         });
       }).as('confirmPost');
       cy.get('#requestId').clear().type(requestId);
-      cy.fillOtp('111111');
+      cy.fillOtp('111111', 'recovery-otp');
       cy.get('#newPassword').clear().type('Testpass1', { log: false });
       cy.get('#confirmPassword').clear().type('Testpass1', { log: false });
       cy.contains('button', 'Сохранить и войти').dblclick();

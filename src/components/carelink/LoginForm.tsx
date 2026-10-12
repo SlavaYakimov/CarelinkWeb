@@ -89,14 +89,17 @@ export function LoginForm({ nextPath, defaultEmail = '', notice }: LoginFormProp
             error={mergeFieldError(gate, 'password', state.fieldErrors?.password)}
             disabled={pending}
             showRequirements={false}
+            formatHintId="password-format-hint"
             onBlur={() => gate.touch('password')}
           />
           {state.fieldErrors?.password ? (
-            <p className="text-xs text-muted-foreground">
+            <p id="password-format-hint" className="text-xs text-muted-foreground">
               После нескольких неудачных попыток вход временно блокируется
             </p>
           ) : (
-            <p className="text-xs text-muted-foreground">Не короче 8 символов</p>
+            <p id="password-format-hint" className="text-xs text-muted-foreground">
+              Не короче 8 символов
+            </p>
           )}
           <input type="hidden" name="password" value={password} />
 

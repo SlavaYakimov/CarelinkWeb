@@ -75,9 +75,9 @@ export function OnboardingEmailForm({ linkInvalid, initialSentAt }: OnboardingEm
           ) : null}
           <div className="space-y-2">
             <Label htmlFor="email">Личная почта</Label>
+            <input type="hidden" name="email" value={emailInput} />
             <Input
               id="email"
-              name="email"
               type="email"
               autoComplete="email"
               autoCapitalize="none"

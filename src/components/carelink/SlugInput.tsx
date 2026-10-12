@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import { filterSlug } from '@/lib/forms/filters';
-import { WORKSPACE_LOGIN_DOMAIN } from '@/lib/workspace-slug';
+import { coerceWorkspaceSlugFieldInput, WORKSPACE_LOGIN_DOMAIN } from '@/lib/workspace-slug';
 import { Input } from '@/components/ui/input';
 
 export type SlugInputProps = {
@@ -52,9 +52,21 @@ export function SlugInput({
         inputMode="url"
         maxLength={32}
         value={value}
-        onBlur={onBlur}
+        onBlur={(e) => {
+          const normalized = filterSlug(e.target.value.trim(), value).value
+            .replace(/^-+/, '')
+            .replace(/-+$/, '');
+          if (normalized !== value) {
+            onChange(normalized);
+          }
+          onBlur?.();
+        }}
         onChange={(e) => {
-          const { value: next, rejectedCyrillic } = filterSlug(e.target.value, value);
+          let raw = e.target.value;
+          if (/workspaces|carelink|@|\.app|app$/i.test(raw)) {
+            raw = coerceWorkspaceSlugFieldInput(raw);
+          }
+          const { value: next, rejectedCyrillic } = filterSlug(raw, value);
           if (rejectedCyrillic) {
             setLatinHint(true);
             onCyrillicRejected?.();
