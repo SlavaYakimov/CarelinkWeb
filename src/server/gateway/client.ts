@@ -226,6 +226,7 @@ async function gatewayFetchInner<T = unknown>(
       method,
       headers,
       body: init.body !== undefined ? JSON.stringify(init.body) : undefined,
+      cache: 'no-store',
       signal: AbortSignal.timeout(env.GATEWAY_TIMEOUT_MS),
     });
   };

@@ -1,10 +1,13 @@
 import 'server-only';
 import { gatewayActionContext } from '@/server/actions/request-context';
+import {
+  normalizePendingMemberInviteList,
+  type PendingMemberInvite,
+} from '@/lib/invites/normalize-pending-invite';
 import { listPendingMemberInvites } from '@/server/gateway/invites';
 import { getSession } from '@/server/session/get-session';
-import type { components } from '@/server/gateway/types.gen';
 
-export type PendingMemberInvite = components['schemas']['PendingMemberInviteView'];
+export type { PendingMemberInvite };
 
 export async function fetchPendingInvites(): Promise<PendingMemberInvite[] | null> {
   const sessionCtx = await getSession();
@@ -17,7 +20,7 @@ export async function fetchPendingInvites(): Promise<PendingMemberInvite[] | nul
       clientIp,
       deviceId,
     });
-    return res.items;
+    return normalizePendingMemberInviteList(res);
   } catch {
     return null;
   }
