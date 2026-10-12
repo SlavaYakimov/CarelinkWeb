@@ -12,6 +12,7 @@ import {
   revokeInviteFixture,
   seedPendingExistingInvite,
   setFamilyMemberInvitesEnabled,
+  setFamilyMemberInvitesEnabledAndVerify,
 } from './invites-compose-fixtures.mjs';
 import {
   acceptMemberInviteGateway,
@@ -38,6 +39,9 @@ async function main() {
     case 'invitesExpire':
       return expireMemberInvite(args);
     case 'invitesSetFlag':
+      if (args.verify && args.keeper) {
+        return setFamilyMemberInvitesEnabledAndVerify(args);
+      }
       return setFamilyMemberInvitesEnabled(args);
     case 'invitesAcceptWrongUser':
       return acceptInviteAsWrongUser(args);

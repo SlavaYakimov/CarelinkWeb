@@ -4,7 +4,7 @@
  */
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
-import { composePostgresExecArgv } from './carelink-auth-compose.mjs';
+import { composeFamilyPostgresExecArgv } from './carelink-auth-compose.mjs';
 import {
   acceptMemberInviteGateway,
   createMemberInviteGateway,
@@ -22,26 +22,32 @@ const execFileAsync = promisify(execFile);
  */
 async function execFamilySql(sql) {
   loadEnvLocal();
-  const service = process.env.E2E_FAMILY_POSTGRES_SERVICE?.trim() || 'postgres';
   const database = process.env.E2E_FAMILY_DATABASE?.trim() || 'family';
-  const argv = ['compose'];
-  const rootFiles = [
-    'docker-compose.yml',
-    'e2e/docker-compose.e2e.yml',
-    'e2e/docker-compose.web.yml',
-  ];
-  const { resolveCarelinkAuthRoot, assertCarelinkAuthRoot } =
-    await import('./carelink-auth-compose.mjs');
-  const root = resolveCarelinkAuthRoot();
-  assertCarelinkAuthRoot(root);
-  const path = await import('node:path');
-  for (const file of rootFiles) {
-    argv.push('-f', path.join(root, file));
-  }
-  argv.push('exec', '-T', service, 'psql', '-U', 'carelink', '-d', database, '-t', '-A', '-c', sql);
+  const argv = composeFamilyPostgresExecArgv([
+    'psql',
+    '-U',
+    'carelink',
+    '-d',
+    database,
+    '-t',
+    '-A',
+    '-c',
+    sql,
+  ]);
 
   const { stdout } = await execFileAsync('docker', argv, { env: process.env });
   return stdout.trim();
+}
+
+/**
+ * @param {string} familyId
+ */
+function sqlFamilyIdLiteral(familyId) {
+  const trimmed = String(familyId ?? '').trim();
+  if (!/^[0-9a-f-]{36}$/i.test(trimmed)) {
+    throw new Error(`invalid familyId for SQL: ${trimmed.slice(0, 8)}…`);
+  }
+  return `'${trimmed}'::uuid`;
 }
 
 /**
@@ -91,17 +97,62 @@ export async function expireMemberInvite(args) {
  * @param {{ familyId: string; enabled: boolean }} args
  */
 export async function setFamilyMemberInvitesEnabled(args) {
-  const flag = args.enabled ? 'true' : 'false';
-  const sql = `UPDATE families SET workspace_member_invite_email_enabled = ${flag} WHERE id = '${args.familyId}'`;
+  const flag = args.enabled ? 'TRUE' : 'FALSE';
+  const familyLiteral = sqlFamilyIdLiteral(args.familyId);
+  const sql = `UPDATE families SET workspace_member_invite_email_enabled = ${flag} WHERE id = ${familyLiteral} RETURNING workspace_member_invite_email_enabled`;
   try {
-    await execFamilySql(sql);
-    return { ok: true };
+    const readback = await execFamilySql(sql);
+    if (!readback) {
+      return {
+        ok: false,
+        message:
+          'UPDATE families returned no row (unknown family id or missing workspace_member_invite_email_enabled column)',
+      };
+    }
+    const enabled = readback === 't' || readback === 'true' || readback === '1';
+    if (enabled !== Boolean(args.enabled)) {
+      return {
+        ok: false,
+        message: `workspace_member_invite_email_enabled readback mismatch: expected ${args.enabled}, got ${readback}`,
+      };
+    }
+    return { ok: true, enabled };
   } catch (err) {
     return {
       ok: false,
       message: err instanceof Error ? err.message : String(err),
     };
   }
+}
+
+/**
+ * @param {{ keeper: object; familyId: string; enabled: boolean; email?: string }} args
+ */
+export async function setFamilyMemberInvitesEnabledAndVerify(args) {
+  const flagResult = await setFamilyMemberInvitesEnabled({
+    familyId: args.familyId,
+    enabled: args.enabled,
+  });
+  if (!flagResult.ok) {
+    return { ...flagResult, gatewayStatus: null };
+  }
+
+  const ctx = await resolveKeeperGatewayContext(args.keeper);
+  const email = args.email?.trim() || `e2e.flag.verify.${Date.now()}@example.com`;
+  const lookup = await lookupInviteEmail(ctx.gatewayUrl, args.familyId, ctx.access, email);
+  const expectDisabled = !args.enabled;
+  const gatewayOk = expectDisabled ? lookup.status === 501 : lookup.status === 200;
+  if (!gatewayOk) {
+    return {
+      ok: false,
+      message: expectDisabled
+        ? `gateway lookup-email expected 501 after flag off, got ${lookup.status} (code=${lookup.data?.code ?? 'n/a'})`
+        : `gateway lookup-email expected 200 after flag on, got ${lookup.status}`,
+      gatewayStatus: lookup.status,
+      gatewayCode: lookup.data?.code,
+    };
+  }
+  return { ok: true, enabled: args.enabled, gatewayStatus: lookup.status };
 }
 
 /**

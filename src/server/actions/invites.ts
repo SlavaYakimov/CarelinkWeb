@@ -26,6 +26,7 @@ import { sessionRecordFromAuthResponse } from '@/server/session/from-auth-sessio
 import { getSession } from '@/server/session/get-session';
 import { saveSession } from '@/server/session/store';
 import { withServerAction } from '@/server/session/with-session-handler';
+import { getInviteErrorMessage } from '@/lib/invites/error-messages';
 import { toFormState } from '@/lib/forms/to-form-state';
 
 const INVITE_FIELD_MAP = {
@@ -121,7 +122,7 @@ async function lookupMemberInviteEmailActionImpl(
       if (err.code === 'FORBIDDEN' || err.code === 'NOT_FOUND') {
         redirect('/forbidden');
       }
-      const mapped = toFormState(err, INVITE_FIELD_MAP);
+      const mapped = toFormState(err, INVITE_FIELD_MAP, getInviteErrorMessage);
       return {
         error: mapped.formError ?? mapped.fieldErrors?.personalEmail,
         retryAfter: mapped.retryAfter,
@@ -165,7 +166,7 @@ async function createMemberInviteActionImpl(
       avatarUrl = uploaded.avatarUrl;
     } catch (err) {
       if (err instanceof GatewayError) {
-        const mapped = toFormState(err, INVITE_FIELD_MAP);
+        const mapped = toFormState(err, INVITE_FIELD_MAP, getInviteErrorMessage);
         return {
           formError: mapped.formError,
           fieldErrors: mapped.fieldErrors,
@@ -196,7 +197,7 @@ async function createMemberInviteActionImpl(
       if (err.code === 'FORBIDDEN' || err.code === 'NOT_FOUND') {
         redirect('/forbidden');
       }
-      const mapped = toFormState(err, INVITE_FIELD_MAP);
+      const mapped = toFormState(err, INVITE_FIELD_MAP, getInviteErrorMessage);
       return {
         formError: mapped.formError,
         fieldErrors: mapped.fieldErrors,
@@ -224,7 +225,9 @@ async function resendMemberInviteActionImpl(
   } catch (err) {
     if (err instanceof GatewayError) {
       if (err.code === 'FORBIDDEN') redirect('/forbidden');
-      return { formError: toFormState(err, INVITE_FIELD_MAP).formError };
+      return {
+        formError: toFormState(err, INVITE_FIELD_MAP, getInviteErrorMessage).formError,
+      };
     }
     throw err;
   }
@@ -247,7 +250,9 @@ async function revokeMemberInviteActionImpl(
   } catch (err) {
     if (err instanceof GatewayError) {
       if (err.code === 'FORBIDDEN') redirect('/forbidden');
-      return { formError: toFormState(err, INVITE_FIELD_MAP).formError };
+      return {
+        formError: toFormState(err, INVITE_FIELD_MAP, getInviteErrorMessage).formError,
+      };
     }
     throw err;
   }

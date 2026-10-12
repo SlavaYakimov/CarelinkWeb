@@ -130,16 +130,23 @@ describe('invites compose negative and infra', () => {
 
   it('E11: invites disabled (501) when family flag off', () => {
     const ts = Date.now();
+    const probeEmail = `e2e.flag.${ts}@example.com`;
 
     seedKeeper(ts).then((keeper) => {
-      cy.task('invitesSetFlag', { familyId: keeper.familyId, enabled: false }).then((flag) => {
-        if (!flag.ok) {
-          cy.log(`flag off skipped: ${flag.message}`);
-        }
+      cy.task('invitesSetFlag', {
+        familyId: keeper.familyId,
+        enabled: false,
+        verify: true,
+        keeper,
+        email: probeEmail,
+      }).then((flag: { ok: boolean; message?: string }) => {
+        expect(flag.ok, flag.message ?? 'invitesSetFlag verify').to.eq(true);
         cy.invitesSignInShortcut(keeper.workspaceEmail, keeper.password);
         cy.invitesOpenNewForm(keeper.familyId);
-        cy.get('#personalEmail').clear().type(`e2e.flag.${ts}@example.com`);
-        cy.contains(/недоступн|501|NOT_IMPLEMENTED/i, { timeout: 30_000 }).should('be.visible');
+        cy.get('#personalEmail').clear().type(probeEmail);
+        cy.contains('Приглашения по почте временно недоступны', { timeout: 30_000 }).should(
+          'be.visible',
+        );
       });
     });
   });
