@@ -10,6 +10,8 @@ import {
   type OnboardingEmailOtpState,
   type OnboardingEmailState,
 } from '@/server/actions/onboarding';
+import { emailFormSchema } from '@/lib/forms/schemas';
+import { useFormGate } from '@/lib/forms/use-form-gate';
 import { OtpInput } from '@/components/carelink/OtpInput';
 import { ResendButton } from '@/components/carelink/ResendButton';
 import { StepShell } from '@/components/carelink/StepShell';
@@ -40,6 +42,13 @@ export function OnboardingEmailForm({ linkInvalid, initialSentAt }: OnboardingEm
     emailInitial,
   );
   const [code, setCode] = React.useState('');
+  const [emailInput, setEmailInput] = React.useState('');
+  const emailGate = useFormGate(
+    emailFormSchema,
+    { email: emailInput },
+    ['email'],
+    { pending: requesting },
+  );
   const sent = emailState.sent || resendState.sent;
   const email = emailState.email ?? resendState.email ?? '';
   const sentAt = emailState.sentAt ?? resendState.sentAt ?? initialSentAt;
@@ -74,12 +83,13 @@ export function OnboardingEmailForm({ linkInvalid, initialSentAt }: OnboardingEm
               type="email"
               autoComplete="email"
               placeholder="you@example.com"
-              defaultValue={email}
+              value={emailInput}
+              onChange={(e) => setEmailInput(e.target.value)}
               disabled={requesting}
               required
             />
           </div>
-          <Button type="submit" className="w-full" disabled={requesting}>
+          <Button type="submit" className="w-full" disabled={requesting || !emailGate.canSubmit}>
             Отправить код
             <ArrowRight className="size-4" aria-hidden />
           </Button>

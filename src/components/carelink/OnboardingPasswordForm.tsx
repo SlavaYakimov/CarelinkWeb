@@ -7,7 +7,10 @@ import {
   setupOnboardingPasswordAction,
   type OnboardingPasswordState,
 } from '@/server/actions/onboarding';
+import { passwordPairFormSchema } from '@/lib/forms/schemas';
+import { useFormGate } from '@/lib/forms/use-form-gate';
 import { PasswordField } from '@/components/carelink/PasswordField';
+import { SubmitButton } from '@/components/carelink/SubmitButton';
 import { StepShell } from '@/components/carelink/StepShell';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
@@ -18,6 +21,14 @@ export function OnboardingPasswordForm() {
   const [state, formAction, pending] = useActionState(setupOnboardingPasswordAction, initial);
   const [newPassword, setNewPassword] = React.useState('');
   const [confirmPassword, setConfirmPassword] = React.useState('');
+  const [confirmTouched, setConfirmTouched] = React.useState(false);
+
+  const gate = useFormGate(
+    passwordPairFormSchema,
+    { newPassword, confirmPassword },
+    ['newPassword', 'confirmPassword'],
+    { pending },
+  );
 
   return (
     <StepShell
@@ -46,17 +57,23 @@ export function OnboardingPasswordForm() {
           id="confirmPassword"
           label="Повторите пароль"
           value={confirmPassword}
-          onChange={setConfirmPassword}
+          onChange={(v) => {
+            setConfirmPassword(v);
+            setConfirmTouched(true);
+          }}
           autoComplete="new-password"
-          error={state.fieldErrors?.confirmPassword}
+          error={
+            state.fieldErrors?.confirmPassword ??
+            (confirmTouched && newPassword !== confirmPassword ? 'Пароли не совпадают' : undefined)
+          }
           disabled={pending}
           showRequirements={false}
         />
         <input type="hidden" name="confirmPassword" value={confirmPassword} />
-        <Button type="submit" className="w-full" disabled={pending}>
+        <SubmitButton type="submit" className="w-full" pending={pending} disabled={!gate.canSubmit}>
           Сохранить пароль
           <ArrowRight className="size-4" aria-hidden />
-        </Button>
+        </SubmitButton>
       </form>
     </StepShell>
   );

@@ -5,6 +5,8 @@ import { useActionState } from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { signInAction, type SignInFormState } from '@/server/actions/sign-in';
+import { signInFormSchema } from '@/lib/forms/schemas';
+import { useFormGate } from '@/lib/forms/use-form-gate';
 import { parseWorkspaceSlugFromLogin } from '@/lib/workspace-slug';
 import { PasswordField } from '@/components/carelink/PasswordField';
 import { WorkspaceSlugField } from '@/components/carelink/WorkspaceSlugField';
@@ -29,6 +31,18 @@ export function LoginForm({ nextPath, defaultEmail = '', notice }: LoginFormProp
     state.workspaceSlug !== undefined
       ? state.workspaceSlug
       : parseWorkspaceSlugFromLogin(defaultEmail);
+  const [slug, setSlug] = React.useState(defaultSlug);
+
+  React.useEffect(() => {
+    if (state.workspaceSlug !== undefined) setSlug(state.workspaceSlug);
+  }, [state.workspaceSlug]);
+
+  const gate = useFormGate(
+    signInFormSchema,
+    { workspaceSlug: slug, password },
+    ['workspaceSlug', 'password'],
+    { pending },
+  );
 
   useFocusFirstError(state.fieldErrors, state.formError);
 
@@ -39,7 +53,7 @@ export function LoginForm({ nextPath, defaultEmail = '', notice }: LoginFormProp
         <CardDescription>Войдите с логином Carelink Workspace вашей семьи</CardDescription>
       </CardHeader>
       <CardContent>
-        <form action={formAction} className="space-y-4">
+        <form action={formAction} className="space-y-4" onSubmit={() => gate.touchAll()}>
           <input type="hidden" name="next" value={nextPath} />
 
           {notice === 'phone-registered' && !state.formError ? (
@@ -56,7 +70,9 @@ export function LoginForm({ nextPath, defaultEmail = '', notice }: LoginFormProp
             id="workspaceSlug"
             name="workspaceSlug"
             label="Адрес семьи (латиница)"
-            defaultValue={defaultSlug}
+            value={slug}
+            onChange={setSlug}
+            onBlur={() => gate.touch('workspaceSlug')}
             error={state.fieldErrors?.workspaceSlug}
             disabled={pending}
             required
@@ -93,7 +109,13 @@ export function LoginForm({ nextPath, defaultEmail = '', notice }: LoginFormProp
             Доверять этому устройству
           </label>
 
-          <SubmitButton type="submit" className="w-full" pending={pending} pendingLabel="Входим…">
+          <SubmitButton
+            type="submit"
+            className="w-full"
+            pending={pending}
+            pendingLabel="Входим…"
+            disabled={!gate.canSubmit}
+          >
             Войти
             <ArrowRight className="size-4" aria-hidden />
           </SubmitButton>
