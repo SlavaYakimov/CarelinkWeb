@@ -1,8 +1,14 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
+import { FamiliesLoadError } from '@/components/carelink/FamiliesLoadError';
 import { FamilyCard } from '@/components/carelink/FamilyCard';
 import { Button } from '@/components/ui/button';
 import { fetchUserFamilies } from '@/server/data/user-families';
+
+export const metadata: Metadata = {
+  title: 'Мои семьи',
+};
 
 export default async function FamiliesHomePage() {
   const families = await fetchUserFamilies();
@@ -25,18 +31,27 @@ export default async function FamiliesHomePage() {
       </div>
 
       {families === null ? (
-        <p className="text-sm text-muted-foreground">
-          Не удалось загрузить список. Обновите страницу.
-        </p>
+        <FamiliesLoadError />
       ) : families.length === 0 ? (
         <div className="rounded-xl border border-dashed border-border bg-card p-10 text-center shadow-card">
           <h2 className="text-lg font-semibold">Пока нет семей</h2>
           <p className="mt-2 text-sm text-muted-foreground">
-            Создайте семью или примите приглашение, когда раздел будет доступен.
+            Создайте семью сейчас — или попросите хранителя прислать ссылку-приглашение из
+            приложения Carelink (SMS или мессенджер).
           </p>
-          <Button className="mt-6" asChild>
-            <Link href="/families/new">Создать семью</Link>
-          </Button>
+          <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
+            <Button asChild>
+              <Link href="/families/new">Создать семью</Link>
+            </Button>
+          </div>
+          <details className="mx-auto mt-6 max-w-md text-left text-sm">
+            <summary className="cursor-pointer text-primary">Как присоединиться к семье</summary>
+            <p className="mt-2 text-muted-foreground">
+              Раздел приглашений в веб-версии пока готовится. Пока что хранитель отправляет
+              приглашение из мобильного приложения — перейдите по ссылке и завершите вход по
+              инструкции в сообщении.
+            </p>
+          </details>
         </div>
       ) : (
         <ul className="grid gap-4 sm:grid-cols-2">

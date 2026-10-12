@@ -1,4 +1,9 @@
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
+
+export const metadata: Metadata = {
+  title: 'Вход',
+};
 import { LoginForm } from '@/components/carelink/LoginForm';
 import { formatWorkspaceLogin, isValidWorkspaceSlug } from '@/lib/workspace-slug';
 import { sanitizeNextParam } from '@/server/security/next-param';

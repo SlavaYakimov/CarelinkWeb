@@ -25,11 +25,15 @@ export function AppSidebarNav({ onNavigate, className }: AppSidebarNavProps) {
           return (
             <span
               key={item.label}
+              aria-disabled="true"
               className="flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground"
-              title="Скоро"
             >
               <Icon className="size-5 shrink-0 opacity-60" aria-hidden />
-              {item.label}
+              <span className="min-w-0 flex-1 truncate">{item.label}</span>
+              <span className="shrink-0 rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                Скоро
+              </span>
+              <span className="sr-only"> — раздел скоро будет доступен</span>
             </span>
           );
         }

@@ -43,3 +43,4 @@ yarn-error.log*
 vitest.config.ts.timestamp-*
 tmp/
 docs/stitch-ref/
+dump.rdb
