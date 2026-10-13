@@ -1,21 +1,20 @@
 import * as React from 'react';
-import { OwlMarkPaths } from '@/components/brand/owl-mark';
 import { cn } from '@/lib/utils';
 
-export type LogoProps = React.SVGProps<SVGSVGElement>;
+export type LogoProps = React.ImgHTMLAttributes<HTMLImageElement>;
 
-/** Inline owl — `currentColor`; source asset: `public/brand/owl.svg`. */
-export function Logo({ className, ...props }: LogoProps) {
+/** Owl-with-book avatar — source: `public/brand/owl-header.svg` (SVGO from carelink-owl-avatar). */
+export function Logo({ className, alt = 'Carelink', ...props }: LogoProps) {
   return (
-    <svg
-      role="img"
-      aria-label="Carelink"
-      viewBox="0 0 512 512"
-      xmlns="http://www.w3.org/2000/svg"
-      className={cn('size-full', className)}
+    // eslint-disable-next-line @next/next/no-img-element -- brand SVG asset; small and cacheable
+    <img
+      src="/brand/owl-header.svg"
+      alt={alt}
+      width={1000}
+      height={1120}
+      decoding="async"
+      className={cn('size-full object-contain', className)}
       {...props}
-    >
-      <OwlMarkPaths fill="currentColor" stroke="currentColor" />
-    </svg>
+    />
   );
 }

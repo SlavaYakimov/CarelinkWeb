@@ -125,12 +125,15 @@
 
 ### 2.1. Файлы
 
-| Путь                                 | Назначение                                       |
-| ------------------------------------ | ------------------------------------------------ |
-| `public/brand/owl.svg`               | Исходный SVG-актив (viewBox `0 0 512 512`)       |
-| `src/components/brand/owl-mark.tsx`  | Общая геометрия `OwlMarkPaths` (синхронна с SVG) |
-| `src/components/brand/Logo.tsx`      | Inline SVG для React, `currentColor`             |
-| `src/components/brand/BrandMark.tsx` | Логотип + wordmark «Carelink» + слоган           |
+| Путь                                    | Назначение                                      |
+| --------------------------------------- | ----------------------------------------------- |
+| `public/brand/owl-header.svg`           | SVGO-сжатый SVG для UI (из carelink-owl-avatar) |
+| `public/brand/owl.svg`                  | Копия `owl-header.svg` (legacy path)            |
+| `public/brand/icons/icon-*.png`         | 32 / 128 / 180 / 192 / 512 — favicon и manifest |
+| `src/app/icon.png`, `apple-icon.png`    | Next metadata (128 / 180)                       |
+| `scripts/generate-owl-brand-assets.mjs` | Регенерация из исходного SVG                    |
+| `src/components/brand/Logo.tsx`         | `<img>` с `object-contain`, alt «Carelink»      |
+| `src/components/brand/BrandMark.tsx`    | Логотип + wordmark «Carelink» + слоган          |
 
 ### 2.2. Минимальные размеры (из `BrandMark`)
 
@@ -153,16 +156,16 @@
 
 ### 2.5. Доступность
 
-- Standalone `Logo`: `role="img"`, `aria-label="Carelink"`.
+- Standalone `Logo`: native `<img>`, `alt="Carelink"`.
 - В составе `BrandMark` у `Logo` — `aria-hidden` (название читается из текста «Carelink»).
 
 ### 2.6. Чего не делать
 
 - **Не** подменять филина символом «дом» (`⌂`) или другим пиктogram — регрессия отслеживается e2e.
-- **Не** менять пропорции viewBox `512×512` и силуэт из `OwlMarkPaths` / `owl.svg`.
-- **Не** растягивать SVG без сохранения квадратного контейнера (`size-*` на обёртке и иконке).
-- Для UI предпочитать компоненты `Logo` / `BrandMark`, а не дублировать path вручную (риск рассинхрона с `public/brand/owl.svg`).
-- Цвет знака в продукте — через `currentColor` на primary-фоне в `BrandMark`; не заливать произвольными hex в обход токенов.
+- **Не** менять пропорции исходника (`1000×1120`, owl-with-book); в UI — только `object-contain` в квадратном контейнере `BrandMark`.
+- **Не** растягивать без `object-contain` (`size-*` на обёртке и `Logo`).
+- Для UI предпочитать `Logo` / `BrandMark`, а не дублировать ассеты вручную (риск рассинхрона с `public/brand/owl-header.svg`).
+- Палитра бренда в иконках приложения: primary `#1f5c4a`, secondary `#8a6a3b` (фон PNG — `#1f5c4a`).
 
 ---
 

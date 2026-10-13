@@ -16,7 +16,7 @@ export function BrandMark({ className, compact = false }: BrandMarkProps) {
           compact ? 'size-9' : 'size-10',
         )}
       >
-        <Logo className={compact ? 'size-5' : 'size-6'} aria-hidden />
+        <Logo className={compact ? 'size-5' : 'size-6'} alt="" aria-hidden />
       </div>
       <div>
         <p
