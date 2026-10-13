@@ -49,7 +49,10 @@ export function StepShell({
             aria-valuemin={0}
             aria-valuemax={100}
           >
-            <div className="h-full bg-primary transition-all" style={{ width: `${pct}%` }} />
+            <div
+              className="h-full bg-primary transition-[width] duration-200 ease-out motion-reduce:transition-none"
+              style={{ width: `${pct}%` }}
+            />
           </div>
         </div>
         <div>

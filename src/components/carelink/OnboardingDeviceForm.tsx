@@ -61,8 +61,8 @@ export function OnboardingDeviceForm({
             </Alert>
           ) : null}
           <p className="text-sm text-muted-foreground">
-            Мы не регистрируем Web Push в браузере: backend принимает platform ios/android. Отправим
-            SMS на номер с предыдущего шага.
+            В браузере подтверждаем устройство по SMS — без push-уведомлений. Код отправим на номер с
+            предыдущего шага.
           </p>
           <form action={sendSms}>
             <Button type="submit" className="w-full" disabled={sending}>

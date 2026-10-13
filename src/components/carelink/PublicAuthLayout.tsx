@@ -96,7 +96,7 @@ export function PublicAuthLayout({
             <div className="mb-4 flex items-center justify-between text-xs text-muted-foreground">
               <span className="inline-flex items-center gap-1.5">
                 <span className="size-1.5 rounded-full bg-success" aria-hidden />
-                Шлюз авторизации семейных сетей
+                Стенд разработки
               </span>
               <span className="rounded-md bg-muted px-2 py-0.5 font-mono">v2.4</span>
             </div>
