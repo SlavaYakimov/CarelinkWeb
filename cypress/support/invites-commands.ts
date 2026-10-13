@@ -62,23 +62,3 @@ Cypress.Commands.add(
 Cypress.Commands.add('invitesSubmitForm', () => {
   cy.clickSubmitWhenEnabled('Отправить приглашение');
 });
-
-export {};
-
-declare global {
-  namespace Cypress {
-    interface Chainable {
-      invitesResolveKeeperContext(keeper: KeeperFixture): Chainable<KeeperGatewayContext>;
-      invitesSignInShortcut(workspaceEmail: string, password: string): Chainable<void>;
-      assertLoginNextParam(expectedNext: string): Chainable<void>;
-      invitesOpenNewForm(familyId: string): Chainable<void>;
-      invitesFillForm(fields: {
-        displayName: string;
-        personalEmail: string;
-        phoneDigits: string;
-        waitLookup?: 'new' | 'existing';
-      }): Chainable<void>;
-      invitesSubmitForm(): Chainable<void>;
-    }
-  }
-}
