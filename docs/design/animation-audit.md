@@ -9,22 +9,22 @@
 
 ## 1. Разведка (recon)
 
-| Параметр | Значение |
-| --- | --- |
-| Стек | Next.js 16, React 19, Tailwind CSS v4 (`@theme` в `src/styles/globals.css`) |
-| Библиотеки motion | **Нет** Framer Motion / GSAP; Radix Dialog; Sonner (тосты — дефолтная анимация библиотеки) |
-| Где живёт motion | `globals.css` (`prefers-reduced-motion`, `@keyframes`), utility-классы Tailwind (`transition-*`, `animate-*`) |
+| Параметр               | Значение                                                                                                                                            |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Стек                   | Next.js 16, React 19, Tailwind CSS v4 (`@theme` в `src/styles/globals.css`)                                                                         |
+| Библиотеки motion      | **Нет** Framer Motion / GSAP; Radix Dialog; Sonner (тосты — дефолтная анимация библиотеки)                                                          |
+| Где живёт motion       | `globals.css` (`prefers-reduced-motion`, `@keyframes`), utility-классы Tailwind (`transition-*`, `animate-*`)                                       |
 | Токены движения в коде | Глобальный reduce-motion; `@keyframes otp-shake`; после этого PR — `--ease-ui-out`, `--duration-ui-fast`, `--duration-ui-drawer`, `overlay-fade-in` |
-| Характер продукта | Спокойный семейный продукт: короткие, редкие переходы; без «вау»-эффектов; приоритет — ясность и доступность |
+| Характер продукта      | Спокойный семейный продукт: короткие, редкие переходы; без «вау»-эффектов; приоритет — ясность и доступность                                        |
 
 **Частота (frequency map):**
 
-| Зона | Элементы | Частота | Рекомендация по философии Emil K. |
-| --- | --- | --- | --- |
-| Приглашения | Accept/decline, формы, списки | Десятки раз в сессию при активной настройке семьи | Без декора; только feedback (loading, ошибки) |
-| Навигация | `AppSidebarNav`, мобильное меню | Десятки/день | Минимум hover; drawer — умеренно |
-| Auth / онбординг | `StepShell`, OTP | Редко / первый раз | Прогресс и OTP-shake допустимы |
-| Карточки семей | `FamilyCard` hover | Средняя | Hover-тень — снизить или ограничить pointer:fine |
+| Зона             | Элементы                        | Частота                                           | Рекомендация по философии Emil K.                |
+| ---------------- | ------------------------------- | ------------------------------------------------- | ------------------------------------------------ |
+| Приглашения      | Accept/decline, формы, списки   | Десятки раз в сессию при активной настройке семьи | Без декора; только feedback (loading, ошибки)    |
+| Навигация        | `AppSidebarNav`, мобильное меню | Десятки/день                                      | Минимум hover; drawer — умеренно                 |
+| Auth / онбординг | `StepShell`, OTP                | Редко / первый раз                                | Прогресс и OTP-shake допустимы                   |
+| Карточки семей   | `FamilyCard` hover              | Средняя                                           | Hover-тень — снизить или ограничить pointer:fine |
 
 ---
 
@@ -34,12 +34,12 @@
 
 **Вывод:** в потоке приглашений **нет собственных** CSS-анимаций или transition-классов. Состояния загрузки и ошибок идут через `SubmitButton` / `Button` (`animate-spin`), `FormAlert` — без motion. Пустые состояния и карточки приглашений статичны.
 
-| Аспект | Оценка |
-| --- | --- |
-| Accept / decline | Мгновенная смена текста кнопок («Отклонено») — без crossfade; для спокойного тона **нормально** |
-| Loading | Spinner на «Принять» — уместный feedback; глобальный `prefers-reduced-motion` + `motion-reduce:animate-none` на спиннерах |
-| Ошибки | `FormAlert` без анимации — хорошо для частых повторов |
-| Навигация к `/invites` | Через sidebar (см. общий аудит) |
+| Аспект                 | Оценка                                                                                                                    |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| Accept / decline       | Мгновенная смена текста кнопок («Отклонено») — без crossfade; для спокойного тона **нормально**                           |
+| Loading                | Spinner на «Принять» — уместный feedback; глобальный `prefers-reduced-motion` + `motion-reduce:animate-none` на спиннерах |
+| Ошибки                 | `FormAlert` без анимации — хорошо для частых повторов                                                                     |
+| Навигация к `/invites` | Через sidebar (см. общий аудит)                                                                                           |
 
 **Риски только косвенные:** общие примитивы (`Button`, `loading.tsx` → `FamiliesPageSkeleton`) используются и вне invites; исправления примитивов улучшают и invites.
 
@@ -47,18 +47,18 @@
 
 ## 3. Таблица находок (review-animations)
 
-| Before | After | Why |
-| --- | --- | --- |
-| `StepShell`: `width` + `transition-all` на полосе прогресса | `transform: scaleX()` + `transition-transform` + токены `--duration-ui-fast` / `--ease-ui-out` | `width` и `transition: all` — layout/off-GPU; прогресс — линейное морфинг, ≤300ms |
-| `dialog.tsx` / `AppMobileNav`: классы `animate-in`, `slide-in-from-left` без `tailwindcss-animate` | `@keyframes overlay-fade-in` + `motion-safe:animate-[…]`; drawer — `translate-x` + transition | Классы shadcn не генерировались — ложное ощущение motion; overlay только opacity (GPU) |
-| `FamilyCard`: `hover:shadow-md` без gating | `motion-safe` + `@media (hover:hover) and (pointer:fine)` | На touch ложный hover; частый список семей |
-| Спиннеры без явного `motion-reduce` | `motion-reduce:animate-none` на `Loader2` | Дублирует глобальный reduce, но явно для a11y-ревью |
-| Нет токенов easing/duration в `@theme` | `--ease-ui-out`, `--duration-ui-fast`, `--duration-ui-drawer` | Согласованность; `DESIGN.md` §1.6 пока без таблицы — см. план ниже |
-| `OtpInput`: shake 300ms `ease-in-out` | *(без изменения в PR)* | Уже отключён при `prefers-reduced-motion` в JS; глобальный reduce сжимает keyframes |
-| `AppSidebarNav`: `transition-colors` на каждой ссылке | *(без изменения)* | Десятки раз/день — кандидат на удаление или только `motion-safe` |
-| Sonner: дефолтные анимации пакета | *(без изменения)* | Нужна отдельная настройка `toastOptions` / CSS, без новых deps |
-| Dialog **content** без enter/exit | *(by design для calm UI)* | Модалка по центру — instant допустим; overlay fade достаточно |
-| Drawer close без exit-animation | *(ограничение Radix mount)* | Transition на close требует presence/CSS exit; отдельный план |
+| Before                                                                                             | After                                                                                          | Why                                                                                    |
+| -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `StepShell`: `width` + `transition-all` на полосе прогресса                                        | `transform: scaleX()` + `transition-transform` + токены `--duration-ui-fast` / `--ease-ui-out` | `width` и `transition: all` — layout/off-GPU; прогресс — линейное морфинг, ≤300ms      |
+| `dialog.tsx` / `AppMobileNav`: классы `animate-in`, `slide-in-from-left` без `tailwindcss-animate` | `@keyframes overlay-fade-in` + `motion-safe:animate-[…]`; drawer — `translate-x` + transition  | Классы shadcn не генерировались — ложное ощущение motion; overlay только opacity (GPU) |
+| `FamilyCard`: `hover:shadow-md` без gating                                                         | `motion-safe` + `@media (hover:hover) and (pointer:fine)`                                      | На touch ложный hover; частый список семей                                             |
+| Спиннеры без явного `motion-reduce`                                                                | `motion-reduce:animate-none` на `Loader2`                                                      | Дублирует глобальный reduce, но явно для a11y-ревью                                    |
+| Нет токенов easing/duration в `@theme`                                                             | `--ease-ui-out`, `--duration-ui-fast`, `--duration-ui-drawer`                                  | Согласованность; `DESIGN.md` §1.6 пока без таблицы — см. план ниже                     |
+| `OtpInput`: shake 300ms `ease-in-out`                                                              | _(без изменения в PR)_                                                                         | Уже отключён при `prefers-reduced-motion` в JS; глобальный reduce сжимает keyframes    |
+| `AppSidebarNav`: `transition-colors` на каждой ссылке                                              | _(без изменения)_                                                                              | Десятки раз/день — кандидат на удаление или только `motion-safe`                       |
+| Sonner: дефолтные анимации пакета                                                                  | _(без изменения)_                                                                              | Нужна отдельная настройка `toastOptions` / CSS, без новых deps                         |
+| Dialog **content** без enter/exit                                                                  | _(by design для calm UI)_                                                                      | Модалка по центру — instant допустим; overlay fade достаточно                          |
+| Drawer close без exit-animation                                                                    | _(ограничение Radix mount)_                                                                    | Transition на close требует presence/CSS exit; отдельный план                          |
 
 ### Вердикт (review)
 
@@ -75,18 +75,18 @@
 
 ## 4. Приорitized backlog (improve-animations)
 
-| # | Severity | Категория | Location | Finding | Fix summary |
-| --- | --- | --- | --- | --- | --- |
-| 1 | HIGH | Performance | `StepShell.tsx:52` | `transition-all` + `width` | ✅ `scaleX` + transform transition |
-| 2 | HIGH | Cohesion / a11y | `dialog.tsx`, `AppMobileNav.tsx` | Мёртвые tailwind-animate классы | ✅ keyframes + transform drawer |
-| 3 | MEDIUM | Accessibility | `FamilyCard.tsx:13` | Hover shadow без pointer gating | ✅ media hover |
-| 4 | MEDIUM | Accessibility | `button.tsx`, `SubmitButton.tsx`, `KeeperWaitPanel.tsx` | Spinner при reduce | ✅ `motion-reduce:animate-none` |
-| 5 | MEDIUM | Cohesion & tokens | `DESIGN.md` §1.6 | Нет таблицы токенов motion в DESIGN | Документировать `--ease-ui-out`, durations после стабилизации |
-| 6 | MEDIUM | Purpose & frequency | `AppSidebarNav.tsx:46` | `transition-colors` на nav | Убрать или `motion-safe:transition-colors` |
-| 7 | LOW | Easing | `OtpInput.tsx:114` | `ease-in-out` на shake | На reduce уже off; опционально `ease-out` 200ms |
-| 8 | LOW | Physicality | `button.tsx` | Нет `:active` scale 0.97 | `active:scale-[0.98]` + transform transition 160ms, только `motion-safe` |
-| 9 | LOW | Interruptibility | `AppMobileNav.tsx` | Нет exit slide | Radix + `@starting-style` / data-state closed transition |
-| 10 | LOW | Cohesion | `sonner.tsx` | Дефолтный motion Sonner | Подстроить duration/easing под `--ease-ui-out` через CSS vars |
+| #   | Severity | Категория           | Location                                                | Finding                             | Fix summary                                                              |
+| --- | -------- | ------------------- | ------------------------------------------------------- | ----------------------------------- | ------------------------------------------------------------------------ |
+| 1   | HIGH     | Performance         | `StepShell.tsx:52`                                      | `transition-all` + `width`          | ✅ `scaleX` + transform transition                                       |
+| 2   | HIGH     | Cohesion / a11y     | `dialog.tsx`, `AppMobileNav.tsx`                        | Мёртвые tailwind-animate классы     | ✅ keyframes + transform drawer                                          |
+| 3   | MEDIUM   | Accessibility       | `FamilyCard.tsx:13`                                     | Hover shadow без pointer gating     | ✅ media hover                                                           |
+| 4   | MEDIUM   | Accessibility       | `button.tsx`, `SubmitButton.tsx`, `KeeperWaitPanel.tsx` | Spinner при reduce                  | ✅ `motion-reduce:animate-none`                                          |
+| 5   | MEDIUM   | Cohesion & tokens   | `DESIGN.md` §1.6                                        | Нет таблицы токенов motion в DESIGN | Документировать `--ease-ui-out`, durations после стабилизации            |
+| 6   | MEDIUM   | Purpose & frequency | `AppSidebarNav.tsx:46`                                  | `transition-colors` на nav          | Убрать или `motion-safe:transition-colors`                               |
+| 7   | LOW      | Easing              | `OtpInput.tsx:114`                                      | `ease-in-out` на shake              | На reduce уже off; опционально `ease-out` 200ms                          |
+| 8   | LOW      | Physicality         | `button.tsx`                                            | Нет `:active` scale 0.97            | `active:scale-[0.98]` + transform transition 160ms, только `motion-safe` |
+| 9   | LOW      | Interruptibility    | `AppMobileNav.tsx`                                      | Нет exit slide                      | Radix + `@starting-style` / data-state closed transition                 |
+| 10  | LOW      | Cohesion            | `sonner.tsx`                                            | Дефолтный motion Sonner             | Подстроить duration/easing под `--ease-ui-out` через CSS vars            |
 
 ### Упущенные возможности (не баги)
 
@@ -99,9 +99,9 @@
 
 ### 005 — Задокументировать motion-токены в DESIGN.md
 
-- **Status:** TODO  
-- **Severity:** MEDIUM  
-- **Category:** Cohesion & tokens  
+- **Status:** TODO
+- **Severity:** MEDIUM
+- **Category:** Cohesion & tokens
 
 **Problem:** В `@theme` появились `--ease-ui-out`, `--duration-ui-fast`, `--duration-ui-drawer`, но `DESIGN.md` §1.6 перечисляет только reduce-motion и otp-shake.
 
@@ -115,9 +115,9 @@
 
 ### 006 — Упростить motion в sidebar nav
 
-- **Status:** TODO  
-- **Severity:** MEDIUM  
-- **Category:** Purpose & frequency  
+- **Status:** TODO
+- **Severity:** MEDIUM
+- **Category:** Purpose & frequency
 
 **Problem:** `AppSidebarNav.tsx:46` — `transition-colors` на ссылках, включая пункт «Приглашения».
 
@@ -129,9 +129,9 @@
 
 ### 007 — Exit-animation мобильного меню
 
-- **Status:** TODO  
-- **Severity:** LOW  
-- **Category:** Interruptibility  
+- **Status:** TODO
+- **Severity:** LOW
+- **Category:** Interruptibility
 
 **Problem:** Drawer открывается с transition, закрытие может быть мгновенным из-за unmount Radix.
 
@@ -143,14 +143,14 @@
 
 ## 6. Что сделано в этом PR
 
-| Файл | Изменение |
-| --- | --- |
-| `src/styles/globals.css` | Токены motion; `@keyframes overlay-fade-in` |
-| `src/components/carelink/StepShell.tsx` | GPU progress bar |
-| `src/components/ui/dialog.tsx` | Рабочий fade overlay |
-| `src/components/carelink/AppMobileNav.tsx` | Убраны мёртвые классы; slide через transform |
-| `src/components/carelink/FamilyCard.tsx` | Gated hover shadow |
-| `src/components/ui/button.tsx`, `SubmitButton.tsx`, `KeeperWaitPanel.tsx` | `motion-reduce` на спиннерах |
+| Файл                                                                      | Изменение                                    |
+| ------------------------------------------------------------------------- | -------------------------------------------- |
+| `src/styles/globals.css`                                                  | Токены motion; `@keyframes overlay-fade-in`  |
+| `src/components/carelink/StepShell.tsx`                                   | GPU progress bar                             |
+| `src/components/ui/dialog.tsx`                                            | Рабочий fade overlay                         |
+| `src/components/carelink/AppMobileNav.tsx`                                | Убраны мёртвые классы; slide через transform |
+| `src/components/carelink/FamilyCard.tsx`                                  | Gated hover shadow                           |
+| `src/components/ui/button.tsx`, `SubmitButton.tsx`, `KeeperWaitPanel.tsx` | `motion-reduce` на спиннерах                 |
 
 ---
 
