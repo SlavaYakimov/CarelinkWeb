@@ -2,7 +2,9 @@
 
 import * as React from 'react';
 import { RefreshCw } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { refreshKeeperJoinLinkAction } from '@/server/actions/join';
+import { formatJoinLinkShortCode } from '@/lib/join/format-short-code';
 import type { components } from '@/server/gateway/types.gen';
 import { SubmitButton } from '@/components/carelink/SubmitButton';
 import { Button } from '@/components/ui/button';
@@ -24,6 +26,8 @@ export function KeeperJoinQrPanel({ familyId, initialLink }: KeeperJoinQrPanelPr
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(new Date(link.expiresAt));
+
+  const shortCode = link.shortCode ?? formatJoinLinkShortCode(link.joinToken);
 
   async function onRefresh() {
     setPending(true);
@@ -48,15 +52,15 @@ export function KeeperJoinQrPanel({ familyId, initialLink }: KeeperJoinQrPanelPr
       </div>
 
       <div className="flex flex-col items-center gap-4 rounded-xl border border-border bg-card p-6 shadow-[var(--shadow-card)]">
-        <div
-          className="flex size-48 items-center justify-center rounded-lg border border-dashed border-border bg-muted text-center text-sm text-muted-foreground"
+        <QRCodeSVG
+          value={link.shareUrl}
+          size={192}
+          level="M"
+          className="rounded-lg border border-border bg-white p-2"
           aria-label="QR-код приглашения"
-        >
-          QR
-          <span className="sr-only">{link.joinToken}</span>
-        </div>
-        <p className="font-mono text-lg tracking-widest text-foreground">{link.shortCode ?? '—'}</p>
-        <p className="break-all text-sm text-muted-foreground">{link.shareUrl}</p>
+        />
+        <p className="font-mono text-lg tracking-widest text-foreground">{shortCode}</p>
+        <p className="break-all text-center text-sm text-muted-foreground">{link.shareUrl}</p>
       </div>
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}

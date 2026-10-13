@@ -999,8 +999,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Current family join QR/link (keeper) */
-        get: operations["getFamilyJoinLink"];
+        get?: never;
         put?: never;
         /** Create or refresh family join QR/link (keeper) */
         post: operations["createOrRefreshFamilyJoinLink"];
@@ -1884,8 +1883,8 @@ export interface components {
             expiresAt: string;
             /** Format: uri */
             shareUrl: string;
-            /** @description Human-readable code for keeper UI */
-            shortCode: string;
+            /** @description Optional; CarelinkAuth 8b58b61 returns joinToken only (formatted in web UI) */
+            shortCode?: string;
         };
         JoinRequestListResponse: {
             items: components["schemas"]["JoinRequestView"][];
@@ -3517,29 +3516,6 @@ export interface operations {
                     "application/json": components["schemas"]["CheckFamilySlugResponse"];
                 };
             };
-        };
-    };
-    getFamilyJoinLink: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                familyId: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Active join link */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FamilyJoinLinkResponse"];
-                };
-            };
-            404: components["responses"]["Error"];
         };
     };
     createOrRefreshFamilyJoinLink: {

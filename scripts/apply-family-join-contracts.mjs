@@ -357,12 +357,15 @@ Object.assign(family.paths, {
 Object.assign(family.components?.schemas ?? {}, {
   FamilyJoinLinkResponse: {
     type: 'object',
-    required: ['joinToken', 'expiresAt', 'shareUrl', 'shortCode'],
+    required: ['joinToken', 'expiresAt', 'shareUrl'],
     properties: {
       joinToken: { type: 'string' },
       expiresAt: { type: 'string', format: 'date-time' },
       shareUrl: { type: 'string', format: 'uri' },
-      shortCode: { type: 'string', description: 'Human-readable code for keeper UI' },
+      shortCode: {
+        type: 'string',
+        description: 'Optional; BE 8b58b61 — web formats joinToken in UI',
+      },
     },
   },
   JoinRequestListResponse: {

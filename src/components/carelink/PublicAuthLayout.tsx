@@ -108,7 +108,7 @@ export function PublicAuthLayout({
 
       {showTopNav ? (
         <footer className="border-t border-border py-6 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Carelink. Спокойная забота о семье. Все права защищены.
+          © {new Date().getFullYear()} Carelink. Все права защищены.
         </footer>
       ) : null}
     </div>

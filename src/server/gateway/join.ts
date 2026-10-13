@@ -80,10 +80,6 @@ export async function joinRedeem(
   );
 }
 
-export async function getFamilyJoinLink(ctx: SessionCtx): Promise<FamilyJoinLinkResponse> {
-  return gatewayFetch({ method: 'GET', path: `/v1/families/${ctx.familyId}/join-links` }, ctx);
-}
-
 export async function createOrRefreshFamilyJoinLink(
   ctx: SessionCtx,
 ): Promise<FamilyJoinLinkResponse> {
