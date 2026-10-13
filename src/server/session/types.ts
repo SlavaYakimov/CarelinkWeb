@@ -66,5 +66,16 @@ export type FlowRecord = {
   phoneVerified?: boolean;
   /** Encrypted delegate-link token for keeper review (kind=delegate). */
   delegateTokenEnc?: string;
+  /** family-join: opaque QR token */
+  joinToken?: string;
+  joinFamilyName?: string;
+  joinKeeperDisplayName?: string;
+  joinRoleLabel?: string;
+  joinExpiresAt?: string;
+  emailVerificationTicket?: string;
+  joinEmailRegistered?: boolean;
+  /** After R5 choose_path */
+  joinUserRefresh?: string;
+  currentFamilyName?: string;
   createdAt: string;
 };

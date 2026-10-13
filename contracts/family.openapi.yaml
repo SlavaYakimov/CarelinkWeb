@@ -11,6 +11,8 @@ servers:
 tags:
   - name: invites
     description: Member invites by email (family keeper + invitee)
+  - name: family-join
+    description: QR join links and requests
 paths:
   /families/{familyId}/role-templates:
     get:
@@ -361,6 +363,108 @@ paths:
           $ref: '#/components/responses/Error'
         '404':
           $ref: '#/components/responses/Error'
+  /families/check-slug:
+    get:
+      tags:
+        - family-join
+      operationId: checkFamilySlug
+      summary: Live family slug availability (R7)
+      parameters:
+        - name: slug
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 3
+            maxLength: 32
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CheckFamilySlugResponse'
+  /families/{familyId}/join-links:
+    get:
+      tags:
+        - family-join
+      operationId: getFamilyJoinLink
+      summary: Current family join QR/link (keeper)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: familyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Active join link
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FamilyJoinLinkResponse'
+        '404':
+          $ref: '#/components/responses/Error'
+    post:
+      tags:
+        - family-join
+      operationId: createOrRefreshFamilyJoinLink
+      summary: Create or refresh family join QR/link (keeper)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: familyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '201':
+          description: Join link issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FamilyJoinLinkResponse'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+  /families/{familyId}/join-requests:
+    get:
+      tags:
+        - family-join
+      operationId: listFamilyJoinRequests
+      summary: Pending join requests (keeper)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: familyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum:
+              - pending
+            default: pending
+      responses:
+        '200':
+          description: Pending join requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JoinRequestListResponse'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
 components:
   securitySchemes: {}
   responses:
@@ -455,6 +559,11 @@ components:
             - BAD_REQUEST
             - NOT_IMPLEMENTED
             - KEEPER_NOT_FOUND
+            - JOIN_LINK_EXPIRED
+            - ALREADY_IN_FAMILY
+            - INVALID_JOIN_TOKEN
+            - EMAIL_CODE_EXPIRED
+            - EMAIL_CODE_INVALID
         message:
           type: string
     MemberInviteListResponse:
@@ -622,3 +731,69 @@ components:
         - declined
         - expired
         - revoked
+    FamilyJoinLinkResponse:
+      type: object
+      required:
+        - joinToken
+        - expiresAt
+        - shareUrl
+        - shortCode
+      properties:
+        joinToken:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+        shareUrl:
+          type: string
+          format: uri
+        shortCode:
+          type: string
+          description: Human-readable code for keeper UI
+    JoinRequestListResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/JoinRequestView'
+    JoinRequestView:
+      type: object
+      required:
+        - requestId
+        - displayName
+        - scannedAt
+        - status
+        - kind
+      properties:
+        requestId:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        scannedAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum:
+            - pending
+            - approved
+            - rejected
+        kind:
+          type: string
+          enum:
+            - qr
+            - email
+    CheckFamilySlugResponse:
+      type: object
+      required:
+        - available
+        - slug
+      properties:
+        available:
+          type: boolean
+        slug:
+          type: string
