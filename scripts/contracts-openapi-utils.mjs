@@ -49,7 +49,9 @@ function pickComponents(fullComponents, initialRefs) {
 }
 
 export function mergeOpenApiDocuments(authDoc, familyDoc) {
-  const pathKeys = [...new Set([...Object.keys(authDoc.paths ?? {}), ...Object.keys(familyDoc.paths ?? {})])].sort();
+  const pathKeys = [
+    ...new Set([...Object.keys(authDoc.paths ?? {}), ...Object.keys(familyDoc.paths ?? {})]),
+  ].sort();
   const paths = {};
   for (const key of pathKeys) {
     paths[key] = familyDoc.paths?.[key] ?? authDoc.paths[key];
@@ -109,7 +111,8 @@ export function extractFamilyInviteSpec(combinedDoc) {
     info: {
       title: 'Carelink Family API',
       version: combinedDoc.info?.version ?? '1.0.0',
-      description: 'Family-service HTTP routes (member invites). Synced from CarelinkAuth docs/backend/family/openapi.yaml',
+      description:
+        'Family-service HTTP routes (member invites). Synced from CarelinkAuth docs/backend/family/openapi.yaml',
     },
     servers: (combinedDoc.servers ?? []).filter((s) => String(s.url).includes('/v1')),
     tags: inviteTags.length ? inviteTags : [{ name: 'invites', description: 'Member invites' }],

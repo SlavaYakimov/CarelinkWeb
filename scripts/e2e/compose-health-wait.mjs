@@ -47,9 +47,7 @@ async function waitFamilyInvitePathReady(probe) {
     }
     await sleep(1_000);
   }
-  throw new Error(
-    `family invite path not ready (lookup ${lastStatus}, code=${lastCode || 'n/a'})`,
-  );
+  throw new Error(`family invite path not ready (lookup ${lastStatus}, code=${lastCode || 'n/a'})`);
 }
 
 /**

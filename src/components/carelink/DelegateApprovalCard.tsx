@@ -35,8 +35,10 @@ function formatWhen(iso: string): string {
 
 function platformLabel(platform?: string): string {
   if (!platform) return 'Не указана';
-  if (platform === 'web') return 'Браузер (веб)';
-  return platform;
+  if (platform === 'web') return 'Браузер';
+  if (platform === 'ios') return 'iPhone или iPad';
+  if (platform === 'android') return 'Android';
+  return 'Другое устройство';
 }
 
 export function DelegateApprovalCard(props: DelegateApprovalCardProps) {

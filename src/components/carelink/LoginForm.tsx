@@ -51,7 +51,9 @@ export function LoginForm({ nextPath, defaultEmail = '', notice }: LoginFormProp
     <Card className="mx-auto w-full max-w-[440px] shadow-card">
       <CardHeader className="space-y-1">
         <CardTitle className="text-2xl">Вход в Carelink</CardTitle>
-        <CardDescription>Войдите с адресом семьи и паролем, которые задали при создании семьи</CardDescription>
+        <CardDescription>
+          Войдите с адресом семьи и паролем, которые задали при создании семьи
+        </CardDescription>
       </CardHeader>
       <CardContent>
         <form action={formAction} className="space-y-4" onSubmit={() => gate.touchAll()}>

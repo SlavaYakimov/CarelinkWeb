@@ -38,16 +38,16 @@ flowchart LR
   S7 -->|ок| S8[8 Release]
 ```
 
-| # | Этап | Репо / где | Критерий готовности |
-|---|------|------------|---------------------|
-| 1 | **Спека** | CarelinkMemory `features/<slug>/spec.md` | Сценарии **Дано / Когда / Тогда** (позитив + негатив); **дельта OpenAPI** (эндпоинты, поля, коды ошибок); влияние на ПДн. **Гейт «ок».** |
-| 2 | **Сервер** | CarelinkAuth, PR `cursor/<slug>-server` | Код, unit-тесты, обновлённый `auth.openapi.yaml`, CI зелёный. |
-| 3 | **Проверка запросов** | Staging Railway | Деплой ветки сервера; по каждому сценарию спеки — curl/GraphQL к gateway **https://gateway-staging-0a47.up.railway.app**; лог запросов/ответов **без ПДн** в отчёт. **Гейт «ок».** Без зелёного — web не начинаем. |
-| 4 | **Web** | CarelinkWeb, PR `cursor/<slug>-web` | Строго под утверждённый контракт: `pnpm contracts:check` зелёный; Playwright (и при необходимости Cypress compose) на сценарии спеки. |
-| 5 | **Ревью + безопасность** | Оба PR | **Независимый** агент (не автор) по `process/checklists/review.md` и `security.md`. Замечания → автор → повтор, пока список пуст. |
-| 6 | **Интеграционный e2e** | compose | `docker compose`: web + gateway + auth + redis; все сценарии спеки, **включая негативные**; `process/checklists/definition-of-done.md`. **Гейт «ок» перед мержем.** |
-| 7 | **Мерж + docs** | Все затронутые репо + Memory | Мерж PR сервера и web **только после «ок»**; PR в CarelinkMemory: `features/<slug>/status.md`, `status.md`, `log/`, при необходимости `decisions.md` / `architecture/`; идеи → `ideas/backlog.md`. |
-| 8 | **Release** | CarelinkAuth, CarelinkWeb, Carelink | Skill **`carelink-release`**: единый SemVer, CHANGELOG, теги и GitHub Release **после «ок»** на релиз. |
+| #   | Этап                     | Репо / где                               | Критерий готовности                                                                                                                                                                                                |
+| --- | ------------------------ | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1   | **Спека**                | CarelinkMemory `features/<slug>/spec.md` | Сценарии **Дано / Когда / Тогда** (позитив + негатив); **дельта OpenAPI** (эндпоинты, поля, коды ошибок); влияние на ПДн. **Гейт «ок».**                                                                           |
+| 2   | **Сервер**               | CarelinkAuth, PR `cursor/<slug>-server`  | Код, unit-тесты, обновлённый `auth.openapi.yaml`, CI зелёный.                                                                                                                                                      |
+| 3   | **Проверка запросов**    | Staging Railway                          | Деплой ветки сервера; по каждому сценарию спеки — curl/GraphQL к gateway **https://gateway-staging-0a47.up.railway.app**; лог запросов/ответов **без ПДн** в отчёт. **Гейт «ок».** Без зелёного — web не начинаем. |
+| 4   | **Web**                  | CarelinkWeb, PR `cursor/<slug>-web`      | Строго под утверждённый контракт: `pnpm contracts:check` зелёный; Playwright (и при необходимости Cypress compose) на сценарии спеки.                                                                              |
+| 5   | **Ревью + безопасность** | Оба PR                                   | **Независимый** агент (не автор) по `process/checklists/review.md` и `security.md`. Замечания → автор → повтор, пока список пуст.                                                                                  |
+| 6   | **Интеграционный e2e**   | compose                                  | `docker compose`: web + gateway + auth + redis; все сценарии спеки, **включая негативные**; `process/checklists/definition-of-done.md`. **Гейт «ок» перед мержем.**                                                |
+| 7   | **Мерж + docs**          | Все затронутые репо + Memory             | Мерж PR сервера и web **только после «ок»**; PR в CarelinkMemory: `features/<slug>/status.md`, `status.md`, `log/`, при необходимости `decisions.md` / `architecture/`; идеи → `ideas/backlog.md`.                 |
+| 8   | **Release**              | CarelinkAuth, CarelinkWeb, Carelink      | Skill **`carelink-release`**: единый SemVer, CHANGELOG, теги и GitHub Release **после «ок»** на релиз.                                                                                                             |
 
 ## Отчёт на каждом гейте «ок»
 
@@ -58,12 +58,12 @@ flowchart LR
 
 ## Связанные навыки
 
-| Этап | Skill / команда |
-|------|-----------------|
-| Спека (глубокий gap) | CarelinkAuth: `logic-gap-analyzer`, `/gap-analyze` |
-| Web e2e внутри этапа 4/6 | CarelinkWeb: `e2e-*`, `/e2e-flow` |
-| Коммиты | `carelink-commit` |
-| Релиз | `carelink-release` |
+| Этап                     | Skill / команда                                    |
+| ------------------------ | -------------------------------------------------- |
+| Спека (глубокий gap)     | CarelinkAuth: `logic-gap-analyzer`, `/gap-analyze` |
+| Web e2e внутри этапа 4/6 | CarelinkWeb: `e2e-*`, `/e2e-flow`                  |
+| Коммиты                  | `carelink-commit`                                  |
+| Релиз                    | `carelink-release`                                 |
 
 ## Ограничения
 

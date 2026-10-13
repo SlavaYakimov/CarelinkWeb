@@ -32,15 +32,16 @@ export function normalizePendingMemberInvite(raw: unknown): PendingMemberInvite 
   const roleName =
     readString(row, 'roleName', 'role_name', 'roleDisplayName', 'role_display_name') ??
     PENDING_INVITE_FALLBACK_DASH;
-  const invitedByDisplayName = readString(
-    row,
-    'invitedByDisplayName',
-    'invited_by_display_name',
-    'invitedByName',
-    'invited_by_name',
-    'invitedBy',
-    'invited_by',
-  ) ?? PENDING_INVITE_FALLBACK_DASH;
+  const invitedByDisplayName =
+    readString(
+      row,
+      'invitedByDisplayName',
+      'invited_by_display_name',
+      'invitedByName',
+      'invited_by_name',
+      'invitedBy',
+      'invited_by',
+    ) ?? PENDING_INVITE_FALLBACK_DASH;
   const expiresAt = readString(row, 'expiresAt', 'expires_at') ?? '';
 
   return {

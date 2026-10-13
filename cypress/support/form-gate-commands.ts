@@ -12,9 +12,6 @@ Cypress.Commands.add(
   },
 );
 
-Cypress.Commands.add(
-  'clickSubmitWhenEnabled',
-  (label: string | RegExp, timeout = 15_000) => {
-    cy.contains('button', label, { timeout }).should('be.enabled').click();
-  },
-);
+Cypress.Commands.add('clickSubmitWhenEnabled', (label: string | RegExp, timeout = 15_000) => {
+  cy.contains('button', label, { timeout }).should('be.enabled').click();
+});

@@ -136,9 +136,7 @@ async function trySqlFamilyInviteFlag(args) {
  * @param {{ familyId: string; enabled: boolean; keeper?: object; email?: string; waitHealth?: boolean }} args
  */
 export async function setFamilyMemberInvitesEnabled(args) {
-  const waitOpts = args.waitHealth
-    ? { keeper: args.keeper, email: args.email }
-    : undefined;
+  const waitOpts = args.waitHealth ? { keeper: args.keeper, email: args.email } : undefined;
   const recreate = waitOpts
     ? (enabled) => recreateFamilyServiceInviteEmailEnabledAndWait(enabled, waitOpts)
     : recreateFamilyServiceInviteEmailEnabled;

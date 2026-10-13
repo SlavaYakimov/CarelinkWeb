@@ -63,14 +63,27 @@ export function normalizeFamilyMemberInvite(
   }
 
   const displayName =
-    readString(row, 'displayName', 'display_name', 'name', 'inviteeDisplayName', 'invitee_display_name') ??
-    '—';
+    readString(
+      row,
+      'displayName',
+      'display_name',
+      'name',
+      'inviteeDisplayName',
+      'invitee_display_name',
+    ) ?? '—';
   const roleName =
     readString(row, 'roleName', 'role_name', 'roleDisplayName', 'role_display_name') ?? '—';
   const statusRaw = readString(row, 'status');
   const createdAt =
-    readString(row, 'createdAt', 'created_at', 'invitedAt', 'invited_at', 'updatedAt', 'updated_at') ??
-    FALLBACK_CREATED_AT;
+    readString(
+      row,
+      'createdAt',
+      'created_at',
+      'invitedAt',
+      'invited_at',
+      'updatedAt',
+      'updated_at',
+    ) ?? FALLBACK_CREATED_AT;
   const expiresAt = readString(row, 'expiresAt', 'expires_at');
   const phone = readString(row, 'phone', 'phoneE164', 'phone_e164');
   const inviteeKindRaw = readString(row, 'inviteeKind', 'invitee_kind');

@@ -49,7 +49,6 @@ describe('normalizePendingMemberInvite', () => {
       familyName: 'E2E Family',
     });
   });
-
 });
 
 describe('normalizePendingMemberInviteList', () => {
