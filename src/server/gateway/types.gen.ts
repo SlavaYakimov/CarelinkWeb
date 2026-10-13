@@ -36,6 +36,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/join/email/request-code": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Send 6-digit join email code (R5/R6) */
+        post: operations["joinEmailRequestCode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/join/email/verify-code": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Verify 6-digit join email code */
+        post: operations["joinEmailVerifyCode"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/join/qr/resolve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Preview family for QR join token (screen 48) */
+        post: operations["joinQrResolve"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/join/redeem": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Unified join redeem (kind=qr|email) */
+        post: operations["joinRedeem"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/logout": {
         parameters: {
             query?: never;
@@ -907,6 +975,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/families/check-slug": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Live family slug availability (R7) */
+        get: operations["checkFamilySlug"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/families/{familyId}/join-links": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Create or refresh family join QR/link (keeper) */
+        post: operations["createOrRefreshFamilyJoinLink"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/families/{familyId}/join-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Pending join requests (keeper) */
+        get: operations["listFamilyJoinRequests"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/families/{familyId}/member-invites": {
         parameters: {
             query?: never;
@@ -1198,7 +1317,7 @@ export interface components {
         };
         ErrorResponse: {
             /** @enum {string} */
-            code: "INVALID_CREDENTIALS" | "UNAUTHORIZED" | "TOKEN_EXPIRED" | "INVALID_OTP" | "PHONE_REGISTERED" | "SMS_UNDELIVERED" | "EMAIL_TAKEN" | "WEAK_PASSWORD" | "INVALID_PAIR_CODE" | "PAIR_SESSION_EXPIRED" | "PAIR_SESSION_NOT_FOUND" | "OFFLINE" | "RATE_LIMIT" | "UNKNOWN" | "PAIRING_SESSION_UNSUPPORTED" | "TEMP_PASSWORD_EXPIRED" | "WORKSPACE_NOT_FOUND" | "BAD_REQUEST" | "NOT_IMPLEMENTED" | "KEEPER_NOT_FOUND";
+            code: "INVALID_CREDENTIALS" | "UNAUTHORIZED" | "TOKEN_EXPIRED" | "INVALID_OTP" | "PHONE_REGISTERED" | "SMS_UNDELIVERED" | "EMAIL_TAKEN" | "WEAK_PASSWORD" | "INVALID_PAIR_CODE" | "PAIR_SESSION_EXPIRED" | "PAIR_SESSION_NOT_FOUND" | "OFFLINE" | "RATE_LIMIT" | "UNKNOWN" | "PAIRING_SESSION_UNSUPPORTED" | "TEMP_PASSWORD_EXPIRED" | "WORKSPACE_NOT_FOUND" | "BAD_REQUEST" | "NOT_IMPLEMENTED" | "KEEPER_NOT_FOUND" | "JOIN_LINK_EXPIRED" | "ALREADY_IN_FAMILY" | "INVALID_JOIN_TOKEN" | "EMAIL_CODE_EXPIRED" | "EMAIL_CODE_INVALID";
             message?: string;
         };
         OtpRequest: {
@@ -1574,6 +1693,8 @@ export interface components {
         CreateFamilyRequest: {
             name: string;
             unionRole?: components["schemas"]["UnionRole"];
+            /** @description Public family slug (R7) */
+            slug?: string;
         };
         CreateFamilyResponse: {
             /** Format: uuid */
@@ -1615,6 +1736,62 @@ export interface components {
         UnionRole: "keeper" | "partner" | "parent";
         /** @enum {string} */
         TrustTier: "nuclear" | "kin" | "friend" | "advisor" | "guest";
+        JoinEmailRequestCodeRequest: {
+            /** Format: email */
+            email: string;
+        };
+        JoinEmailVerifyCodeRequest: {
+            /** Format: email */
+            email: string;
+            code: string;
+        };
+        JoinEmailVerifyCodeResponse: {
+            emailVerificationTicket: string;
+            registered: boolean;
+        };
+        JoinQrResolveRequest: {
+            joinToken: string;
+        };
+        JoinQrResolveResponse: {
+            familyName: string;
+            keeperDisplayName: string;
+            roleLabel: string;
+            /** Format: date-time */
+            expiresAt: string;
+            joinToken?: string;
+        };
+        JoinRedeemRequest: {
+            /** @enum {string} */
+            kind: "qr" | "email";
+            joinToken?: string;
+            emailVerificationTicket?: string;
+            registration?: components["schemas"]["JoinRegistrationPatch"];
+        };
+        JoinRegistrationPatch: {
+            displayName?: string;
+            /** @description E.164 */
+            phone?: string;
+        };
+        JoinRedeemResponse: components["schemas"]["JoinRedeemPending"] | components["schemas"]["JoinRedeemSession"] | components["schemas"]["JoinRedeemChoosePath"];
+        JoinRedeemPending: {
+            /** @enum {string} */
+            outcome: "pending_approval";
+            /** Format: uuid */
+            requestId: string;
+            approvalSecret: string;
+            keeperDisplayName: string;
+            message: string;
+        };
+        JoinRedeemSession: {
+            /** @enum {string} */
+            outcome: "session";
+            session: components["schemas"]["AuthSessionResponse"];
+        };
+        JoinRedeemChoosePath: {
+            /** @enum {string} */
+            outcome: "choose_path";
+            userRefresh: string;
+        };
         RoleTemplateListResponse: {
             items: components["schemas"]["RoleTemplate"][];
         };
@@ -1700,6 +1877,33 @@ export interface components {
         };
         /** @enum {string} */
         MemberInviteStatus: "sent" | "pending_accept" | "accepted" | "declined" | "expired" | "revoked";
+        FamilyJoinLinkResponse: {
+            joinToken: string;
+            /** Format: date-time */
+            expiresAt: string;
+            /** Format: uri */
+            shareUrl: string;
+            /** @description Optional; CarelinkAuth 8b58b61 returns joinToken only (formatted in web UI) */
+            shortCode?: string;
+        };
+        JoinRequestListResponse: {
+            items: components["schemas"]["JoinRequestView"][];
+        };
+        JoinRequestView: {
+            /** Format: uuid */
+            requestId: string;
+            displayName: string;
+            /** Format: date-time */
+            scannedAt: string;
+            /** @enum {string} */
+            status: "pending" | "approved" | "rejected";
+            /** @enum {string} */
+            kind: "qr" | "email";
+        };
+        CheckFamilySlugResponse: {
+            available: boolean;
+            slug: string;
+        };
     };
     responses: {
         /** @description Error */
@@ -1800,6 +2004,118 @@ export interface operations {
                     };
                 };
             };
+        };
+    };
+    joinEmailRequestCode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JoinEmailRequestCodeRequest"];
+            };
+        };
+        responses: {
+            /** @description Code sent (anti-enumeration) */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            429: components["responses"]["RateLimit"];
+        };
+    };
+    joinEmailVerifyCode: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JoinEmailVerifyCodeRequest"];
+            };
+        };
+        responses: {
+            /** @description Verification ticket for redeem */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JoinEmailVerifyCodeResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            429: components["responses"]["RateLimit"];
+        };
+    };
+    joinQrResolve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JoinQrResolveRequest"];
+            };
+        };
+        responses: {
+            /** @description Join preview */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JoinQrResolveResponse"];
+                };
+            };
+            404: components["responses"]["Error"];
+            410: components["responses"]["Error"];
+        };
+    };
+    joinRedeem: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JoinRedeemRequest"];
+            };
+        };
+        responses: {
+            /** @description Redeem outcome */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JoinRedeemResponse"];
+                };
+            };
+            400: components["responses"]["Error"];
+            401: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+            /** @description Already in another family (R3) */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponse"];
+                };
+            };
+            429: components["responses"]["RateLimit"];
         };
     };
     logout: {
@@ -3179,6 +3495,77 @@ export interface operations {
                     "application/json": components["schemas"]["CreateFamilyResponse"];
                 };
             };
+        };
+    };
+    checkFamilySlug: {
+        parameters: {
+            query: {
+                slug: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CheckFamilySlugResponse"];
+                };
+            };
+        };
+    };
+    createOrRefreshFamilyJoinLink: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Join link issued */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyJoinLinkResponse"];
+                };
+            };
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+        };
+    };
+    listFamilyJoinRequests: {
+        parameters: {
+            query?: {
+                status?: "pending";
+            };
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Pending join requests */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["JoinRequestListResponse"];
+                };
+            };
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
         };
     };
     listFamilyMemberInvites: {

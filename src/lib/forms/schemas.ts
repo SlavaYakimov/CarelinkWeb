@@ -205,4 +205,28 @@ export const lookupInviteEmailSchema = z.object({
   email: emailFieldSchema,
 });
 
+export const joinEmailFormSchema = z.object({
+  email: emailFieldSchema,
+});
+
+export const joinEmailOtpFormSchema = z.object({
+  email: emailFieldSchema,
+  code: z.string().regex(/^\d{6}$/, 'Введите 6 цифр'),
+});
+
+export const joinQrFormSchema = z.object({
+  displayName: displayNameSchema,
+  phone: phoneRawSchema,
+});
+
+export const joinQrClientSchema = joinQrFormSchema.refine((v) => Boolean(phoneRawToE164(v.phone)), {
+  message: getValidationMessage('phoneInvalid'),
+  path: ['phone'],
+});
+
+export const joinCreateFamilyFormSchema = z.object({
+  name: familyDisplayNameSchema,
+  slug: familySlugSchema,
+});
+
 export { isValidWorkspaceSlug, normalizeWorkspaceSlug };

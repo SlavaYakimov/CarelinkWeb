@@ -23,6 +23,7 @@ const otpScriptPath = path.join(__dirname, 'scripts/e2e/fetch-onboarding-otp.mjs
 const flushRedisScriptPath = path.join(__dirname, 'scripts/e2e/flush-redis.mjs');
 const approveRecoveryScriptPath = path.join(__dirname, 'scripts/e2e/approve-recovery-compose.mjs');
 const seedRecoveryFlowScriptPath = path.join(__dirname, 'scripts/e2e/seed-recovery-sent-flow.mjs');
+const seedJoinFlowScriptPath = path.join(__dirname, 'scripts/e2e/seed-join-flow.mjs');
 const runInvitesTaskScriptPath = path.join(__dirname, 'scripts/e2e/run-invites-task.mjs');
 
 async function runInvitesTask<T>(taskName: string, args: unknown): Promise<T> {
@@ -100,6 +101,14 @@ export default defineConfig({
           const { stdout } = await execFileAsync(
             process.execPath,
             [seedRecoveryFlowScriptPath, args.familySlug, args.phoneDigits],
+            { env: process.env },
+          );
+          return JSON.parse(stdout.trim()) as { fid: string; flowCookieName: string };
+        },
+        async seedJoinFlow(flow: Record<string, unknown>) {
+          const { stdout } = await execFileAsync(
+            process.execPath,
+            [seedJoinFlowScriptPath, JSON.stringify(flow)],
             { env: process.env },
           );
           return JSON.parse(stdout.trim()) as { fid: string; flowCookieName: string };

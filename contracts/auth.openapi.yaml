@@ -29,6 +29,8 @@ tags:
     description: Kubernetes probes (not under /v1)
   - name: recovery
     description: Account recovery via family keeper (v2)
+  - name: family-join
+    description: QR and email family join (family-join)
 paths:
   /healthz:
     get:
@@ -1253,6 +1255,102 @@ paths:
                 $ref: '#/components/schemas/AuthSessionRebuildResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
+  /auth/join/email/request-code:
+    post:
+      tags:
+        - family-join
+      operationId: joinEmailRequestCode
+      summary: Send 6-digit join email code (R5/R6)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JoinEmailRequestCodeRequest'
+      responses:
+        '202':
+          description: Code sent (anti-enumeration)
+        '429':
+          $ref: '#/components/responses/RateLimit'
+  /auth/join/email/verify-code:
+    post:
+      tags:
+        - family-join
+      operationId: joinEmailVerifyCode
+      summary: Verify 6-digit join email code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JoinEmailVerifyCodeRequest'
+      responses:
+        '200':
+          description: Verification ticket for redeem
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JoinEmailVerifyCodeResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/RateLimit'
+  /auth/join/qr/resolve:
+    post:
+      tags:
+        - family-join
+      operationId: joinQrResolve
+      summary: Preview family for QR join token (screen 48)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JoinQrResolveRequest'
+      responses:
+        '200':
+          description: Join preview
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JoinQrResolveResponse'
+        '404':
+          $ref: '#/components/responses/Error'
+        '410':
+          $ref: '#/components/responses/Error'
+  /auth/join/redeem:
+    post:
+      tags:
+        - family-join
+      operationId: joinRedeem
+      summary: Unified join redeem (kind=qr|email)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JoinRedeemRequest'
+      responses:
+        '200':
+          description: Redeem outcome
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JoinRedeemResponse'
+        '400':
+          $ref: '#/components/responses/Error'
+        '401':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+        '409':
+          description: Already in another family (R3)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          $ref: '#/components/responses/RateLimit'
 components:
   securitySchemes:
     userRefreshAuth:
@@ -1449,6 +1547,11 @@ components:
             - BAD_REQUEST
             - NOT_IMPLEMENTED
             - KEEPER_NOT_FOUND
+            - JOIN_LINK_EXPIRED
+            - ALREADY_IN_FAMILY
+            - INVALID_JOIN_TOKEN
+            - EMAIL_CODE_EXPIRED
+            - EMAIL_CODE_INVALID
         message:
           type: string
     OtpRequest:
@@ -2304,6 +2407,11 @@ components:
           type: string
         unionRole:
           $ref: '#/components/schemas/UnionRole'
+        slug:
+          type: string
+          minLength: 3
+          maxLength: 32
+          description: Public family slug (R7)
     CreateFamilyResponse:
       type: object
       required:
@@ -2415,3 +2523,136 @@ components:
         - friend
         - advisor
         - guest
+    JoinEmailRequestCodeRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: string
+          format: email
+    JoinEmailVerifyCodeRequest:
+      type: object
+      required:
+        - email
+        - code
+      properties:
+        email:
+          type: string
+          format: email
+        code:
+          type: string
+          pattern: ^[0-9]{6}$
+    JoinEmailVerifyCodeResponse:
+      type: object
+      required:
+        - emailVerificationTicket
+        - registered
+      properties:
+        emailVerificationTicket:
+          type: string
+        registered:
+          type: boolean
+    JoinQrResolveRequest:
+      type: object
+      required:
+        - joinToken
+      properties:
+        joinToken:
+          type: string
+    JoinQrResolveResponse:
+      type: object
+      required:
+        - familyName
+        - keeperDisplayName
+        - roleLabel
+        - expiresAt
+      properties:
+        familyName:
+          type: string
+        keeperDisplayName:
+          type: string
+        roleLabel:
+          type: string
+        expiresAt:
+          type: string
+          format: date-time
+        joinToken:
+          type: string
+    JoinRedeemRequest:
+      type: object
+      required:
+        - kind
+      properties:
+        kind:
+          type: string
+          enum:
+            - qr
+            - email
+        joinToken:
+          type: string
+        emailVerificationTicket:
+          type: string
+        registration:
+          $ref: '#/components/schemas/JoinRegistrationPatch'
+    JoinRegistrationPatch:
+      type: object
+      properties:
+        displayName:
+          type: string
+          minLength: 1
+          maxLength: 128
+        phone:
+          type: string
+          description: E.164
+    JoinRedeemResponse:
+      oneOf:
+        - $ref: '#/components/schemas/JoinRedeemPending'
+        - $ref: '#/components/schemas/JoinRedeemSession'
+        - $ref: '#/components/schemas/JoinRedeemChoosePath'
+    JoinRedeemPending:
+      type: object
+      required:
+        - outcome
+        - requestId
+        - approvalSecret
+        - keeperDisplayName
+        - message
+      properties:
+        outcome:
+          type: string
+          enum:
+            - pending_approval
+        requestId:
+          type: string
+          format: uuid
+        approvalSecret:
+          type: string
+        keeperDisplayName:
+          type: string
+        message:
+          type: string
+    JoinRedeemSession:
+      type: object
+      required:
+        - outcome
+        - session
+      properties:
+        outcome:
+          type: string
+          enum:
+            - session
+        session:
+          $ref: '#/components/schemas/AuthSessionResponse'
+    JoinRedeemChoosePath:
+      type: object
+      required:
+        - outcome
+        - userRefresh
+      properties:
+        outcome:
+          type: string
+          enum:
+            - choose_path
+        userRefresh:
+          type: string

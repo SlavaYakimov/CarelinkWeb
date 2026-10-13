@@ -16,6 +16,7 @@ const ACTION_FILES = [
   'onboarding.ts',
   'verify-phone.ts',
   'invites.ts',
+  'join.ts',
 ];
 
 const ROUTE_HANDLERS: Array<{ path: string; exempt?: boolean }> = [
