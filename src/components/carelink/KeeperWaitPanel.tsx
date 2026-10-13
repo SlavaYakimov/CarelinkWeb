@@ -109,7 +109,7 @@ export function KeeperWaitPanel({
       <CardHeader className="text-center">
         <div className="mx-auto mb-3 flex size-12 items-center justify-center rounded-full bg-primary/10 text-primary">
           {phase === 'completing' ? (
-            <Loader2 className="size-6 animate-spin" aria-hidden />
+            <Loader2 className="size-6 animate-spin motion-reduce:animate-none" aria-hidden />
           ) : (
             <ShieldCheck className="size-6" aria-hidden />
           )}
@@ -124,7 +124,7 @@ export function KeeperWaitPanel({
       <CardContent className="space-y-4 text-center text-sm text-muted-foreground">
         {phase === 'waiting' || phase === 'starting' ? (
           <p className="flex items-center justify-center gap-2">
-            <Loader2 className="size-4 animate-spin" aria-hidden />
+            <Loader2 className="size-4 animate-spin motion-reduce:animate-none" aria-hidden />
             Ожидаем ответ…
           </p>
         ) : null}
