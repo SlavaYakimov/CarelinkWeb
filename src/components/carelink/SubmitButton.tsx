@@ -27,7 +27,9 @@ export function SubmitButton({
       {...props}
     >
       <span className="inline-flex items-center justify-center gap-2">
-        {pending ? <Loader2 className="size-4 animate-spin" aria-hidden /> : null}
+        {pending ? (
+          <Loader2 className="size-4 animate-spin motion-reduce:animate-none" aria-hidden />
+        ) : null}
         {children}
       </span>
       {pending ? <span className="sr-only">{pendingLabel}</span> : null}

@@ -40,6 +40,10 @@
   --radius-xl: 1rem;
 
   --shadow-card: 0 1px 2px rgb(20 32 27 / 6%);
+
+  --ease-ui-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --duration-ui-fast: 200ms;
+  --duration-ui-drawer: 300ms;
 }
 
 @layer base {
@@ -67,6 +71,15 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+@keyframes overlay-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
