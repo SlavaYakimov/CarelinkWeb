@@ -30,6 +30,7 @@
     "cypress:run": "cypress run",
     "contracts:merge": "node scripts/contracts-merge.mjs",
     "contracts:generate": "pnpm contracts:merge && openapi-typescript contracts/gateway.openapi.yaml -o src/server/gateway/types.gen.ts",
+    "brand:owl:generate": "node scripts/generate-owl-brand-assets.mjs",
     "contracts:check": "pnpm contracts:generate && git diff --exit-code src/server/gateway/types.gen.ts",
     "contracts:sync": "node scripts/contracts-sync.mjs"
   },
@@ -71,7 +72,9 @@
     "jsdom": "^30.1.2",
     "openapi-typescript": "^7.9.1",
     "prettier": "^3.6.2",
+    "sharp": "^0.35.5",
     "start-server-and-test": "^2.0.12",
+    "svgo": "^4.1.0",
     "tailwindcss": "^4.1.13",
     "typescript": "^5.9.2",
     "vitest": "^4.1.11",
