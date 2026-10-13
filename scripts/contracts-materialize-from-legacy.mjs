@@ -29,4 +29,6 @@ const familyDoc = extractFamilyInviteSpec(combined);
 
 writeFileSync(join(root, 'contracts', 'auth.openapi.yaml'), dumpYaml(authDoc), 'utf8');
 writeFileSync(join(root, 'contracts', 'family.openapi.yaml'), dumpYaml(familyDoc), 'utf8');
-console.log('contracts:materialize: wrote contracts/auth.openapi.yaml and contracts/family.openapi.yaml');
+console.log(
+  'contracts:materialize: wrote contracts/auth.openapi.yaml and contracts/family.openapi.yaml',
+);

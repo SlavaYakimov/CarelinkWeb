@@ -30,10 +30,7 @@ export function FamilyCard({ family }: { family: FamilyListItem }) {
             {family.pulseLabel}
           </p>
         ) : null}
-        <span
-          className="inline-block text-sm font-medium text-primary opacity-50"
-          title="Скоро"
-        >
+        <span className="inline-block text-sm font-medium text-primary opacity-50" title="Скоро">
           Открыть семью
         </span>
       </CardContent>

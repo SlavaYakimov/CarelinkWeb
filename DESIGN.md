@@ -14,52 +14,52 @@
 
 Отдельных токенов для тёмной темы, класса `.dark` и `prefers-color-scheme: dark` в `globals.css` **нет**. Интерфейс рассчитан на светлую палитру ниже.
 
-| Токен | Hex | Назначение в UI |
-| --- | --- | --- |
-| `--color-background` | `#f7faf8` | Фон страницы (`body`, shell) |
-| `--color-foreground` | `#14201b` | Основной текст |
-| `--color-card` | `#ffffff` | Карточки, поля ввода, popover |
-| `--color-card-foreground` | `#14201b` | Текст на карточке |
-| `--color-popover` | `#ffffff` | Popover |
-| `--color-popover-foreground` | `#14201b` | Текст popover |
-| `--color-primary` | `#1f5c4a` | Главный акцент: кнопки, фокус, прогресс, контейнер логотипа |
-| `--color-primary-foreground` | `#ffffff` | Текст/иконка на primary |
-| `--color-secondary` | `#8a6a3b` | Вторичный акцент (подзаголовок бренда, декоративные акценты) |
-| `--color-secondary-foreground` | `#ffffff` | Текст на secondary (если залит фон secondary) |
-| `--color-muted` | `#eef3f0` | Приглушённые поверхности, прогресс-бар «дорожка» |
-| `--color-muted-foreground` | `#4a5650` | Вторичный текст, подписи, footer |
-| `--color-accent` | `#dcefe6` | Hover ghost-кнопок, success-alert фон |
-| `--color-accent-foreground` | `#0b3726` | Текст на accent |
-| `--color-destructive` | `#b3261e` | Ошибки, destructive-кнопки |
-| `--color-destructive-foreground` | `#ffffff` | Текст на destructive |
-| `--color-border` | `#c3ccc7` | Границы карточек, разделители |
-| `--color-input` | `#8a958f` | Граница полей ввода |
-| `--color-ring` | `#1f5c4a` | Focus ring (совпадает с primary) |
-| `--color-info` | `#3e5f7a` | Информационные акценты |
-| `--color-info-foreground` | `#ffffff` | Текст на info |
-| `--color-info-muted` | `#e3eef7` | Фон info-alert |
-| `--color-success` | `#2e7d4f` | Индикаторы успеха (точки статуса) |
-| `--color-success-foreground` | `#ffffff` | Текст на success |
-| `--color-warning` | `#a86200` | Предупреждения |
-| `--color-warning-foreground` | `#8a5000` | Текст на warning-muted |
-| `--color-warning-muted` | `#fff4e0` | Фон warning-alert |
-| `--color-error-muted` | `#fce8e6` | Фон destructive-alert |
+| Токен                            | Hex       | Назначение в UI                                              |
+| -------------------------------- | --------- | ------------------------------------------------------------ |
+| `--color-background`             | `#f7faf8` | Фон страницы (`body`, shell)                                 |
+| `--color-foreground`             | `#14201b` | Основной текст                                               |
+| `--color-card`                   | `#ffffff` | Карточки, поля ввода, popover                                |
+| `--color-card-foreground`        | `#14201b` | Текст на карточке                                            |
+| `--color-popover`                | `#ffffff` | Popover                                                      |
+| `--color-popover-foreground`     | `#14201b` | Текст popover                                                |
+| `--color-primary`                | `#1f5c4a` | Главный акцент: кнопки, фокус, прогресс, контейнер логотипа  |
+| `--color-primary-foreground`     | `#ffffff` | Текст/иконка на primary                                      |
+| `--color-secondary`              | `#8a6a3b` | Вторичный акцент (подзаголовок бренда, декоративные акценты) |
+| `--color-secondary-foreground`   | `#ffffff` | Текст на secondary (если залит фон secondary)                |
+| `--color-muted`                  | `#eef3f0` | Приглушённые поверхности, прогресс-бар «дорожка»             |
+| `--color-muted-foreground`       | `#4a5650` | Вторичный текст, подписи, footer                             |
+| `--color-accent`                 | `#dcefe6` | Hover ghost-кнопок, success-alert фон                        |
+| `--color-accent-foreground`      | `#0b3726` | Текст на accent                                              |
+| `--color-destructive`            | `#b3261e` | Ошибки, destructive-кнопки                                   |
+| `--color-destructive-foreground` | `#ffffff` | Текст на destructive                                         |
+| `--color-border`                 | `#c3ccc7` | Границы карточек, разделители                                |
+| `--color-input`                  | `#8a958f` | Граница полей ввода                                          |
+| `--color-ring`                   | `#1f5c4a` | Focus ring (совпадает с primary)                             |
+| `--color-info`                   | `#3e5f7a` | Информационные акценты                                       |
+| `--color-info-foreground`        | `#ffffff` | Текст на info                                                |
+| `--color-info-muted`             | `#e3eef7` | Фон info-alert                                               |
+| `--color-success`                | `#2e7d4f` | Индикаторы успеха (точки статуса)                            |
+| `--color-success-foreground`     | `#ffffff` | Текст на success                                             |
+| `--color-warning`                | `#a86200` | Предупреждения                                               |
+| `--color-warning-foreground`     | `#8a5000` | Текст на warning-muted                                       |
+| `--color-warning-muted`          | `#fff4e0` | Фон warning-alert                                            |
+| `--color-error-muted`            | `#fce8e6` | Фон destructive-alert                                        |
 
 Контраст ключевых пар проверяется в `tests/unit/contrast-tokens.test.ts` (hex дублируют `@theme`).
 
 ### 1.2. Типографика
 
-| Токен / правило | Значение |
-| --- | --- |
-| `--font-sans` | `var(--font-inter)`, system-ui, sans-serif |
-| `--font-heading` | `var(--font-manrope)`, затем sans |
+| Токен / правило  | Значение                                   |
+| ---------------- | ------------------------------------------ |
+| `--font-sans`    | `var(--font-inter)`, system-ui, sans-serif |
+| `--font-heading` | `var(--font-manrope)`, затем sans          |
 
 Подключение шрифтов: `src/lib/fonts.ts` (self-hosted woff2 в `public/fonts/`).
 
-| Семейство | Начертания в репо | Роль |
-| --- | --- | --- |
-| Inter | 400, 500 | `body`, UI, поля (`font-sans`) |
-| Manrope | 600, 700 | `h1`–`h4`, заголовки карточек и бренда (`font-heading`) |
+| Семейство | Начертания в репо | Роль                                                    |
+| --------- | ----------------- | ------------------------------------------------------- |
+| Inter     | 400, 500          | `body`, UI, поля (`font-sans`)                          |
+| Manrope   | 600, 700          | `h1`–`h4`, заголовки карточек и бренда (`font-heading`) |
 
 Базовые правила (`@layer base`):
 
@@ -68,30 +68,30 @@
 
 **Фактические размеры в компонентах** (отдельных typography-токенов в CSS нет):
 
-| Класс | Где встречается |
-| --- | --- |
-| `text-xs` | Подпись бренда «Спокойная забота», footer, бейджи, шаги |
-| `text-sm` | Label, описания, основной вторичный текст |
-| `text-base` | Поля ввода (`Input`) |
-| `text-lg` / `text-xl` | Заголовки карточек, названия семей |
-| `text-2xl` | Заголовки auth-форм в `CardTitle` |
-| `text-3xl` / `md:text-4xl` | Маркeting-заголовок в `PublicAuthLayout` |
+| Класс                      | Где встречается                                         |
+| -------------------------- | ------------------------------------------------------- |
+| `text-xs`                  | Подпись бренда «Спокойная забота», footer, бейджи, шаги |
+| `text-sm`                  | Label, описания, основной вторичный текст               |
+| `text-base`                | Поля ввода (`Input`)                                    |
+| `text-lg` / `text-xl`      | Заголовки карточек, названия семей                      |
+| `text-2xl`                 | Заголовки auth-форм в `CardTitle`                       |
+| `text-3xl` / `md:text-4xl` | Маркeting-заголовок в `PublicAuthLayout`                |
 
 ### 1.3. Скругления
 
-| Токен | Значение |
-| --- | --- |
+| Токен         | Значение          |
+| ------------- | ----------------- |
 | `--radius-sm` | `0.625rem` (10px) |
-| `--radius-md` | `0.75rem` (12px) |
-| `--radius-lg` | `0.75rem` |
-| `--radius-xl` | `1rem` (16px) |
+| `--radius-md` | `0.75rem` (12px)  |
+| `--radius-lg` | `0.75rem`         |
+| `--radius-xl` | `1rem` (16px)     |
 
 Использование: кнопки и инпуты — `radius-md`; карточки — `radius-lg`; иллюстрации и feature-блоки — `rounded-xl` (Tailwind, не отдельный токен).
 
 ### 1.4. Тени
 
-| Токен | Значение |
-| --- | --- |
+| Токен           | Значение                       |
+| --------------- | ------------------------------ |
 | `--shadow-card` | `0 1px 2px rgb(20 32 27 / 6%)` |
 
 В разметке также встречается утилита `shadow-card` (если настроена в теме Tailwind) и явно `shadow-[var(--shadow-card)]` в `Card` и инпутах.
@@ -100,17 +100,17 @@
 
 **Отдельных spacing-токенов в `@theme` нет** — используется шкала Tailwind по умолчанию. Повторяющиеся паттерны в коде:
 
-| Паттерн | Типичное применение |
-| --- | --- |
-| `max-w-[440px]` | Auth-формы, `StepShell`, `ErrorScreen` |
-| `max-w-6xl` + `px-4 md:px-8` | `PublicAuthLayout` |
-| `p-6` / `pt-0` | `CardHeader` / `CardContent` |
-| `space-y-4` | Формы внутри карточки |
-| `space-y-2` | `FormField` |
-| `space-y-6` | `StepShell` |
-| `gap-3` | `BrandMark`, feature-строки |
-| `h-12` | Кнопки (`default`), поля ввода — минимальная зона нажатия |
-| `min-h-11` | Ссылки footer, icon-кнопки |
+| Паттерн                      | Типичное применение                                       |
+| ---------------------------- | --------------------------------------------------------- |
+| `max-w-[440px]`              | Auth-формы, `StepShell`, `ErrorScreen`                    |
+| `max-w-6xl` + `px-4 md:px-8` | `PublicAuthLayout`                                        |
+| `p-6` / `pt-0`               | `CardHeader` / `CardContent`                              |
+| `space-y-4`                  | Формы внутри карточки                                     |
+| `space-y-2`                  | `FormField`                                               |
+| `space-y-6`                  | `StepShell`                                               |
+| `gap-3`                      | `BrandMark`, feature-строки                               |
+| `h-12`                       | Кнопки (`default`), поля ввода — минимальная зона нажатия |
+| `min-h-11`                   | Ссылки footer, icon-кнопки                                |
 
 ### 1.6. Движение и доступность
 
@@ -125,19 +125,19 @@
 
 ### 2.1. Файлы
 
-| Путь | Назначение |
-| --- | --- |
-| `public/brand/owl.svg` | Исходный SVG-актив (viewBox `0 0 512 512`) |
-| `src/components/brand/owl-mark.tsx` | Общая геометрия `OwlMarkPaths` (синхронна с SVG) |
-| `src/components/brand/Logo.tsx` | Inline SVG для React, `currentColor` |
-| `src/components/brand/BrandMark.tsx` | Логотип + wordmark «Carelink» + слоган |
+| Путь                                 | Назначение                                       |
+| ------------------------------------ | ------------------------------------------------ |
+| `public/brand/owl.svg`               | Исходный SVG-актив (viewBox `0 0 512 512`)       |
+| `src/components/brand/owl-mark.tsx`  | Общая геометрия `OwlMarkPaths` (синхронна с SVG) |
+| `src/components/brand/Logo.tsx`      | Inline SVG для React, `currentColor`             |
+| `src/components/brand/BrandMark.tsx` | Логотип + wordmark «Carelink» + слоган           |
 
 ### 2.2. Минимальные размеры (из `BrandMark`)
 
-| Режим | Контейнер иконки | SVG внутри |
-| --- | --- | --- |
-| Обычный | `size-10` (2.5rem) | `size-6` |
-| `compact` | `size-9` | `size-5` |
+| Режим     | Контейнер иконки   | SVG внутри |
+| --------- | ------------------ | ---------- |
+| Обычный   | `size-10` (2.5rem) | `size-6`   |
+| `compact` | `size-9`           | `size-5`   |
 
 Контейнер: `rounded-lg bg-primary text-primary-foreground`, иконка центрируется flex.
 
@@ -189,14 +189,14 @@ src/components/
 
 ### 3.3. Паттерны `carelink/`
 
-| Область | Компоненты / соглашения |
-| --- | --- |
-| Публичный auth | `PublicAuthLayout` — двухколоночная сетка на `lg`, форма справа |
-| Пошаговые сценарии | `StepShell` — прогресс, «Назад», заголовок; контент формы ниже |
-| Формы | Одна **внешняя** `Card` на экран (`max-w-[440px]`), внутри `form` + `FormField` + доменные поля (`PhoneInput`, `OtpInput`, `PasswordField`, …) |
-| Ошибки | `FormAlert`, `FieldError`, коды из `messages/ru.json` через сервер |
-| Приложение | `AppShell` + `AppSidebar` / `AppTopBar` / `AppMobileNav` |
-| Юридические черновики | `LegalDraftNotice` — warning-alert «Черновик для юристов» |
+| Область               | Компоненты / соглашения                                                                                                                        |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Публичный auth        | `PublicAuthLayout` — двухколоночная сетка на `lg`, форма справа                                                                                |
+| Пошаговые сценарии    | `StepShell` — прогресс, «Назад», заголовок; контент формы ниже                                                                                 |
+| Формы                 | Одна **внешняя** `Card` на экран (`max-w-[440px]`), внутри `form` + `FormField` + доменные поля (`PhoneInput`, `OtpInput`, `PasswordField`, …) |
+| Ошибки                | `FormAlert`, `FieldError`, коды из `messages/ru.json` через сервер                                                                             |
+| Приложение            | `AppShell` + `AppSidebar` / `AppTopBar` / `AppMobileNav`                                                                                       |
+| Юридические черновики | `LegalDraftNotice` — warning-alert «Черновик для юристов»                                                                                      |
 
 Клиентские формы: см. [`.cursor/rules/forms.mdc`](.cursor/rules/forms.mdc) (состояние, OTP, zod на сервере).
 
@@ -234,26 +234,26 @@ Lucide React (`lucide-react`), в кнопках по умолчанию `size-4
 
 Не добавлять в новые экраны без явного решения продукта:
 
-| Антипаттерн | Почему |
-| --- | --- |
-| **Gradient text** (`bg-clip-text`, радужные заголовки) | Нет в текущей палитре и компонентах; ухудшает спокойный медицинско-семейный тон и контраст |
-| **Вложенные карточки** (`Card` внутри `Card`) | Auth и формы используют **одну** карточку на экран; вложенность создаёт визуальный шум и лишние границы |
-| **Маркетинговые buzzwords** («революция», «AI-powered», «х10 продуктивность», «best-in-class») | Противоречит фактическому тону интерфейса и 152-ФЗ-friendly подаче |
-| **Символ дома вместо филина** | Явно исключено тестами бренда |
-| **Случайные hex вне `@theme`** | Ломает контраст-тесты и единообразие |
-| **Клиентские «глобальные» сторы для текста ошибок** | Дублирование server state; см. rules форм |
+| Антипаттерн                                                                                    | Почему                                                                                                  |
+| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| **Gradient text** (`bg-clip-text`, радужные заголовки)                                         | Нет в текущей палитре и компонентах; ухудшает спокойный медицинско-семейный тон и контраст              |
+| **Вложенные карточки** (`Card` внутри `Card`)                                                  | Auth и формы используют **одну** карточку на экран; вложенность создаёт визуальный шум и лишние границы |
+| **Маркетинговые buzzwords** («революция», «AI-powered», «х10 продуктивность», «best-in-class») | Противоречит фактическому тону интерфейса и 152-ФЗ-friendly подаче                                      |
+| **Символ дома вместо филина**                                                                  | Явно исключено тестами бренда                                                                           |
+| **Случайные hex вне `@theme`**                                                                 | Ломает контраст-тесты и единообразие                                                                    |
+| **Клиентские «глобальные» сторы для текста ошибок**                                            | Дублирование server state; см. rules форм                                                               |
 
 ---
 
 ## 6. Связанные файлы
 
-| Файл | Роль |
-| --- | --- |
-| `src/styles/globals.css` | Токены `@theme` |
-| `src/lib/fonts.ts` | Self-hosted шрифты |
-| `tests/unit/contrast-tokens.test.ts` | WCAG-контраст токенов |
-| `messages/ru.json` | Тексты ошибок |
-| `.cursor/rules/forms.mdc` | Правила форм |
-| `docs/PLAN.md` | Продуктовый план, в т.ч. 152-ФЗ и хостинг |
+| Файл                                 | Роль                                      |
+| ------------------------------------ | ----------------------------------------- |
+| `src/styles/globals.css`             | Токены `@theme`                           |
+| `src/lib/fonts.ts`                   | Self-hosted шрифты                        |
+| `tests/unit/contrast-tokens.test.ts` | WCAG-контраст токенов                     |
+| `messages/ru.json`                   | Тексты ошибок                             |
+| `.cursor/rules/forms.mdc`            | Правила форм                              |
+| `docs/PLAN.md`                       | Продуктовый план, в т.ч. 152-ФЗ и хостинг |
 
 При изменении токенов: обновить `globals.css`, этот файл, hex в `contrast-tokens.test.ts` и при необходимости swatches в `DevKitShowcase`.

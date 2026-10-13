@@ -53,8 +53,8 @@ export function SlugInput({
         maxLength={32}
         value={value}
         onBlur={(e) => {
-          const normalized = filterSlug(e.target.value.trim(), value).value
-            .replace(/^-+/, '')
+          const normalized = filterSlug(e.target.value.trim(), value)
+            .value.replace(/^-+/, '')
             .replace(/-+$/, '');
           if (normalized !== value) {
             onChange(normalized);

@@ -70,12 +70,7 @@ function logLineMatchesInviteEmail(payload, subjectIncludes) {
  * @param {{ to: string; skipPriorMatches?: number; subjectIncludes?: string; bodyIncludes?: string }} args
  */
 export async function fetchMemberInviteEmail(args) {
-  const {
-    to,
-    skipPriorMatches = 0,
-    subjectIncludes = DEFAULT_SUBJECT,
-    bodyIncludes,
-  } = args;
+  const { to, skipPriorMatches = 0, subjectIncludes = DEFAULT_SUBJECT, bodyIncludes } = args;
   const logs = await fetchNotificationLogs();
   const lines = logs.split('\n').filter(Boolean);
   const matches = [];

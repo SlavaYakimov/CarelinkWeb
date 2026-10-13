@@ -28,11 +28,7 @@ export async function fetchPendingInvites(): Promise<PendingMemberInvite[] | nul
     log.warn(
       {
         reason:
-          err instanceof GatewayError
-            ? err.code
-            : err instanceof Error
-              ? err.name
-              : 'unknown',
+          err instanceof GatewayError ? err.code : err instanceof Error ? err.name : 'unknown',
       },
       'fetchPendingInvites failed',
     );

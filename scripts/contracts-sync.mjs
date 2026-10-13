@@ -41,7 +41,8 @@ function patchWorkspaceVerifyPhoneCodeLength(authDoc) {
 
 async function fetchAuthSpec() {
   const token = process.env.CONTRACTS_SYNC_TOKEN ?? process.env.GITHUB_TOKEN;
-  const resolvedUrl = process.env.CONTRACTS_SYNC_AUTH_URL ?? process.env.CONTRACTS_SYNC_URL ?? defaultAuthRaw;
+  const resolvedUrl =
+    process.env.CONTRACTS_SYNC_AUTH_URL ?? process.env.CONTRACTS_SYNC_URL ?? defaultAuthRaw;
 
   if (!token && resolvedUrl.includes('raw.githubusercontent.com')) {
     console.error(

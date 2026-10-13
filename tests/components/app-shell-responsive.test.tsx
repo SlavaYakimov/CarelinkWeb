@@ -52,7 +52,9 @@ describe('AppShell responsive shell', () => {
         <h1>Мои семьи</h1>
       </AppShell>,
     );
-    expect(document.activeElement).not.toBe(screen.getByRole('heading', { level: 1, name: 'Мои семьи' }));
+    expect(document.activeElement).not.toBe(
+      screen.getByRole('heading', { level: 1, name: 'Мои семьи' }),
+    );
 
     pathnameRef.current = '/families/new';
     rerender(

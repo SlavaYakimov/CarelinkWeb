@@ -41,7 +41,7 @@ paths:
         - url: https://api.carelink.app
         - url: http://localhost:8080
       responses:
-        "200":
+        '200':
           description: Process healthy
           content:
             application/json:
@@ -64,7 +64,7 @@ paths:
         - url: https://api.carelink.app
         - url: http://localhost:8080
       responses:
-        "200":
+        '200':
           description: Ready to serve traffic
           content:
             application/json:
@@ -76,7 +76,7 @@ paths:
                   status:
                     type: string
                     example: ready
-        "503":
+        '503':
           description: Dependency unavailable
           content:
             application/json:
@@ -100,14 +100,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/WorkspaceSignInRequest"
+              $ref: '#/components/schemas/WorkspaceSignInRequest'
       responses:
-        "200":
+        '200':
           description: Shortcut session or full-flow challenge
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/WorkspaceSignInResponse"
+                $ref: '#/components/schemas/WorkspaceSignInResponse'
   /auth/workspace/sign-in/start:
     post:
       tags:
@@ -118,14 +118,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/WorkspaceSignInStartRequest"
+              $ref: '#/components/schemas/WorkspaceSignInStartRequest'
       responses:
-        "200":
+        '200':
           description: Full-flow challenge
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/WorkspaceSignInStartResponse"
+                $ref: '#/components/schemas/WorkspaceSignInStartResponse'
   /auth/workspace/sign-in/request-push-verify:
     post:
       tags:
@@ -136,14 +136,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/DeviceVerifyChallengeRequest"
+              $ref: '#/components/schemas/DeviceVerifyChallengeRequest'
       responses:
-        "200":
+        '200':
           description: Device verify push dispatched
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DeviceVerifySentResponse"
+                $ref: '#/components/schemas/DeviceVerifySentResponse'
   /auth/workspace/sign-in/resend-push-verify:
     post:
       tags:
@@ -154,14 +154,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/DeviceVerifyChallengeRequest"
+              $ref: '#/components/schemas/DeviceVerifyChallengeRequest'
       responses:
-        "200":
+        '200':
           description: Device verify push resent
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DeviceVerifySentResponse"
+                $ref: '#/components/schemas/DeviceVerifySentResponse'
   /auth/workspace/sign-in/request-sms:
     post:
       tags:
@@ -172,14 +172,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/DeviceVerifySmsRequest"
+              $ref: '#/components/schemas/DeviceVerifySmsRequest'
       responses:
-        "200":
+        '200':
           description: Opt-in SMS dispatched
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DeviceVerifySentResponse"
+                $ref: '#/components/schemas/DeviceVerifySentResponse'
   /auth/workspace/sign-in/verify-sms:
     post:
       tags:
@@ -190,14 +190,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/DeviceVerifySmsConfirmRequest"
+              $ref: '#/components/schemas/DeviceVerifySmsConfirmRequest'
       responses:
-        "200":
+        '200':
           description: SMS verified; device session issued
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DeviceVerifySessionResponse"
+                $ref: '#/components/schemas/DeviceVerifySessionResponse'
   /auth/workspace/sign-in/verify-link:
     get:
       tags:
@@ -210,12 +210,12 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Deep link verified; device session issued
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DeviceVerifySessionResponse"
+                $ref: '#/components/schemas/DeviceVerifySessionResponse'
   /auth/workspace/sign-in/request-otp:
     post:
       tags:
@@ -226,14 +226,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/WorkspaceSignInRequestOtpRequest"
+              $ref: '#/components/schemas/WorkspaceSignInRequestOtpRequest'
       responses:
-        "200":
+        '200':
           description: OTP dispatched to registered phone
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/WorkspaceSignInRequestOtpResponse"
+                $ref: '#/components/schemas/WorkspaceSignInRequestOtpResponse'
   /auth/workspace/sign-in/verify-phone:
     post:
       tags:
@@ -244,14 +244,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/WorkspaceSignInVerifyPhoneRequest"
+              $ref: '#/components/schemas/WorkspaceSignInVerifyPhoneRequest'
       responses:
-        "200":
+        '200':
           description: Phone bound to challenge
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/WorkspaceSignInVerifyPhoneResponse"
+                $ref: '#/components/schemas/WorkspaceSignInVerifyPhoneResponse'
   /auth/workspace/sign-in/complete:
     post:
       tags:
@@ -262,14 +262,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/WorkspaceSignInCompleteRequest"
+              $ref: '#/components/schemas/WorkspaceSignInCompleteRequest'
       responses:
-        "200":
+        '200':
           description: Session or password change required
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/WorkspaceSignInCompleteResponse"
+                $ref: '#/components/schemas/WorkspaceSignInCompleteResponse'
   /auth/workspace/sign-in/request-delegate-push:
     post:
       tags:
@@ -281,15 +281,15 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/WorkspaceDelegatePushRequest"
+              $ref: '#/components/schemas/WorkspaceDelegatePushRequest'
       responses:
-        "200":
+        '200':
           description: Push dispatched to keeper
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DeviceVerifySentResponse"
-        "403":
+                $ref: '#/components/schemas/DeviceVerifySentResponse'
+        '403':
           description: DELEGATE_NOT_ALLOWED
   /auth/workspace/sign-in/delegate-details:
     get:
@@ -304,15 +304,15 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Delegate context for keeper UI
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/WorkspaceDelegateDetailsResponse"
-        "400":
+                $ref: '#/components/schemas/WorkspaceDelegateDetailsResponse'
+        '400':
           description: BAD_REQUEST (missing token)
-        "410":
+        '410':
           description: DELEGATE_EXPIRED (link invalid, expired, or already consumed on read)
   /auth/workspace/sign-in/delegate-link:
     get:
@@ -327,17 +327,17 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: JSON details when Accept prefers application/json
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/WorkspaceDelegateDetailsResponse"
-        "302":
+                $ref: '#/components/schemas/WorkspaceDelegateDetailsResponse'
+        '302':
           description: Redirect to app delegate screen when Accept includes text/html
-        "400":
+        '400':
           description: BAD_REQUEST (missing token)
-        "410":
+        '410':
           description: DELEGATE_EXPIRED (link invalid, expired, or already consumed on read)
   /auth/workspace/sign-in/approve-delegate:
     post:
@@ -352,23 +352,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/WorkspaceDelegateTokenRequest"
+              $ref: '#/components/schemas/WorkspaceDelegateTokenRequest'
       responses:
-        "200":
+        '200':
           description: Approved (deviceSession is not returned to keeper)
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/WorkspaceDelegateApproveResponse"
-        "401":
+                $ref: '#/components/schemas/WorkspaceDelegateApproveResponse'
+        '401':
           description: UNAUTHORIZED
-        "403":
+        '403':
           description: DELEGATE_NOT_ALLOWED (authenticated user is not keeper of this family)
-        "404":
+        '404':
           description: NOT_FOUND (valid token but delegate sidecar/challenge no longer pending)
-        "409":
+        '409':
           description: CONFLICT (token already used on approve/reject)
-        "410":
+        '410':
           description: DELEGATE_EXPIRED (invalid or expired token)
   /auth/workspace/sign-in/reject-delegate:
     post:
@@ -382,23 +382,23 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/WorkspaceDelegateTokenRequest"
+              $ref: '#/components/schemas/WorkspaceDelegateTokenRequest'
       responses:
-        "200":
+        '200':
           description: Rejected
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/WorkspaceDelegateRejectResponse"
-        "401":
+                $ref: '#/components/schemas/WorkspaceDelegateRejectResponse'
+        '401':
           description: UNAUTHORIZED
-        "403":
+        '403':
           description: DELEGATE_NOT_ALLOWED
-        "404":
+        '404':
           description: NOT_FOUND (valid token but delegate sidecar/challenge no longer pending)
-        "409":
+        '409':
           description: CONFLICT (token already used on approve/reject)
-        "410":
+        '410':
           description: DELEGATE_EXPIRED (invalid or expired token)
   /auth/workspace/sign-in/delegate-status:
     get:
@@ -418,12 +418,12 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: pending | approved | rejected | expired
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/WorkspaceDelegateStatusResponse"
+                $ref: '#/components/schemas/WorkspaceDelegateStatusResponse'
   /auth/personal/sign-in/request-email:
     post:
       tags:
@@ -431,9 +431,9 @@ paths:
       operationId: personalSignInRequestEmail
       summary: Request OTP on verified personal email
       responses:
-        "200":
+        '200':
           description: OTP dispatched
-        "501":
+        '501':
           description: Personal sign-in disabled (PERSONAL_SIGNIN_ENABLED=false)
   /auth/personal/sign-in/verify-email:
     post:
@@ -441,7 +441,7 @@ paths:
         - personal-auth
       operationId: personalSignInVerifyEmail
       responses:
-        "200":
+        '200':
           description: Email verified; challenge issued
   /auth/personal/sign-in/request-phone-otp:
     post:
@@ -449,7 +449,7 @@ paths:
         - personal-auth
       operationId: personalSignInRequestPhoneOtp
       responses:
-        "200":
+        '200':
           description: Phone OTP dispatched
   /auth/personal/sign-in/verify-phone:
     post:
@@ -457,7 +457,7 @@ paths:
         - personal-auth
       operationId: personalSignInVerifyPhone
       responses:
-        "200":
+        '200':
           description: Phone verified
   /auth/personal/sign-in/complete:
     post:
@@ -465,7 +465,7 @@ paths:
         - personal-auth
       operationId: personalSignInComplete
       responses:
-        "200":
+        '200':
           description: Session issued
   /auth/sign-in/email/request:
     post:
@@ -474,7 +474,7 @@ paths:
       operationId: personalSignInRequestEmailLegacy
       deprecated: true
       responses:
-        "200":
+        '200':
           description: Legacy path; prefer /auth/personal/sign-in/request-email
   /auth/recovery/request:
     post:
@@ -487,16 +487,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/RecoveryRequestBody"
+              $ref: '#/components/schemas/RecoveryRequestBody'
       responses:
-        "202":
+        '202':
           description: Opaque ticket (always returned to prevent enumeration)
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/RecoveryAcceptedResponse"
-        "501":
-          $ref: "#/components/responses/NotImplemented"
+                $ref: '#/components/schemas/RecoveryAcceptedResponse'
+        '501':
+          $ref: '#/components/responses/NotImplemented'
   /auth/recovery/confirm:
     post:
       tags:
@@ -508,20 +508,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/RecoveryConfirmRequest"
+              $ref: '#/components/schemas/RecoveryConfirmRequest'
       responses:
-        "200":
+        '200':
           description: Full session after password reset
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AuthSessionResponse"
-        "410":
+                $ref: '#/components/schemas/AuthSessionResponse'
+        '410':
           description: Recovery code consumed or expired
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
   /auth/pair/phone/request-otp:
     post:
       tags:
@@ -532,9 +532,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PairPhoneRequestOTPRequest"
+              $ref: '#/components/schemas/PairPhoneRequestOTPRequest'
       responses:
-        "200":
+        '200':
           description: OTP dispatched
           content:
             application/json:
@@ -553,14 +553,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PairPhoneVerifyRequest"
+              $ref: '#/components/schemas/PairPhoneVerifyRequest'
       responses:
-        "200":
+        '200':
           description: Registration token for pair confirm
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PairPhoneVerifyResponse"
+                $ref: '#/components/schemas/PairPhoneVerifyResponse'
   /devices/register:
     post:
       tags:
@@ -577,9 +577,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/GatewayDeviceRegisterRequest"
+              $ref: '#/components/schemas/GatewayDeviceRegisterRequest'
       responses:
-        "201":
+        '201':
           description: Device registered
           content:
             application/json:
@@ -589,8 +589,8 @@ paths:
                   deviceId:
                     type: string
                     format: uuid
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
   /auth/devices:
     get:
       tags:
@@ -599,12 +599,12 @@ paths:
       security:
         - bearerAuth: []
       responses:
-        "200":
+        '200':
           description: Registered devices for current user
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DeviceListResponse"
+                $ref: '#/components/schemas/DeviceListResponse'
   /auth/devices/{clientDeviceId}:
     delete:
       tags:
@@ -618,10 +618,10 @@ paths:
           required: true
           schema:
             type: string
-        - $ref: "#/components/parameters/XDeviceSession"
-        - $ref: "#/components/parameters/XDeviceId"
+        - $ref: '#/components/parameters/XDeviceSession'
+        - $ref: '#/components/parameters/XDeviceId'
       responses:
-        "200":
+        '200':
           description: Device revoked
           content:
             application/json:
@@ -650,20 +650,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/WorkspaceChangePasswordRequest"
+              $ref: '#/components/schemas/WorkspaceChangePasswordRequest'
       responses:
-        "200":
+        '200':
           description: Session after password change
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AuthSessionResponse"
-        "403":
+                $ref: '#/components/schemas/AuthSessionResponse'
+        '403':
           description: Device not verified (missing or invalid X-Device-Session)
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
   /auth/onboarding/email/request:
     post:
       tags:
@@ -674,14 +674,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/OnboardingRequestEmailRequest"
+              $ref: '#/components/schemas/OnboardingRequestEmailRequest'
       responses:
-        "200":
+        '200':
           description: Verification email dispatched
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OnboardingSentResponse"
+                $ref: '#/components/schemas/OnboardingSentResponse'
   /auth/onboarding/email/verify:
     post:
       tags:
@@ -692,14 +692,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/OnboardingVerifyEmailRequest"
+              $ref: '#/components/schemas/OnboardingVerifyEmailRequest'
       responses:
-        "200":
+        '200':
           description: Email verified; workspace shell created
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OnboardingVerifyEmailResponse"
+                $ref: '#/components/schemas/OnboardingVerifyEmailResponse'
   /auth/onboarding/email/verify-link:
     get:
       tags:
@@ -724,13 +724,13 @@ paths:
             type: boolean
           description: When true, redirect to app deep link instead of JSON
       responses:
-        "200":
+        '200':
           description: Magic link verified; same body as email verify
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OnboardingVerifyEmailResponse"
-        "302":
+                $ref: '#/components/schemas/OnboardingVerifyEmailResponse'
+        '302':
           description: Redirect to app deep link (redirect=true or Accept text/html)
   /auth/onboarding/phone/request-otp:
     post:
@@ -742,14 +742,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/OnboardingRequestPhoneOtpRequest"
+              $ref: '#/components/schemas/OnboardingRequestPhoneOtpRequest'
       responses:
-        "200":
+        '200':
           description: SMS OTP dispatched
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OnboardingSentResponse"
+                $ref: '#/components/schemas/OnboardingSentResponse'
   /auth/onboarding/phone/verify:
     post:
       tags:
@@ -760,14 +760,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/OnboardingVerifyPhoneRequest"
+              $ref: '#/components/schemas/OnboardingVerifyPhoneRequest'
       responses:
-        "200":
+        '200':
           description: Phone verified; keeper user created
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OnboardingVerifyPhoneResponse"
+                $ref: '#/components/schemas/OnboardingVerifyPhoneResponse'
   /auth/onboarding/abandon:
     post:
       tags:
@@ -782,20 +782,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/OnboardingAbandonRequest"
+              $ref: '#/components/schemas/OnboardingAbandonRequest'
       responses:
-        "204":
+        '204':
           description: Onboarding abandoned (or nothing to abandon)
-        "400":
+        '400':
           description: |
             BAD_REQUEST (no challenge id) or ONBOARDING_STEP_ORDER (challenge is before phone verify
             or the workspace is already finalized)
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "429":
-          $ref: "#/components/responses/RateLimit"
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          $ref: '#/components/responses/RateLimit'
   /auth/onboarding/device/verify/request-push:
     post:
       tags:
@@ -806,14 +806,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/OnboardingDeviceVerifyRequest"
+              $ref: '#/components/schemas/OnboardingDeviceVerifyRequest'
       responses:
-        "200":
+        '200':
           description: Push dispatched
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DeviceVerifySentResponse"
+                $ref: '#/components/schemas/DeviceVerifySentResponse'
   /auth/onboarding/device/verify/resend-push:
     post:
       tags:
@@ -824,14 +824,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/OnboardingDeviceVerifyRequest"
+              $ref: '#/components/schemas/OnboardingDeviceVerifyRequest'
       responses:
-        "200":
+        '200':
           description: Push resent
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DeviceVerifySentResponse"
+                $ref: '#/components/schemas/DeviceVerifySentResponse'
   /auth/onboarding/device/verify/request-sms:
     post:
       tags:
@@ -842,14 +842,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/OnboardingDeviceVerifySmsRequest"
+              $ref: '#/components/schemas/OnboardingDeviceVerifySmsRequest'
       responses:
-        "200":
+        '200':
           description: Opt-in SMS dispatched
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DeviceVerifySentResponse"
+                $ref: '#/components/schemas/DeviceVerifySentResponse'
   /auth/onboarding/device/verify/verify-sms:
     post:
       tags:
@@ -860,14 +860,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/OnboardingDeviceVerifySmsConfirmRequest"
+              $ref: '#/components/schemas/OnboardingDeviceVerifySmsConfirmRequest'
       responses:
-        "200":
+        '200':
           description: SMS verified
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/DeviceVerifySessionResponse"
+                $ref: '#/components/schemas/DeviceVerifySessionResponse'
   /auth/onboarding/device/verify-link:
     get:
       tags:
@@ -880,12 +880,12 @@ paths:
           schema:
             type: string
       responses:
-        "200":
+        '200':
           description: Deep link verified
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OnboardingDeviceVerifyLinkResponse"
+                $ref: '#/components/schemas/OnboardingDeviceVerifyLinkResponse'
   /auth/onboarding/device/confirm:
     post:
       tags:
@@ -896,14 +896,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/OnboardingConfirmDeviceRequest"
+              $ref: '#/components/schemas/OnboardingConfirmDeviceRequest'
       responses:
-        "200":
+        '200':
           description: Device gate passed; userRefresh issued
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OnboardingConfirmDeviceResponse"
+                $ref: '#/components/schemas/OnboardingConfirmDeviceResponse'
   /auth/onboarding/password/setup:
     post:
       tags:
@@ -917,14 +917,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/OnboardingSetupPasswordRequest"
+              $ref: '#/components/schemas/OnboardingSetupPasswordRequest'
       responses:
-        "200":
+        '200':
           description: Workspace password set; family session issued
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OnboardingSetupPasswordResponse"
+                $ref: '#/components/schemas/OnboardingSetupPasswordResponse'
   /auth/onboarding/workspace/check-slug:
     post:
       tags:
@@ -936,16 +936,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CheckWorkspaceSlugRequest"
+              $ref: '#/components/schemas/CheckWorkspaceSlugRequest'
       responses:
-        "200":
+        '200':
           description: Slug availability result
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CheckWorkspaceSlugResponse"
-        "400":
-          $ref: "#/components/responses/Error"
+                $ref: '#/components/schemas/CheckWorkspaceSlugResponse'
+        '400':
+          $ref: '#/components/responses/Error'
   /auth/onboarding/workspace/finalize:
     post:
       tags:
@@ -958,38 +958,38 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/OnboardingFinalizeWorkspaceRequest"
+              $ref: '#/components/schemas/OnboardingFinalizeWorkspaceRequest'
       responses:
-        "200":
+        '200':
           description: Final workspace slug chosen
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OnboardingFinalizeWorkspaceResponse"
-        "409":
-          $ref: "#/components/responses/Error"
+                $ref: '#/components/schemas/OnboardingFinalizeWorkspaceResponse'
+        '409':
+          $ref: '#/components/responses/Error'
   /auth/token/refresh:
     post:
       tags:
         - auth
       operationId: tokenRefresh
       parameters:
-        - $ref: "#/components/parameters/XScope"
+        - $ref: '#/components/parameters/XScope'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/TokenRefreshRequest"
+              $ref: '#/components/schemas/TokenRefreshRequest'
       responses:
-        "200":
+        '200':
           description: New tokens
           content:
             application/json:
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/FamilyTokenBundle"
-                  - $ref: "#/components/schemas/UserRefreshResponse"
+                  - $ref: '#/components/schemas/FamilyTokenBundle'
+                  - $ref: '#/components/schemas/UserRefreshResponse'
   /auth/logout:
     post:
       tags:
@@ -1001,14 +1001,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/LogoutRequest"
+              $ref: '#/components/schemas/LogoutRequest'
       responses:
-        "200":
+        '200':
           description: Logged out
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/OkResponse"
+                $ref: '#/components/schemas/OkResponse'
   /auth/pair/resolve:
     post:
       tags:
@@ -1019,16 +1019,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PairResolveRequest"
+              $ref: '#/components/schemas/PairResolveRequest'
       responses:
-        "200":
+        '200':
           description: Family preview
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/PairingResolveResult"
-        "404":
-          $ref: "#/components/responses/Error"
+                $ref: '#/components/schemas/PairingResolveResult'
+        '404':
+          $ref: '#/components/responses/Error'
   /auth/pair/confirm:
     post:
       tags:
@@ -1039,16 +1039,16 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PairConfirmRequest"
+              $ref: '#/components/schemas/PairConfirmRequest'
       responses:
-        "200":
+        '200':
           description: Pending or session
           content:
             application/json:
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/PairConfirmPending"
-                  - $ref: "#/components/schemas/AuthSessionResponse"
+                  - $ref: '#/components/schemas/PairConfirmPending'
+                  - $ref: '#/components/schemas/AuthSessionResponse'
   /auth/pair/approval-status:
     post:
       tags:
@@ -1059,17 +1059,17 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ApprovalStatusRequest"
+              $ref: '#/components/schemas/ApprovalStatusRequest'
       responses:
-        "200":
+        '200':
           description: Status
           content:
             application/json:
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/ApprovalPending"
-                  - $ref: "#/components/schemas/ApprovalApproved"
-                  - $ref: "#/components/schemas/ApprovalRejected"
+                  - $ref: '#/components/schemas/ApprovalPending'
+                  - $ref: '#/components/schemas/ApprovalApproved'
+                  - $ref: '#/components/schemas/ApprovalRejected'
   /auth/pair/reject:
     post:
       tags:
@@ -1084,14 +1084,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PairRejectRequest"
+              $ref: '#/components/schemas/PairRejectRequest'
       responses:
-        "200":
+        '200':
           description: Rejected
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ApprovalRejected"
+                $ref: '#/components/schemas/ApprovalRejected'
   /auth/pair/approve:
     post:
       tags:
@@ -1106,9 +1106,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PairRejectRequest"
+              $ref: '#/components/schemas/PairRejectRequest'
       responses:
-        "200":
+        '200':
           description: Approved
           content:
             application/json:
@@ -1133,14 +1133,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateMeRequest"
+              $ref: '#/components/schemas/UpdateMeRequest'
       responses:
-        "200":
+        '200':
           description: Updated profile
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserProfile"
+                $ref: '#/components/schemas/UserProfile'
   /user/me/avatar:
     post:
       tags:
@@ -1162,12 +1162,12 @@ paths:
                   type: string
                   format: binary
       responses:
-        "200":
+        '200':
           description: Profile with placeholder avatarUrl
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UserProfile"
+                $ref: '#/components/schemas/UserProfile'
   /families:
     post:
       tags:
@@ -1192,14 +1192,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateFamilyRequest"
+              $ref: '#/components/schemas/CreateFamilyRequest'
       responses:
-        "201":
+        '201':
           description: Family created with session
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CreateFamilyResponse"
+                $ref: '#/components/schemas/CreateFamilyResponse'
   /user/families:
     get:
       tags:
@@ -1226,14 +1226,14 @@ paths:
             type: string
             format: date-time
       responses:
-        "200":
+        '200':
           description: Family list or sync delta
           content:
             application/json:
               schema:
                 oneOf:
-                  - $ref: "#/components/schemas/FamilyListResponse"
-                  - $ref: "#/components/schemas/FamilySyncResponse"
+                  - $ref: '#/components/schemas/FamilyListResponse'
+                  - $ref: '#/components/schemas/FamilySyncResponse'
   /auth/session/rebuild:
     post:
       tags:
@@ -1241,18 +1241,18 @@ paths:
       operationId: sessionRebuild
       summary: Rebuild session after family membership change (BE-07)
       parameters:
-        - $ref: "#/components/parameters/XUserRefresh"
+        - $ref: '#/components/parameters/XUserRefresh'
       security:
         - bearerAuth: []
       responses:
-        "200":
+        '200':
           description: Full session with updated families
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AuthSessionRebuildResponse"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+                $ref: '#/components/schemas/AuthSessionRebuildResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
 components:
   securitySchemes:
     userRefreshAuth:
@@ -1301,7 +1301,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
     RateLimit:
       description: Rate limited. Response includes `Retry-After` header (seconds until window reset; fallback 60).
       headers:
@@ -1312,19 +1312,19 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
     Unauthorized:
       description: Unauthorized
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
     NotImplemented:
       description: Feature disabled
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
   schemas:
     RecoveryRequestBody:
       type: object
@@ -1458,7 +1458,7 @@ components:
       properties:
         phone:
           type: string
-          example: "+79001234567"
+          example: '+79001234567'
     OtpRequestResponse:
       type: object
       required:
@@ -1482,7 +1482,7 @@ components:
           type: string
         code:
           type: string
-          example: "1234"
+          example: '1234'
     OtpVerifyResponse:
       type: object
       required:
@@ -1504,7 +1504,7 @@ components:
         displayName:
           type: string
         unionRole:
-          $ref: "#/components/schemas/UnionRole"
+          $ref: '#/components/schemas/UnionRole'
     PhoneRegisterResponse:
       type: object
       required:
@@ -1529,7 +1529,7 @@ components:
         familyName:
           type: string
         unionRole:
-          $ref: "#/components/schemas/UnionRole"
+          $ref: '#/components/schemas/UnionRole'
     WorkspaceSignInRequest:
       type: object
       required:
@@ -1573,7 +1573,7 @@ components:
           description: |
             Device verification path after password (and phone OTP when required): `push` — registered device, push verify then complete; `sms` — phone OTP, device register, then push/SMS device verify. Value `phone` may be sent by legacy clients; prefer `requiresPhoneVerification` when present. When `requiresPhoneVerification` is true, `verificationChannel` is still `sms` (device path after phone verify).
         session:
-          $ref: "#/components/schemas/AuthSessionResponse"
+          $ref: '#/components/schemas/AuthSessionResponse'
     DeviceVerifySentResponse:
       type: object
       properties:
@@ -1604,7 +1604,7 @@ components:
           type: string
     DeviceVerifySmsRequest:
       allOf:
-        - $ref: "#/components/schemas/DeviceVerifyChallengeRequest"
+        - $ref: '#/components/schemas/DeviceVerifyChallengeRequest'
         - type: object
           required:
             - phone
@@ -1613,7 +1613,7 @@ components:
               type: string
     DeviceVerifySmsConfirmRequest:
       allOf:
-        - $ref: "#/components/schemas/DeviceVerifySmsRequest"
+        - $ref: '#/components/schemas/DeviceVerifySmsRequest'
         - type: object
           required:
             - code
@@ -1635,7 +1635,7 @@ components:
           type: string
     OnboardingDeviceVerifySmsRequest:
       allOf:
-        - $ref: "#/components/schemas/OnboardingDeviceVerifyRequest"
+        - $ref: '#/components/schemas/OnboardingDeviceVerifyRequest'
         - type: object
           required:
             - phone
@@ -1644,7 +1644,7 @@ components:
               type: string
     OnboardingDeviceVerifySmsConfirmRequest:
       allOf:
-        - $ref: "#/components/schemas/OnboardingDeviceVerifySmsRequest"
+        - $ref: '#/components/schemas/OnboardingDeviceVerifySmsRequest'
         - type: object
           required:
             - code
@@ -1653,7 +1653,7 @@ components:
               type: string
     OnboardingDeviceVerifyLinkResponse:
       allOf:
-        - $ref: "#/components/schemas/DeviceVerifySessionResponse"
+        - $ref: '#/components/schemas/DeviceVerifySessionResponse'
         - type: object
           properties:
             onboardingChallengeId:
@@ -1664,7 +1664,7 @@ components:
         devices:
           type: array
           items:
-            $ref: "#/components/schemas/DeviceListItem"
+            $ref: '#/components/schemas/DeviceListItem'
     DeviceListItem:
       type: object
       properties:
@@ -1763,7 +1763,7 @@ components:
         requiresPasswordChange:
           type: boolean
         session:
-          $ref: "#/components/schemas/AuthSessionResponse"
+          $ref: '#/components/schemas/AuthSessionResponse'
     WorkspaceDelegateTokenRequest:
       type: object
       required:
@@ -1953,7 +1953,7 @@ components:
             Only when existingUser=true (BE-27): finalized families where the user has a workspace
             password, excluding the current onboarding shell. Omitted when empty.
           items:
-            $ref: "#/components/schemas/OnboardingLoginWorkspace"
+            $ref: '#/components/schemas/OnboardingLoginWorkspace'
     OnboardingLoginWorkspace:
       type: object
       required:
@@ -2023,7 +2023,7 @@ components:
         - requiresWorkspaceFinalize
       properties:
         session:
-          $ref: "#/components/schemas/AuthSessionResponse"
+          $ref: '#/components/schemas/AuthSessionResponse'
         requiresWorkspaceFinalize:
           type: boolean
     CheckWorkspaceSlugRequest:
@@ -2131,7 +2131,7 @@ components:
         - session
       properties:
         session:
-          $ref: "#/components/schemas/AuthSessionResponse"
+          $ref: '#/components/schemas/AuthSessionResponse'
     AuthSessionResponse:
       type: object
       required:
@@ -2147,7 +2147,7 @@ components:
         families:
           type: array
           items:
-            $ref: "#/components/schemas/FamilyTokenBundle"
+            $ref: '#/components/schemas/FamilyTokenBundle'
     PairResolveRequest:
       type: object
       required:
@@ -2178,7 +2178,7 @@ components:
         roleLabel:
           type: string
         trustTier:
-          $ref: "#/components/schemas/TrustTier"
+          $ref: '#/components/schemas/TrustTier'
     PairConfirmRequest:
       type: object
       required:
@@ -2203,7 +2203,7 @@ components:
           type: string
           description: Phone path after OTP verify
         unionRole:
-          $ref: "#/components/schemas/UnionRole"
+          $ref: '#/components/schemas/UnionRole'
       oneOf:
         - required:
             - registrationToken
@@ -2249,7 +2249,7 @@ components:
             - pending
     ApprovalApproved:
       allOf:
-        - $ref: "#/components/schemas/AuthSessionResponse"
+        - $ref: '#/components/schemas/AuthSessionResponse'
         - type: object
           required:
             - status
@@ -2303,7 +2303,7 @@ components:
         name:
           type: string
         unionRole:
-          $ref: "#/components/schemas/UnionRole"
+          $ref: '#/components/schemas/UnionRole'
     CreateFamilyResponse:
       type: object
       required:
@@ -2320,7 +2320,7 @@ components:
         memberCount:
           type: integer
         session:
-          $ref: "#/components/schemas/AuthSessionResponse"
+          $ref: '#/components/schemas/AuthSessionResponse'
     FamilyListResponse:
       type: object
       required:
@@ -2333,7 +2333,7 @@ components:
         items:
           type: array
           items:
-            $ref: "#/components/schemas/FamilyContext"
+            $ref: '#/components/schemas/FamilyContext'
         total:
           type: integer
         hasMore:
@@ -2353,7 +2353,7 @@ components:
         upserted:
           type: array
           items:
-            $ref: "#/components/schemas/FamilyContext"
+            $ref: '#/components/schemas/FamilyContext'
         removed:
           type: array
           items:
@@ -2415,4 +2415,3 @@ components:
         - friend
         - advisor
         - guest
-

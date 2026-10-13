@@ -21,16 +21,16 @@
 
 ## Этапы (кратко)
 
-| # | Этап | Действие агента |
-|---|------|-----------------|
-| 1 | Спека | `spec.md`: Given/When/Then + OpenAPI delta + ПДн → гейт «ок» |
-| 2 | Сервер | PR CarelinkAuth, OpenAPI, тесты, CI |
-| 3 | Staging | Запросы к `https://gateway-staging-0a47.up.railway.app`, отчёт → гейт «ок» |
-| 4 | Web | PR CarelinkWeb: `contracts:check`, Playwright |
-| 5 | Ревью + security | Независимый проход checklists; цикл замечаний |
-| 6 | Integration e2e | compose web+gateway+auth+redis, негативы → гейт «ок» |
-| 7 | Мерж + docs | Мерж PR после «ок»; Memory docs |
-| 8 | Release | Skill **`carelink-release`** после «ок» |
+| #   | Этап             | Действие агента                                                            |
+| --- | ---------------- | -------------------------------------------------------------------------- |
+| 1   | Спека            | `spec.md`: Given/When/Then + OpenAPI delta + ПДн → гейт «ок»               |
+| 2   | Сервер           | PR CarelinkAuth, OpenAPI, тесты, CI                                        |
+| 3   | Staging          | Запросы к `https://gateway-staging-0a47.up.railway.app`, отчёт → гейт «ок» |
+| 4   | Web              | PR CarelinkWeb: `contracts:check`, Playwright                              |
+| 5   | Ревью + security | Независимый проход checklists; цикл замечаний                              |
+| 6   | Integration e2e  | compose web+gateway+auth+redis, негативы → гейт «ок»                       |
+| 7   | Мерж + docs      | Мерж PR после «ок»; Memory docs                                            |
+| 8   | Release          | Skill **`carelink-release`** после «ок»                                    |
 
 ## Subagent'ы (по желанию)
 
