@@ -9,7 +9,7 @@ function roleLabel(role: string): string {
 
 export function FamilyCard({ family }: { family: FamilyListItem }) {
   return (
-    <Card className="shadow-card transition-shadow hover:shadow-md">
+    <Card className="shadow-card motion-safe:transition-shadow [@media(hover:hover)_and_(pointer:fine)]:hover:shadow-md">
       <CardHeader className="pb-2">
         <CardTitle className="truncate text-lg" title={family.name}>
           {family.name}

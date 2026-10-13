@@ -50,8 +50,8 @@ export function StepShell({
             aria-valuemax={100}
           >
             <div
-              className="h-full bg-primary transition-[width] duration-200 ease-out motion-reduce:transition-none"
-              style={{ width: `${pct}%` }}
+              className="h-full w-full origin-left bg-primary transition-transform duration-[var(--duration-ui-fast)] ease-[var(--ease-ui-out)] motion-reduce:transition-none"
+              style={{ transform: `scaleX(${pct / 100})` }}
             />
           </div>
         </div>

@@ -15,12 +15,12 @@ export function AppMobileNav({ open, onOpenChange }: AppMobileNavProps) {
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/40 data-[state=open]:animate-in data-[state=closed]:animate-out lg:hidden" />
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/40 motion-safe:animate-[overlay-fade-in_var(--duration-ui-fast)_ease-out] lg:hidden" />
         <DialogPrimitive.Content
           aria-describedby={undefined}
           className={cn(
             'fixed inset-y-0 left-0 z-50 flex h-full w-[min(100%,280px)] flex-col border-r border-border bg-muted/50 p-4 shadow-lg outline-none lg:hidden',
-            'data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left',
+            '-translate-x-full transition-transform duration-[var(--duration-ui-drawer)] ease-[var(--ease-ui-out)] motion-reduce:transition-none data-[state=open]:translate-x-0 data-[state=closed]:-translate-x-full',
           )}
           onCloseAutoFocus={(event) => {
             event.preventDefault();
