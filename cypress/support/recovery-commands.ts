@@ -88,6 +88,7 @@ Cypress.Commands.add(
     cy.openRecoveryConfirmFromSent();
     cy.task<{ requestId: string; smsCode: string }>('approveRecoveryRequest', {
       phoneDigits: fixture.phoneDigits,
+      familySlug,
       keeperWorkspaceEmail: keeper?.keeperWorkspaceEmail,
       keeperPassword: keeper?.keeperPassword,
     }).then(({ requestId, smsCode }) => {

@@ -229,6 +229,7 @@ describe('login and forgot password — negative (compose BE-21)', () => {
       cy.openRecoveryConfirmFromSent();
       cy.task<{ requestId: string; smsCode: string }>('approveRecoveryRequest', {
         phoneDigits: family.phoneDigits,
+        familySlug,
         keeperWorkspaceEmail: family.workspaceEmail,
         keeperPassword: family.password,
       }).then(({ requestId, smsCode }) => {
