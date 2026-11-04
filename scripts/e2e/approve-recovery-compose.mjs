@@ -1,25 +1,30 @@
 #!/usr/bin/env node
 /**
  * Cypress task helper: resolve pending request id + keeper approve + recovery SMS OTP.
- * Usage: node approve-recovery-compose.mjs <phoneDigits>
+ * Usage: node approve-recovery-compose.mjs <phoneDigits> [familySlug]
  * Prints JSON { requestId, smsCode } to stdout.
  */
 import { approveRecoveryRequest } from './approve-recovery-request.mjs';
 import { countRecipientSmsInLogs, fetchOnboardingOtp } from './fetch-onboarding-otp.mjs';
 import { fetchPendingRecoveryRequestId } from './fetch-pending-recovery-request-id.mjs';
 
+const RECOVERY_SMS_BODY_NEEDLE = 'восстановлен';
+
 /**
  * @param {string} phoneDigits
  * @param {{ workspaceEmail: string; password: string }} [keeper]
+ * @param {{ familySlug?: string }} [options]
  * @returns {Promise<{ requestId: string; smsCode: string }>}
  */
-const RECOVERY_SMS_BODY_NEEDLE = 'восстановлен';
-
-export async function approveRecoveryCompose(phoneDigits, keeper) {
+export async function approveRecoveryCompose(phoneDigits, keeper, options = {}) {
   const smsBefore = await countRecipientSmsInLogs(phoneDigits, {
     bodyIncludes: RECOVERY_SMS_BODY_NEEDLE,
   });
-  const requestId = await fetchPendingRecoveryRequestId();
+  const requestId = await fetchPendingRecoveryRequestId({
+    phoneDigits,
+    familySlug: options.familySlug,
+    keeper,
+  });
   await approveRecoveryRequest({ requestId, phone: phoneDigits, keeper });
   const smsCode = await fetchOnboardingOtp({
     channel: 'sms',
@@ -34,8 +39,9 @@ export async function approveRecoveryCompose(phoneDigits, keeper) {
 const isMain = process.argv[1]?.endsWith('approve-recovery-compose.mjs');
 if (isMain) {
   const phone = process.argv[2];
+  const familySlug = process.argv[3];
   if (!phone) {
-    console.error('Usage: approve-recovery-compose.mjs <phoneDigits>');
+    console.error('Usage: approve-recovery-compose.mjs <phoneDigits> [familySlug]');
     process.exit(1);
   }
   const keeper =
@@ -45,7 +51,7 @@ if (isMain) {
           password: process.env.E2E_RECOVERY_KEEPER_PASSWORD,
         }
       : undefined;
-  approveRecoveryCompose(phone, keeper)
+  approveRecoveryCompose(phone, keeper, { familySlug })
     .then((payload) => {
       process.stdout.write(JSON.stringify(payload));
     })

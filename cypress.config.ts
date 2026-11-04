@@ -37,6 +37,7 @@ async function runInvitesTask<T>(taskName: string, args: unknown): Promise<T> {
 
 type ApproveRecoveryRequestArgs = {
   phoneDigits: string;
+  familySlug?: string;
   keeperWorkspaceEmail?: string;
   keeperPassword?: string;
 };
@@ -89,11 +90,11 @@ export default defineConfig({
           if (args.keeperPassword) {
             taskEnv.E2E_RECOVERY_KEEPER_PASSWORD = args.keeperPassword;
           }
-          const { stdout } = await execFileAsync(
-            process.execPath,
-            [approveRecoveryScriptPath, args.phoneDigits],
-            { env: taskEnv },
-          );
+          const argv = [approveRecoveryScriptPath, args.phoneDigits];
+          if (args.familySlug?.trim()) {
+            argv.push(args.familySlug.trim());
+          }
+          const { stdout } = await execFileAsync(process.execPath, argv, { env: taskEnv });
           const parsed = JSON.parse(stdout.trim()) as { requestId: string; smsCode: string };
           return parsed;
         },

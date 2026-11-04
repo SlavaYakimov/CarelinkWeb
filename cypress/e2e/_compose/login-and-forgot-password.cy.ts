@@ -38,6 +38,7 @@ function runRecoveryHappyPath(
 
   cy.task<{ requestId: string; smsCode: string }>('approveRecoveryRequest', {
     phoneDigits,
+    familySlug,
     ...keeperOverride,
   }).then(({ requestId, smsCode }) => {
     cy.submitRecoveryConfirm(requestId, smsCode, newPassword);
