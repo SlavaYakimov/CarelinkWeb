@@ -14,8 +14,9 @@ export function jsonLogPayload(line) {
   if (!line.includes('mock email sent') && !line.includes('mock SMS sent')) {
     return null;
   }
-  const jsonStart = line.indexOf('{');
-  const jsonText = jsonStart === -1 ? line.trim() : line.slice(jsonStart).trim();
+  const braceIdx = line.indexOf('{');
+  const jsonText =
+    braceIdx !== -1 ? line.slice(braceIdx).trim() : line.slice(line.lastIndexOf('|') + 1).trim();
   try {
     const payload = JSON.parse(jsonText);
     return typeof payload === 'object' && payload !== null ? payload : null;
@@ -156,7 +157,7 @@ function localPartMatchesEmailMask(maskLocal, toLocal) {
   const prefixMatch = maskLocal.match(/^([^*]+)\*+$/);
   if (prefixMatch) {
     const prefix = prefixMatch[1];
-    return toLocal.startsWith(prefix) && toLocal.length > prefix.length;
+    return toLocal.startsWith(prefix) && toLocal.length >= prefix.length;
   }
 
   return false;
@@ -193,13 +194,13 @@ function domainPartMatchesEmailMask(maskDomain, toDomain) {
   const labelPrefixMatch = maskLabel.match(/^([^*]+)\*+$/);
   if (labelPrefixMatch) {
     const prefix = labelPrefixMatch[1];
-    return toLabel.startsWith(prefix) && toLabel.length > prefix.length;
+    return toLabel.startsWith(prefix) && toLabel.length >= prefix.length;
   }
 
   return false;
 }
 
-function maskMatchesEmail(emailMask, to) {
+export function maskMatchesEmail(emailMask, to) {
   const at = emailMask.indexOf('@');
   if (at === -1) return false;
   const maskLocal = emailMask.slice(0, at);
