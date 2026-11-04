@@ -129,45 +129,77 @@ function maskMatchesPhoneDigits(phoneMask, toDigits) {
 }
 
 /**
- * Visible (non-*) prefix of a masked email segment; empty if none.
- * @param {string} segment
+ * Match CarelinkAuth `email_mask` to a full recipient address.
+ *
+ * Supports legacy masks (visible local prefix + full domain, e.g. `e2***@example.com`)
+ * and domain-redacted masks (e.g. `e***@e***.com` for `e2e+…@example.com`).
+ *
+ * Limitation: if two different addresses share the same visible local prefix, the same
+ * first domain-label character, and the same TLD (e.g. `eve@email.com` vs `e2e@example.com`
+ * both match `e***@e***.com`), the mask alone cannot distinguish them — `findOtpInLogs`
+ * then relies on log order (newest matching line first) and the caller's explicit `to`.
  */
-function maskVisiblePrefix(segment) {
-  const stars = segment.indexOf('*');
-  if (stars === -1) return segment;
-  return segment.slice(0, stars);
-}
-
-/**
- * Whether a single domain label matches a mask label (`e***`, `example`, …).
- * @param {string} toLabel
- * @param {string} maskLabel
- */
-function maskLabelMatches(toLabel, maskLabel) {
-  if (!maskLabel.includes('*')) {
-    return toLabel === maskLabel;
+function localPartMatchesEmailMask(maskLocal, toLocal) {
+  if (!maskLocal.includes('*')) {
+    return maskLocal === toLocal;
   }
-  const prefix = maskVisiblePrefix(maskLabel);
-  if (!prefix) return false;
-  return toLabel.startsWith(prefix);
+
+  // Fixed-width mask: one `*` per hidden character (e.g. `e2***` → 5-char local).
+  if (maskLocal.length === toLocal.length) {
+    for (let i = 0; i < maskLocal.length; i += 1) {
+      if (maskLocal[i] === '*') continue;
+      if (maskLocal[i] !== toLocal[i]) return false;
+    }
+    return true;
+  }
+
+  // Variable-length local: visible prefix then `***` wildcard run.
+  const prefixMatch = maskLocal.match(/^([^*]+)\*+$/);
+  if (prefixMatch) {
+    const prefix = prefixMatch[1];
+    return toLocal.startsWith(prefix) && toLocal.length > prefix.length;
+  }
+
+  return false;
 }
 
-/**
- * Matches CarelinkAuth mock `email_mask` to a full recipient address.
- *
- * Supports legacy masks with a full domain (`e2e***@example.com`) and newer
- * masks where the domain label is also redacted (`e***@e***.com` → first
- * character of local part, first label, and TLD; `***` is wildcard).
- *
- * Limitation: when the domain label is masked, distinct addresses such as
- * `e2e@example.com` and `e2e@email.com` produce the same mask. Parser
- * cannot disambiguate without a full address in the log — `findOtpInLogs`
- * returns the newest matching line (see skipPriorMatches for older OTPs).
- *
- * @param {string} emailMask
- * @param {string} to
- * @returns {boolean}
- */
+function domainPartMatchesEmailMask(maskDomain, toDomain) {
+  if (!maskDomain.includes('*')) {
+    return maskDomain === toDomain;
+  }
+
+  const maskDot = maskDomain.lastIndexOf('.');
+  const toDot = toDomain.lastIndexOf('.');
+  if (maskDot === -1 || toDot === -1) return false;
+
+  const maskTld = maskDomain.slice(maskDot + 1);
+  const toTld = toDomain.slice(toDot + 1);
+  if (maskTld !== toTld) return false;
+
+  const maskLabel = maskDomain.slice(0, maskDot);
+  const toLabel = toDomain.slice(0, toDot);
+
+  if (!maskLabel.includes('*')) {
+    return maskLabel === toLabel;
+  }
+
+  if (maskLabel.length === toLabel.length) {
+    for (let i = 0; i < maskLabel.length; i += 1) {
+      if (maskLabel[i] === '*') continue;
+      if (maskLabel[i] !== toLabel[i]) return false;
+    }
+    return true;
+  }
+
+  const labelPrefixMatch = maskLabel.match(/^([^*]+)\*+$/);
+  if (labelPrefixMatch) {
+    const prefix = labelPrefixMatch[1];
+    return toLabel.startsWith(prefix) && toLabel.length > prefix.length;
+  }
+
+  return false;
+}
+
 export function maskMatchesEmail(emailMask, to) {
   const at = emailMask.indexOf('@');
   if (at === -1) return false;
@@ -179,22 +211,8 @@ export function maskMatchesEmail(emailMask, to) {
   const toLocal = toLower.slice(0, toAt);
   const toDomain = toLower.slice(toAt + 1);
 
-  if (!maskLabelMatches(toLocal, maskLocal)) return false;
-
-  if (!maskDomain.includes('*')) {
-    return toDomain === maskDomain;
-  }
-
-  const maskLabels = maskDomain.split('.');
-  const toLabels = toDomain.split('.');
-  if (maskLabels.length !== toLabels.length || maskLabels.length < 2) {
-    return false;
-  }
-
-  for (let i = 0; i < maskLabels.length; i += 1) {
-    if (!maskLabelMatches(toLabels[i], maskLabels[i])) return false;
-  }
-  return true;
+  if (!localPartMatchesEmailMask(maskLocal, toLocal)) return false;
+  return domainPartMatchesEmailMask(maskDomain, toDomain);
 }
 
 export function lineMatchesRecipient(line, channel, to) {

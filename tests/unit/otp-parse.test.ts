@@ -61,6 +61,39 @@ describe('otp-parse', () => {
     ).toBe('987654');
   });
 
+  it('lineMatchesRecipient matches legacy full-domain email_mask', () => {
+    const line = 'info | mock email sent | {"email_mask":"e2***@example.com","otp_code":"111111"}';
+    expect(lineMatchesRecipient(line, 'email', 'e2e.list@example.com')).toBe(true);
+    expect(lineMatchesRecipient(line, 'email', 'e2e+1730000000@example.com')).toBe(true);
+    expect(lineMatchesRecipient(line, 'email', 'alice@example.com')).toBe(false);
+  });
+
+  it('lineMatchesRecipient matches domain-redacted email_mask (CarelinkAuth a995396f+)', () => {
+    const line =
+      'info | mock email sent | {"email_mask":"e***@e***.com","otp_code":"482916","body":"Code: 482-916"}';
+    expect(lineMatchesRecipient(line, 'email', 'e2e+1730000000@example.com')).toBe(true);
+    expect(lineMatchesRecipient(line, 'email', 'eve@example.com')).toBe(true);
+    expect(lineMatchesRecipient(line, 'email', 'alice@example.com')).toBe(false);
+    expect(lineMatchesRecipient(line, 'email', 'e2e+1730000000@email.com')).toBe(true);
+    expect(lineMatchesRecipient(line, 'email', 'e2e+1730000000@example.org')).toBe(false);
+  });
+
+  it('findOtpInLogs picks newest email OTP for masked recipient', () => {
+    const to = 'e2e+1730000001@example.com';
+    const logs = [
+      'mock email sent | {"email_mask":"e***@e***.com","otp_code":"111111"}',
+      'mock email sent | {"email_mask":"e***@e***.com","otp_code":"222222"}',
+    ].join('\n');
+    expect(findOtpInLogs(logs, { channel: 'email', to })).toBe('222222');
+    expect(findOtpInLogs(logs, { channel: 'email', to, skipPriorMatches: 1 })).toBe('111111');
+  });
+
+  it('findOtpInLogs ignores mock email for non-matching address', () => {
+    const logs =
+      'mock email sent | {"email_mask":"e***@e***.com","otp_code":"999999","body":"Code: 999-999"}';
+    expect(findOtpInLogs(logs, { channel: 'email', to: 'owner@other.org' })).toBeNull();
+  });
+
   it('findOtpInLogs supports skipPriorMatches for older SMS', () => {
     const logs = [
       'mock SMS sent | {"to":"+79001234567","otp_code":"111111"}',
