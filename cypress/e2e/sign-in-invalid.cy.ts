@@ -15,7 +15,8 @@ describe('sign-in invalid credentials flow', () => {
       expect(
         text.includes('Не удалось войти') ||
           text.includes('Сервис вернул неожиданный ответ') ||
-          text.includes('Неверный логин или пароль'),
+          text.includes('Неверный логин или пароль') ||
+          text.includes('Слишком много попыток'),
       ).to.eq(true);
     });
   });

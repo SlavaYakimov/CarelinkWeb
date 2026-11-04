@@ -3,6 +3,12 @@
 import { useActionState } from 'react';
 import Link from 'next/link';
 import { createFamilyAction, type CreateFamilyFormState } from '@/server/actions/create-family';
+import { createFamilyFormSchema } from '@/lib/forms/schemas';
+import { useFormGate } from '@/lib/forms/use-form-gate';
+import { SubmitButton } from '@/components/carelink/SubmitButton';
+import * as React from 'react';
+import { FieldError } from '@/components/carelink/FieldError';
+import { FormAlert } from '@/components/carelink/FormAlert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,6 +17,8 @@ const initial: CreateFamilyFormState = {};
 
 export function CreateFamilyForm() {
   const [state, formAction, pending] = useActionState(createFamilyAction, initial);
+  const [name, setName] = React.useState('');
+  const gate = useFormGate(createFamilyFormSchema, { name }, ['name'], { pending });
 
   return (
     <form action={formAction} className="mx-auto flex w-full max-w-[520px] flex-col gap-6">
@@ -21,11 +29,7 @@ export function CreateFamilyForm() {
         </p>
       </div>
 
-      {state.formError ? (
-        <p className="text-sm text-destructive" role="alert">
-          {state.formError}
-        </p>
-      ) : null}
+      {state.formError ? <FormAlert message={state.formError} /> : null}
 
       <div className="space-y-2">
         <Label htmlFor="familyName">Имя семьи</Label>
@@ -33,13 +37,15 @@ export function CreateFamilyForm() {
           id="familyName"
           name="name"
           placeholder="Сидоровы"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          maxLength={64}
+          autoComplete="off"
           disabled={pending}
           aria-invalid={Boolean(state.fieldErrors?.name)}
         />
         {state.fieldErrors?.name ? (
-          <p className="text-sm text-destructive" role="alert">
-            {state.fieldErrors.name}
-          </p>
+          <FieldError id="familyName-error">{state.fieldErrors.name}</FieldError>
         ) : (
           <p className="text-xs text-muted-foreground">Отображается в списках и приглашениях</p>
         )}
@@ -50,12 +56,18 @@ export function CreateFamilyForm() {
       </div>
 
       <div className="flex justify-end gap-3 border-t border-border pt-4">
-        <Button type="button" variant="secondary" asChild disabled={pending}>
-          <Link href="/families">Отмена</Link>
-        </Button>
-        <Button type="submit" disabled={pending}>
+        {pending ? (
+          <Button type="button" variant="secondary" disabled>
+            Отмена
+          </Button>
+        ) : (
+          <Button type="button" variant="secondary" asChild>
+            <Link href="/families">Отмена</Link>
+          </Button>
+        )}
+        <SubmitButton type="submit" pending={pending} disabled={!gate.canSubmit}>
           Создать семью
-        </Button>
+        </SubmitButton>
       </div>
     </form>
   );

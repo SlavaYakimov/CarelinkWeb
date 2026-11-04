@@ -4,6 +4,40 @@ export function normalizeWorkspaceSlug(raw: string): string {
   return raw.trim().toLowerCase();
 }
 
+/** Slug segment while typing/pasting a workspace login (local part before `@`). */
+export function slugFromWorkspaceLoginInput(value: string): string {
+  const trimmed = value.trim();
+  const at = trimmed.indexOf('@');
+  if (at > 0) {
+    return normalizeWorkspaceSlug(trimmed.slice(0, at));
+  }
+  return normalizeWorkspaceSlug(trimmed);
+}
+
+/** Normalizes slug field input, including partial workspace-email typing (no `@` left in value). */
+export function coerceWorkspaceSlugFieldInput(raw: string): string {
+  const trimmed = raw.trim();
+  if (!trimmed) return '';
+  if (trimmed.includes('@')) {
+    return slugFromWorkspaceLoginInput(trimmed);
+  }
+  if (/workspaces|carelink|@|\.app|app$/i.test(trimmed)) {
+    const pasted = trimmed.match(
+      /^([a-z0-9-]{3,32}?)(?:workspaces\.carelink\.app|workspaces|carelink|\.app|app)+$/i,
+    );
+    if (pasted) {
+      return normalizeWorkspaceSlug(pasted[1]!);
+    }
+    const lower = trimmed.toLowerCase();
+    const suffixMarkers = ['workspaces', 'carelink', '.app', 'app'];
+    const cutAt = suffixMarkers.map((marker) => lower.indexOf(marker)).filter((idx) => idx > 0);
+    if (cutAt.length > 0) {
+      return normalizeWorkspaceSlug(trimmed.slice(0, Math.min(...cutAt)));
+    }
+  }
+  return raw;
+}
+
 /** For login forms: full workspace email or bare slug → slug for the input. */
 export function parseWorkspaceSlugFromLogin(value: string): string {
   const trimmed = value.trim();

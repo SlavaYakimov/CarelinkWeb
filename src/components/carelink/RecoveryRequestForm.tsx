@@ -4,54 +4,69 @@ import * as React from 'react';
 import { useActionState } from 'react';
 import Link from 'next/link';
 import { recoveryRequestAction, type RecoveryRequestFormState } from '@/server/actions/recovery';
+import { recoveryRequestClientSchema } from '@/lib/forms/schemas';
+import { mergeFieldError } from '@/lib/forms/client-field-error';
+import { useFormGate } from '@/lib/forms/use-form-gate';
 import { PhoneInput } from '@/components/carelink/PhoneInput';
+import { usePhoneField } from '@/components/carelink/use-phone-field';
 import { WorkspaceSlugField } from '@/components/carelink/WorkspaceSlugField';
-import { Button } from '@/components/ui/button';
+import { FormAlert } from '@/components/carelink/FormAlert';
+import { SubmitButton } from '@/components/carelink/SubmitButton';
+import { useFocusFirstError } from '@/components/carelink/use-focus-first-error';
 
 const initial: RecoveryRequestFormState = {};
 
 export function RecoveryRequestForm() {
   const [state, formAction, pending] = useActionState(recoveryRequestAction, initial);
-  const [phone, setPhone] = React.useState('+7');
+  const phoneField = usePhoneField('+7');
+  const [familySlug, setFamilySlug] = React.useState('');
+
+  const phoneDigits = phoneField.display.replace(/\D/g, '');
+  const phoneForGate =
+    phoneField.e164 || (phoneDigits.length > 1 ? phoneField.display : phoneDigits);
+  const gate = useFormGate(
+    recoveryRequestClientSchema,
+    { familySlug, phone: phoneForGate },
+    ['familySlug', 'phone'],
+    { pending },
+  );
+
+  useFocusFirstError(state.fieldErrors, state.formError);
 
   return (
     <form action={formAction} className="space-y-4">
-      {state.formError ? (
-        <div className="space-y-1">
-          <p className="text-sm text-destructive" role="alert">
-            {state.formError}
-          </p>
-          {state.formError.includes('временно недоступно') ? (
-            <p className="text-xs text-muted-foreground">
-              Нужен CarelinkAuth compose с RECOVERY_ENABLED (см. README).
-            </p>
-          ) : null}
-        </div>
-      ) : null}
+      {state.formError ? <FormAlert message={state.formError} /> : null}
 
       <WorkspaceSlugField
         id="familySlug"
         name="familySlug"
         label="Адрес семьи (латиница)"
-        error={state.fieldErrors?.familySlug}
+        value={familySlug}
+        onChange={setFamilySlug}
+        onBlur={() => gate.touch('familySlug')}
+        error={mergeFieldError(gate, 'familySlug', state.fieldErrors?.familySlug)}
         disabled={pending}
         required
       />
 
-      <input type="hidden" name="phone" value={phone} />
       <PhoneInput
-        value={phone}
-        onChange={(display) => setPhone(display)}
-        error={state.fieldErrors?.phone}
+        value={phoneField.display}
+        onChange={phoneField.onChange}
+        onBlur={() => gate.touch('phone')}
+        error={mergeFieldError(gate, 'phone', state.fieldErrors?.phone)}
         disabled={pending}
       />
+      <input type="hidden" name="phone" value={phoneField.e164} />
 
-      <Button type="submit" className="w-full" disabled={pending}>
+      <SubmitButton type="submit" className="w-full" pending={pending} disabled={!gate.canSubmit}>
         Отправить запрос хранителю
-      </Button>
+      </SubmitButton>
 
       <p className="text-center text-sm">
-        <Link href="/login" className="text-primary hover:underline">
+        <Link
+          href="/login"
+          className="inline-flex min-h-11 items-center text-primary hover:underline"
+        >
           Вернуться ко входу
         </Link>
       </p>

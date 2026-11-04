@@ -4,6 +4,8 @@ Next.js BFF для семейного приложения Carelink. Брауз�
 
 План: [`docs/PLAN.md`](docs/PLAN.md).
 
+Дизайн и UI-токены: [`DESIGN.md`](DESIGN.md) (источник правды; витрина — `/dev/kit` в development).
+
 Memory bank проекта — git submodule [`memory/`](memory/) ([CarelinkMemory](https://github.com/SlavaYakimov/CarelinkMemory), приватный). Сборка Next.js **не использует** содержимое `memory/` (исключено из lint/typecheck/tests).
 
 ### Клон и субмодуль
@@ -14,7 +16,14 @@ cd CarelinkWeb
 # если клонировали без submodules:
 git submodule update --init memory
 ./scripts/sync-cursor-shared.sh   # .cursor/rules/shared/ из memory/cursor/shared
+pnpm install                      # prepare → core.hooksPath .githooks (commit-msg)
 ```
+
+### Коммиты и релизы
+
+- Формат: conventional subject (EN) + секции **Задача / Зачем / Что сделано** (RU) — [`.cursor/rules/commits.mdc`](.cursor/rules/commits.mdc); проверка локально через `.githooks/commit-msg` после `pnpm install`.
+- PR: CI прогоняет `pnpm commits:lint` (`memory/cursor/shared/ci/commit-lint.sh`, тот же hook что локально).
+- SemVer: [`VERSION`](VERSION) и `package.json` (`0.1.0`), журнал [`CHANGELOG.md`](CHANGELOG.md). Публикация тега — только вручную: `./scripts/release.sh` (dry-run), `./scripts/release.sh --publish` (создаёт tag + `gh release`; не в CI).
 
 ### Bump memory bank
 
@@ -146,15 +155,18 @@ docker run --rm -p 3000:3000 \
 curl -s http://localhost:3000/api/health
 ```
 
-## Контракт auth
+## Контракт gateway
 
-Файл: `contracts/auth.openapi.yaml`. Типы: `pnpm contracts:generate` → `src/server/gateway/types.gen.ts`.
+- `contracts/auth.openapi.yaml` — auth (CarelinkAuth `docs/backend/auth/openapi.yaml`)
+- `contracts/family.openapi.yaml` — member invites / role templates (**vendored in CarelinkWeb**; `contracts:sync` does not overwrite — upstream family OpenAPI is incomplete; TODO BE-20)
+- `pnpm contracts:merge` → `contracts/gateway.openapi.yaml` (gitignored)
+- `pnpm contracts:generate` → `src/server/gateway/types.gen.ts`
 
 Синхронизация из CarelinkAuth:
 
 ```bash
 export GITHUB_TOKEN=...   # read access к CarelinkAuth
-pnpm contracts:sync
+pnpm contracts:sync && pnpm contracts:generate
 ```
 
 ## Staging gateway (ручные проверки)

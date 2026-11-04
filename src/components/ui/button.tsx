@@ -17,9 +17,9 @@ const buttonVariants = cva(
       },
       size: {
         default: 'h-12 px-5 py-2',
-        sm: 'h-10 rounded-[var(--radius-sm)] px-4',
+        sm: 'h-11 min-h-11 rounded-[var(--radius-sm)] px-4',
         lg: 'h-12 px-8',
-        icon: 'h-10 w-10',
+        icon: 'size-11 min-h-11 min-w-11',
       },
     },
     defaultVariants: {
@@ -52,7 +52,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || loading}
         {...props}
       >
-        {loading ? <Loader2 className="animate-spin" aria-hidden /> : null}
+        {loading ? (
+          <Loader2 className="animate-spin motion-reduce:animate-none" aria-hidden />
+        ) : null}
         {children}
       </Comp>
     );

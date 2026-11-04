@@ -5,14 +5,21 @@ import { useActionState } from 'react';
 import { ArrowRight } from 'lucide-react';
 import {
   requestOnboardingEmailAction,
+  resendOnboardingEmailAction,
   verifyOnboardingEmailAction,
   type OnboardingEmailOtpState,
   type OnboardingEmailState,
 } from '@/server/actions/onboarding';
+import Link from 'next/link';
+import { onboardingEmailConsentGateSchema } from '@/lib/forms/schemas';
+import { mergeFieldError } from '@/lib/forms/client-field-error';
+import { useFormGate } from '@/lib/forms/use-form-gate';
 import { OtpInput } from '@/components/carelink/OtpInput';
+import { ResendButton } from '@/components/carelink/ResendButton';
 import { StepShell } from '@/components/carelink/StepShell';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -21,9 +28,10 @@ const otpInitial: OnboardingEmailOtpState = {};
 
 export type OnboardingEmailFormProps = {
   linkInvalid?: boolean;
+  initialSentAt?: string;
 };
 
-export function OnboardingEmailForm({ linkInvalid }: OnboardingEmailFormProps) {
+export function OnboardingEmailForm({ linkInvalid, initialSentAt }: OnboardingEmailFormProps) {
   const [emailState, requestEmail, requesting] = useActionState(
     requestOnboardingEmailAction,
     emailInitial,
@@ -32,9 +40,24 @@ export function OnboardingEmailForm({ linkInvalid }: OnboardingEmailFormProps) {
     verifyOnboardingEmailAction,
     otpInitial,
   );
+  const [resendState, resendEmail, resending] = useActionState(
+    resendOnboardingEmailAction,
+    emailInitial,
+  );
   const [code, setCode] = React.useState('');
-  const sent = emailState.sent;
-  const email = emailState.email ?? '';
+  const [emailInput, setEmailInput] = React.useState('');
+  const [personalDataConsent, setPersonalDataConsent] = React.useState(false);
+  const emailGate = useFormGate(
+    onboardingEmailConsentGateSchema,
+    { email: emailInput, personalDataConsent },
+    ['email', 'personalDataConsent'],
+    {
+      pending: requesting,
+    },
+  );
+  const sent = emailState.sent || resendState.sent;
+  const email = emailState.email ?? resendState.email ?? '';
+  const sentAt = emailState.sentAt ?? resendState.sentAt ?? initialSentAt;
 
   return (
     <StepShell
@@ -60,52 +83,101 @@ export function OnboardingEmailForm({ linkInvalid }: OnboardingEmailFormProps) {
           ) : null}
           <div className="space-y-2">
             <Label htmlFor="email">Личная почта</Label>
+            <input type="hidden" name="email" value={emailInput} />
             <Input
               id="email"
-              name="email"
               type="email"
               autoComplete="email"
+              autoCapitalize="none"
+              enterKeyHint="send"
               placeholder="you@example.com"
-              defaultValue={email}
+              value={emailInput}
+              onChange={(e) => setEmailInput(e.target.value)}
+              onBlur={() => emailGate.touch('email')}
               disabled={requesting}
               required
+              aria-invalid={Boolean(mergeFieldError(emailGate, 'email'))}
             />
+            {mergeFieldError(emailGate, 'email') ? (
+              <p className="text-sm text-destructive" role="alert">
+                {mergeFieldError(emailGate, 'email')}
+              </p>
+            ) : null}
           </div>
-          <Button type="submit" className="w-full" disabled={requesting}>
+          <div className="space-y-2">
+            <div className="flex min-h-11 items-start gap-3">
+              <Checkbox
+                id="personalDataConsent"
+                checked={personalDataConsent}
+                onCheckedChange={(checked) => {
+                  setPersonalDataConsent(checked === true);
+                  emailGate.touch('personalDataConsent');
+                }}
+                disabled={requesting}
+                aria-invalid={Boolean(mergeFieldError(emailGate, 'personalDataConsent'))}
+              />
+              <Label htmlFor="personalDataConsent" className="text-sm leading-snug font-normal">
+                Согласен на{' '}
+                <Link href="/privacy" className="text-primary hover:underline">
+                  обработку персональных данных
+                </Link>{' '}
+                в соответствии с 152-ФЗ, включая сведения о здоровье, если я их укажу в сервисе.
+              </Label>
+            </div>
+            {mergeFieldError(emailGate, 'personalDataConsent') ? (
+              <p className="text-sm text-destructive" role="alert">
+                {mergeFieldError(emailGate, 'personalDataConsent')}
+              </p>
+            ) : null}
+          </div>
+          <Button type="submit" className="w-full" disabled={requesting || !emailGate.canSubmit}>
             Отправить код
             <ArrowRight className="size-4" aria-hidden />
           </Button>
         </form>
       ) : (
-        <form action={verifyEmail} className="space-y-4">
-          <input type="hidden" name="email" value={email} />
-          {otpState.error ? (
-            <Alert variant="destructive">
-              <AlertDescription>{otpState.error}</AlertDescription>
-            </Alert>
-          ) : null}
-          <p className="text-sm text-muted-foreground">
-            Код отправлен на {email}. Можно ввести 6 цифр или перейти по ссылке из письма.
+        <div className="space-y-4">
+          <form id="onboarding-email-otp-form" action={verifyEmail} className="space-y-4">
+            <input type="hidden" name="email" value={email} />
+            <p className="text-sm text-muted-foreground">
+              Код отправлен на {email}. Можно ввести 6 цифр или перейти по ссылке из письма.
+            </p>
+            <div className="space-y-2">
+              <Label id="email-otp-label" htmlFor="email-otp">
+                Код из письма
+              </Label>
+              <OtpInput
+                id="email-otp"
+                labelledBy="email-otp-label"
+                name="code"
+                formId="onboarding-email-otp-form"
+                length={6}
+                value={code}
+                onChange={setCode}
+                disabled={verifying}
+                error={otpState.error ?? undefined}
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={verifying || code.length < 6}>
+              Продолжить
+              <ArrowRight className="size-4" aria-hidden />
+            </Button>
+          </form>
+          <ResendButton
+            action={resendEmail}
+            pending={resending}
+            successAt={sentAt}
+            startOnMount={Boolean(sent)}
+            retryAfter={resendState.retryAfter}
+            error={resendState.error}
+            onResendSuccess={() => setCode('')}
+          />
+          <p className="text-center text-sm">
+            <a href="/onboarding/email" className="text-primary hover:underline">
+              Изменить почту
+            </a>
           </p>
-          <div className="space-y-2">
-            <Label id="email-otp-label" htmlFor="email-otp">
-              Код из письма
-            </Label>
-            <input type="hidden" name="code" value={code} />
-            <OtpInput
-              id="email-otp"
-              labelledBy="email-otp-label"
-              length={6}
-              value={code}
-              onChange={setCode}
-              disabled={verifying}
-            />
-          </div>
-          <Button type="submit" className="w-full" disabled={verifying || code.length < 6}>
-            Продолжить
-            <ArrowRight className="size-4" aria-hidden />
-          </Button>
-        </form>
+        </div>
       )}
     </StepShell>
   );

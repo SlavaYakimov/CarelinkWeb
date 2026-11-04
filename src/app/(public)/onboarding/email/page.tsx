@@ -1,4 +1,9 @@
+import type { Metadata } from 'next';
 import { OnboardingEmailForm } from '@/components/carelink/OnboardingEmailForm';
+
+export const metadata: Metadata = {
+  title: 'Онбординг — почта',
+};
 
 type PageProps = {
   searchParams: Promise<{ link?: string }>;

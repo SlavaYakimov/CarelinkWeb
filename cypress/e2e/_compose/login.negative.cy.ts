@@ -44,7 +44,7 @@ describe('workspace login — negative (compose BE-21)', () => {
         .clear()
         .type(family.workspaceEmail.split('@')[0] ?? '');
       cy.get('#password').clear().type(family.password, { log: false });
-      cy.contains('button', 'Войти').click();
+      cy.clickSubmitWhenEnabled('Войти');
       cy.getCookies().should((cookies) => {
         const hasSid = cookies.some((c) => c.name === 'cl_sid' || c.name.endsWith('cl_sid'));
         expect(hasSid).to.eq(true);

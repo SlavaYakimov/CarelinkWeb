@@ -10,7 +10,8 @@ export function sessionRecordFromAuthResponse(
   opts: { deviceSession?: string; guestMode?: boolean },
 ): Omit<SessionRecord, 'createdAt' | 'lastSeenAt'> {
   const families: SessionRecord['families'] = {};
-  for (const bundle of session.families) {
+  const bundles = Array.isArray(session.families) ? session.families : [];
+  for (const bundle of bundles) {
     families[bundle.familyId] = {
       access: bundle.access,
       refresh: bundle.refresh,

@@ -6,14 +6,17 @@ import { ArrowRight } from 'lucide-react';
 import {
   checkOnboardingWorkspaceSlugAction,
   finalizeOnboardingWorkspaceAction,
-  type CheckOnboardingWorkspaceSlugResult,
   type OnboardingWorkspaceState,
 } from '@/server/actions/onboarding';
-import { formatWorkspaceLogin, isValidWorkspaceSlug } from '@/lib/workspace-slug';
+import { onboardingWorkspaceFormSchema } from '@/lib/forms/schemas';
+import { mergeFieldError } from '@/lib/forms/client-field-error';
+import { useFormGate } from '@/lib/forms/use-form-gate';
+import { isSlugAvailabilityOk, type WorkspaceSlugCheckUi } from '@/lib/forms/workspace-gate';
+import { formatWorkspaceLogin } from '@/lib/workspace-slug';
 import { StepShell } from '@/components/carelink/StepShell';
+import { SubmitButton } from '@/components/carelink/SubmitButton';
+import { FormAlert } from '@/components/carelink/FormAlert';
 import { WorkspaceSlugField } from '@/components/carelink/WorkspaceSlugField';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
@@ -26,12 +29,10 @@ export type OnboardingWorkspaceFormProps = {
   defaultDisplayName?: string;
 };
 
-type SlugCheckUi =
-  | { phase: 'idle' }
-  | { phase: 'checking' }
-  | { phase: 'done'; result: CheckOnboardingWorkspaceSlugResult };
-
-function slugFieldError(serverError: string | undefined, check: SlugCheckUi): string | undefined {
+function slugFieldError(
+  serverError: string | undefined,
+  check: WorkspaceSlugCheckUi,
+): string | undefined {
   if (serverError) return serverError;
   if (check.phase !== 'done') return undefined;
   if (check.result.status === 'taken' || check.result.status === 'invalid') {
@@ -40,39 +41,30 @@ function slugFieldError(serverError: string | undefined, check: SlugCheckUi): st
   return undefined;
 }
 
-function canSubmitSlug(slug: string, check: SlugCheckUi, pending: boolean): boolean {
-  if (pending) return false;
-  if (!slug.trim() || !isValidWorkspaceSlug(slug)) return false;
-  if (check.phase === 'checking') return false;
-  if (check.phase === 'done') {
-    return check.result.status === 'available';
-  }
-  return false;
-}
-
 export function OnboardingWorkspaceForm({
   defaultSlug = '',
   defaultDisplayName = '',
 }: OnboardingWorkspaceFormProps) {
   const [state, formAction, pending] = useActionState(finalizeOnboardingWorkspaceAction, initial);
   const [slug, setSlug] = React.useState(defaultSlug);
-  const [slugCheck, setSlugCheck] = React.useState<SlugCheckUi>({ phase: 'idle' });
+  const [displayName, setDisplayName] = React.useState(defaultDisplayName);
+  const [slugCheck, setSlugCheck] = React.useState<WorkspaceSlugCheckUi>({ phase: 'idle' });
   const checkGeneration = React.useRef(0);
+
+  const gate = useFormGate(
+    onboardingWorkspaceFormSchema,
+    { workspaceSlug: slug, displayName },
+    ['workspaceSlug', 'displayName'],
+    {
+      pending,
+      extraOk: isSlugAvailabilityOk(slugCheck),
+    },
+  );
 
   const runSlugCheck = React.useCallback(async (value: string) => {
     const trimmed = value.trim();
     if (!trimmed) {
       setSlugCheck({ phase: 'idle' });
-      return;
-    }
-    if (!isValidWorkspaceSlug(trimmed)) {
-      setSlugCheck({
-        phase: 'done',
-        result: {
-          status: 'invalid',
-          message: 'Только латиница, цифры и дефис, от 3 до 32 символов',
-        },
-      });
       return;
     }
 
@@ -82,9 +74,6 @@ export function OnboardingWorkspaceForm({
       const result = await checkOnboardingWorkspaceSlugAction(trimmed);
       if (generation !== checkGeneration.current) return;
       setSlugCheck({ phase: 'done', result });
-      if (result.status === 'available' || result.status === 'taken') {
-        setSlug(result.workspaceSlug);
-      }
     } catch {
       if (generation !== checkGeneration.current) return;
       setSlugCheck({
@@ -105,15 +94,16 @@ export function OnboardingWorkspaceForm({
     return () => window.clearTimeout(timer);
   }, [slug, runSlugCheck]);
 
-  const workspaceSlugError = slugFieldError(state.fieldErrors?.workspaceSlug, slugCheck);
-  const submitEnabled = canSubmitSlug(slug, slugCheck, pending);
+  const workspaceSlugError =
+    mergeFieldError(gate, 'workspaceSlug') ??
+    slugFieldError(state.fieldErrors?.workspaceSlug, slugCheck);
 
   const slugFooter =
     slugCheck.phase === 'checking' ? (
       <p className="text-xs text-muted-foreground">Проверяем, свободен ли адрес…</p>
     ) : slugCheck.phase === 'done' && slugCheck.result.status === 'available' ? (
       <p className="text-xs text-muted-foreground">
-        Логин для входа: {formatWorkspaceLogin(slugCheck.result.workspaceSlug)}
+        Логин для входа: {formatWorkspaceLogin(slugCheck.result.workspaceSlug ?? slug)}
       </p>
     ) : null;
 
@@ -122,45 +112,50 @@ export function OnboardingWorkspaceForm({
       step={5}
       totalSteps={5}
       title="Адрес семьи"
-      description="Выберите короткий адрес — из него соберётся workspace-логин для входа."
+      description="Выберите короткий адрес семьи — из него соберётся логин для входа."
     >
       <form action={formAction} className="space-y-4">
-        {state.formError ? (
-          <Alert variant="destructive">
-            <AlertDescription>{state.formError}</AlertDescription>
-          </Alert>
-        ) : null}
+        {state.formError ? <FormAlert message={state.formError} /> : null}
         <div className="space-y-2">
           <Label htmlFor="displayName">Название семьи</Label>
           <Input
             id="displayName"
             name="displayName"
-            defaultValue={defaultDisplayName}
+            autoComplete="off"
+            maxLength={64}
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
             placeholder="Семья Ивановых"
             disabled={pending}
             required
+            aria-invalid={Boolean(state.fieldErrors?.displayName)}
           />
           {state.fieldErrors?.displayName ? (
-            <p className="text-sm text-destructive">{state.fieldErrors.displayName}</p>
+            <p className="text-sm text-destructive" role="alert">
+              {state.fieldErrors.displayName}
+            </p>
           ) : null}
         </div>
         <WorkspaceSlugField
           id="workspaceSlug"
           name="workspaceSlug"
           label="Адрес семьи"
-          hint="Часть workspace-логина до @"
+          hint="Часть логина для входа до @"
           value={slug}
           onChange={setSlug}
-          onBlur={() => void runSlugCheck(slug)}
+          onBlur={() => {
+            gate.touch('workspaceSlug');
+            void runSlugCheck(slug);
+          }}
           error={workspaceSlugError}
           disabled={pending}
           required
           footer={slugFooter}
         />
-        <Button type="submit" className="w-full" disabled={!submitEnabled}>
+        <SubmitButton type="submit" className="w-full" pending={pending} disabled={!gate.canSubmit}>
           Создать семью
           <ArrowRight className="size-4" aria-hidden />
-        </Button>
+        </SubmitButton>
       </form>
     </StepShell>
   );

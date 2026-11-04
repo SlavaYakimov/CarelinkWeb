@@ -1,4 +1,9 @@
+import type { Metadata } from 'next';
 import { RecoveryRequestForm } from '@/components/carelink/RecoveryRequestForm';
+
+export const metadata: Metadata = {
+  title: 'Восстановление доступа',
+};
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function RecoveryRequestPage() {

@@ -21,8 +21,11 @@ describe('login and forgot password — negative (guest)', () => {
     cy.visitLogin();
     cy.get('#workspaceSlug').clear().type('yakimovs');
     cy.get('#password').clear().type('short7');
-    cy.contains('button', 'Войти').click();
-    cy.contains('[role="alert"]', 'Не короче 8 символов').should('be.visible');
+    cy.assertGatedValidation({
+      submitLabel: 'Войти',
+      blurSelector: '#password',
+      errorText: 'Не короче 8 символов',
+    });
     cy.location('pathname').should('eq', '/login');
   });
 
@@ -30,8 +33,11 @@ describe('login and forgot password — negative (guest)', () => {
     cy.visitLogin();
     cy.get('#workspaceSlug').clear().type('ab');
     cy.get('#password').clear().type('longenough');
-    cy.contains('button', 'Войти').click();
-    cy.contains('[role="alert"]', 'Адрес семьи не короче 3 символов').should('be.visible');
+    cy.assertGatedValidation({
+      submitLabel: 'Войти',
+      blurSelector: '#workspaceSlug',
+      errorText: 'Адрес семьи не короче 3 символов',
+    });
     cy.location('pathname').should('eq', '/login');
   });
 
@@ -67,36 +73,39 @@ describe('login and forgot password — negative (guest)', () => {
     cy.visit('/login/recovery');
     cy.get('#familySlug').clear().type('ab');
     cy.get('#phone').clear().type('9001234567');
-    cy.contains('button', 'Отправить запрос хранителю').click();
-    cy.contains('[role="alert"]', 'Адрес семьи не короче 3 символов').should('be.visible');
+    cy.assertGatedValidation({
+      submitLabel: 'Отправить запрос хранителю',
+      blurSelector: '#familySlug',
+      errorText: 'Адрес семьи не короче 3 символов',
+    });
     cy.location('pathname').should('eq', '/login/recovery');
   });
 
-  it('rejects non-latin family slug on recovery (R-10)', () => {
+  it('normalizes mixed-case family slug to lowercase (R-10)', () => {
     cy.visit('/login/recovery');
     cy.get('#familySlug').clear().type('Yakimovs');
+    cy.get('#familySlug').should('have.value', 'yakimovs');
     cy.get('#phone').clear().type('9001234567');
-    cy.contains('button', 'Отправить запрос хранителю').click();
-    cy.contains('[role="alert"]', 'Только латиница, цифры и дефис').should('be.visible');
-    cy.location('pathname').should('eq', '/login/recovery');
+    cy.contains('button', 'Отправить запрос хранителю').should('be.enabled');
   });
 
-  it('rejects workspace email in family slug field (R-14)', () => {
+  it('strips workspace email to slug characters in family field (R-14)', () => {
     cy.visit('/login/recovery');
     cy.get('#familySlug').clear().type('yakimovs@workspaces.carelink.app');
+    cy.get('#familySlug').should('have.value', 'yakimovs');
     cy.get('#phone').clear().type('9001234567');
-    cy.contains('button', 'Отправить запрос хранителю').click();
-    cy.contains('[role="alert"]', 'Только латиница, цифры и дефис').should('be.visible');
-    cy.location('pathname').should('eq', '/login/recovery');
+    cy.contains('button', 'Отправить запрос хранителю').should('be.enabled');
   });
 
   it('rejects invalid phone on recovery request (R-11)', () => {
     cy.visit('/login/recovery');
     cy.get('#familySlug').clear().type('yakimovs');
     cy.get('#phone').clear().type('900');
-    cy.contains('button', 'Отправить запрос хранителю').click();
-    // Short display value → zod min(10) before normalizeRuPhone (`recovery.ts:29`)
-    cy.contains('[role="alert"]', 'Укажите телефон').should('be.visible');
+    cy.assertGatedValidation({
+      submitLabel: 'Отправить запрос хранителю',
+      blurSelector: '#phone',
+      errorText: 'Введите номер в формате +7 …',
+    });
     cy.location('pathname').should('eq', '/login/recovery');
   });
 

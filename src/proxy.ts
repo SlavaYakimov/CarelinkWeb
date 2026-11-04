@@ -9,6 +9,12 @@ function sessionCookieName(): string {
 const PROTECTED_PREFIXES = ['/families', '/invites', '/profile', '/devices', '/notifications'];
 
 function isProtectedPath(pathname: string): boolean {
+  if (pathname.startsWith('/invites/email')) {
+    return false;
+  }
+  if (pathname === '/join' || pathname.startsWith('/join/')) {
+    return false;
+  }
   return PROTECTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 

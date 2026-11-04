@@ -26,7 +26,15 @@ export async function createFamily(
   ctx: GatewayRequestContext & {
     sid: string;
     session: NonNullable<GatewayRequestContext['session']>;
+    userRefresh?: string;
   },
 ): Promise<CreateFamilyResponse> {
-  return gatewayFetch<CreateFamilyResponse>({ method: 'POST', path: '/v1/families', body }, ctx);
+  return gatewayFetch<CreateFamilyResponse>(
+    { method: 'POST', path: '/v1/families', body },
+    {
+      ...ctx,
+      userRefresh: ctx.userRefresh,
+      userRefreshHeader: Boolean(ctx.userRefresh),
+    },
+  );
 }

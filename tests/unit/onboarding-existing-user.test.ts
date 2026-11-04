@@ -31,6 +31,11 @@ vi.mock('next/navigation', () => ({
   redirect: (url: string) => {
     throw new Error(`REDIRECT:${url}`);
   },
+  unstable_rethrow: (err: unknown) => {
+    if (err instanceof Error && err.message.startsWith('REDIRECT:')) {
+      throw err;
+    }
+  },
 }));
 
 const phoneFlow = {

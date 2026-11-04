@@ -13,6 +13,7 @@ export type PhoneInputProps = {
   error?: string;
   disabled?: boolean;
   hint?: string;
+  onBlur?: React.FocusEventHandler<HTMLInputElement>;
 };
 
 export function PhoneInput({
@@ -23,6 +24,7 @@ export function PhoneInput({
   error,
   disabled,
   hint,
+  onBlur,
 }: PhoneInputProps) {
   return (
     <div className="space-y-2">
@@ -41,6 +43,7 @@ export function PhoneInput({
           const formatted = formatRuPhoneDisplay(e.target.value);
           onChange(formatted, normalizeRuPhone(formatted));
         }}
+        onBlur={onBlur}
       />
       {hint ? (
         <p id={`${id}-hint`} className="text-sm text-muted-foreground">

@@ -1,8 +1,16 @@
 // @vitest-environment jsdom
 import * as React from 'react';
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { AppShell } from '@/components/carelink/AppShell';
+
+vi.mock('next/navigation', () => ({
+  usePathname: () => '/families',
+}));
+
+vi.mock('@/server/actions/logout', () => ({
+  logoutAction: vi.fn(),
+}));
 
 const FORBIDDEN = [/шифрован/i, /сквозн/i, /HIPAA/i, /GDPR/i, /в сети/i, /TLS\s*1\.3/i];
 

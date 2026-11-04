@@ -13,8 +13,8 @@ describe('Carelink inputs', () => {
     const onChange = vi.fn();
     render(<OtpInput value="" onChange={onChange} error="Неверный код" id="otp-test" />);
     expect(screen.getByRole('alert')).toHaveTextContent('Неверный код');
-    const first = screen.getByLabelText('Цифра 1 из 6');
-    await user.type(first, '1');
+    const input = screen.getByLabelText(/Код подтверждения/i);
+    await user.type(input, '1');
     expect(onChange).toHaveBeenCalled();
   });
 

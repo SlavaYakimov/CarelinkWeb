@@ -1,8 +1,9 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { z } from 'zod';
+import { rethrowNextNavigation } from '@/server/actions/rethrow-navigation';
 import { getErrorMessage } from '@/lib/messages';
+import { otpFormSchema, phoneFormSchema } from '@/lib/forms/schemas';
 import { maskRuPhoneE164, normalizeRuPhone } from '@/lib/phone';
 import { GatewayError } from '@/server/gateway/errors';
 import { workspaceSignInRequestSms, workspaceSignInVerifySms } from '@/server/gateway/auth';
@@ -11,18 +12,12 @@ import { persistSignInFlow, requireSignInFlow } from '@/server/flows/signin-flow
 import { gatewayActionContext } from '@/server/actions/request-context';
 import { withServerAction } from '@/server/session/with-session-handler';
 
-const phoneSchema = z.object({
-  phone: z.string().min(1, 'Укажите номер телефона'),
-});
-
-const otpSchema = z.object({
-  code: z.string().regex(/^\d{6}$/, 'Введите все 6 цифр кода'),
-});
-
 export type VerifySmsPhoneState = {
   error?: string;
   phoneMasked?: string;
   smsSent?: boolean;
+  sentAt?: string;
+  retryAfter?: number;
 };
 
 export type VerifySmsOtpState = {
@@ -35,7 +30,7 @@ async function sendSignInSmsActionImpl(
   formData: FormData,
 ): Promise<VerifySmsPhoneState> {
   const { fid, flow } = await requireSignInFlow('verify-sms');
-  const parsed = phoneSchema.safeParse({ phone: formData.get('phone') });
+  const parsed = phoneFormSchema.safeParse({ phone: formData.get('phone') });
   if (!parsed.success) {
     return { error: parsed.error.flatten().fieldErrors.phone?.[0] };
   }
@@ -60,8 +55,10 @@ async function sendSignInSmsActionImpl(
       smsSentAt: new Date().toISOString(),
     };
     await persistSignInFlow(fid, updated);
-    return { smsSent: true, phoneMasked: maskRuPhoneE164(phoneE164) };
+    const sentAt = new Date().toISOString();
+    return { smsSent: true, phoneMasked: maskRuPhoneE164(phoneE164), sentAt };
   } catch (err) {
+    rethrowNextNavigation(err);
     if (err instanceof GatewayError) {
       if (err.code === 'RATE_LIMIT') {
         redirect(`/login/too-many?retryAfter=${err.retryAfter ?? 60}`);
@@ -85,12 +82,28 @@ async function resendSignInSmsActionImpl(): Promise<VerifySmsPhoneState> {
       { clientIp, deviceId },
     );
     await persistSignInFlow(fid, { ...flow, smsSentAt: new Date().toISOString() });
-    return { smsSent: true, phoneMasked: maskRuPhoneE164(phoneE164) };
+    return {
+      smsSent: true,
+      phoneMasked: maskRuPhoneE164(phoneE164),
+      sentAt: new Date().toISOString(),
+    };
   } catch (err) {
+    rethrowNextNavigation(err);
     if (err instanceof GatewayError && err.code === 'RATE_LIMIT') {
-      redirect(`/login/too-many?retryAfter=${err.retryAfter ?? 60}`);
+      return {
+        error: getErrorMessage(err.code),
+        smsSent: true,
+        phoneMasked: maskRuPhoneE164(phoneE164),
+        retryAfter: err.retryAfter ?? 60,
+      };
     }
-    if (err instanceof GatewayError) return { error: getErrorMessage(err.code) };
+    if (err instanceof GatewayError) {
+      return {
+        error: getErrorMessage(err.code),
+        smsSent: true,
+        phoneMasked: maskRuPhoneE164(phoneE164),
+      };
+    }
     throw err;
   }
 }
@@ -100,7 +113,7 @@ async function confirmSignInSmsActionImpl(
   formData: FormData,
 ): Promise<VerifySmsOtpState> {
   const { fid, flow } = await requireSignInFlow('verify-sms');
-  const parsed = otpSchema.safeParse({ code: formData.get('code') });
+  const parsed = otpFormSchema.safeParse({ code: formData.get('code') });
   if (!parsed.success) {
     return { error: parsed.error.flatten().fieldErrors.code?.[0] };
   }
@@ -130,6 +143,7 @@ async function confirmSignInSmsActionImpl(
     });
     return {};
   } catch (err) {
+    rethrowNextNavigation(err);
     if (err instanceof GatewayError) {
       if (err.code === 'RATE_LIMIT') {
         redirect(`/login/too-many?retryAfter=${err.retryAfter ?? 60}`);

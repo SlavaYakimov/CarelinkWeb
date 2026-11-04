@@ -1,5 +1,6 @@
 import 'server-only';
 import { redirect } from 'next/navigation';
+import { rethrowNextNavigation } from '@/server/actions/rethrow-navigation';
 import {
   delegateUnavailablePath,
   mapDelegateGatewayError,
@@ -13,6 +14,7 @@ export function redirectDelegateUnavailable(reason: DelegateUnavailableReason): 
 
 /** Redirects or rethrows when delegate token API fails with a known outcome. */
 export function handleDelegateGatewayError(err: unknown): never {
+  rethrowNextNavigation(err);
   if (!(err instanceof GatewayError)) throw err;
 
   const mapped = mapDelegateGatewayError(err);

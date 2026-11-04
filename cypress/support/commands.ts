@@ -11,5 +11,5 @@ function workspaceSlugFromLogin(value: string): string {
 Cypress.Commands.add('fillWorkspaceLogin', (emailOrSlug: string, password: string) => {
   cy.get('#workspaceSlug').clear().type(workspaceSlugFromLogin(emailOrSlug));
   cy.get('#password').clear().type(password, { log: false });
-  cy.contains('button', 'Войти').click();
+  cy.clickSubmitWhenEnabled('Войти');
 });

@@ -21,8 +21,8 @@
   --color-destructive: #b3261e;
   --color-destructive-foreground: #ffffff;
   --color-border: #c3ccc7;
-  --color-input: #c3ccc7;
-  --color-ring: #8cc9b0;
+  --color-input: #8a958f;
+  --color-ring: #1f5c4a;
 
   --color-info: #3e5f7a;
   --color-info-foreground: #ffffff;
@@ -30,7 +30,7 @@
   --color-success: #2e7d4f;
   --color-success-foreground: #ffffff;
   --color-warning: #a86200;
-  --color-warning-foreground: #14201b;
+  --color-warning-foreground: #8a5000;
   --color-warning-muted: #fff4e0;
   --color-error-muted: #fce8e6;
 
@@ -40,6 +40,10 @@
   --radius-xl: 1rem;
 
   --shadow-card: 0 1px 2px rgb(20 32 27 / 6%);
+
+  --ease-ui-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --duration-ui-fast: 200ms;
+  --duration-ui-drawer: 300ms;
 }
 
 @layer base {
@@ -56,5 +60,42 @@
   h3,
   h4 {
     font-family: var(--font-heading);
+  }
+
+  a:focus-visible {
+    @apply outline-none ring-[3px] ring-ring ring-offset-2 ring-offset-background rounded-[var(--radius-sm)];
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@keyframes overlay-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes otp-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-4px);
+  }
+  75% {
+    transform: translateX(4px);
   }
 }

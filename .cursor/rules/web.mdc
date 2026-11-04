@@ -11,3 +11,4 @@ alwaysApply: true
 - Не логировать тела запросов, пароли, коды, телефоны, cookie, authorization.
 - Endpoint'ы не придумывать — сверяться с CarelinkAuth; иначе «нужен BE-xx» в PR.
 - План: `docs/PLAN.md`.
+- UI, токены, бренд, тон copy: `DESIGN.md` в корне репозитория.

@@ -16,6 +16,9 @@ export type PasswordFieldProps = {
   error?: string;
   disabled?: boolean;
   showRequirements?: boolean;
+  /** Static hint id (e.g. login “Не короче 8 символов”) when checklist is off */
+  formatHintId?: string;
+  onBlur?: React.FocusEventHandler<HTMLInputElement>;
 };
 
 export function PasswordField({
@@ -27,9 +30,23 @@ export function PasswordField({
   error,
   disabled,
   showRequirements = true,
+  formatHintId,
+  onBlur,
 }: PasswordFieldProps) {
   const [visible, setVisible] = React.useState(false);
   const strong = isPasswordStrongEnough(value);
+  const requirementsId = `${id}-requirements`;
+  const errorId = `${id}-error`;
+  const weakHintId = `${id}-weak-hint`;
+
+  const describedBy = [
+    showRequirements ? requirementsId : null,
+    !showRequirements && formatHintId ? formatHintId : null,
+    error ? errorId : null,
+    !error && value && !strong ? weakHintId : null,
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   return (
     <div className="space-y-2">
@@ -42,20 +59,23 @@ export function PasswordField({
           value={value}
           disabled={disabled}
           aria-invalid={error ? true : undefined}
+          aria-describedby={describedBy || undefined}
           onChange={(e) => onChange(e.target.value)}
+          onBlur={onBlur}
           className="pr-11"
         />
         <button
           type="button"
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          className="absolute right-0 top-1/2 inline-flex size-11 min-h-11 min-w-11 -translate-y-1/2 items-center justify-center rounded-[var(--radius-md)] text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring"
           onClick={() => setVisible((v) => !v)}
           aria-label={visible ? 'Скрыть пароль' : 'Показать пароль'}
+          aria-pressed={visible}
         >
           {visible ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
         </button>
       </div>
       {showRequirements ? (
-        <ul className="space-y-1 text-sm" aria-live="polite">
+        <ul id={requirementsId} className="space-y-1 text-sm" aria-live="polite">
           {PASSWORD_RULES.map((rule) => {
             const ok = rule.test(value);
             return (
@@ -74,12 +94,12 @@ export function PasswordField({
         </ul>
       ) : null}
       {!error && value && !strong ? (
-        <p className="text-sm text-muted-foreground">
+        <p id={weakHintId} className="text-sm text-muted-foreground">
           Пароль пока не соответствует всем требованиям
         </p>
       ) : null}
       {error ? (
-        <p className="text-sm text-destructive" role="alert">
+        <p id={errorId} className="text-sm text-destructive" role="alert">
           {error}
         </p>
       ) : null}

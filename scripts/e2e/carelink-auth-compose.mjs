@@ -100,3 +100,22 @@ export function composePostgresExecArgv(psqlArgs) {
   args.push('exec', '-T', 'postgres', ...psqlArgs);
   return args;
 }
+
+/**
+ * argv for execFile('docker', [...]) — family-service Postgres (database `family` by default).
+ * Override service with E2E_FAMILY_POSTGRES_SERVICE (e.g. dedicated family DB container).
+ * @param {string[]} psqlArgs e.g. ['psql', '-U', 'carelink', '-d', 'family', ...]
+ * @returns {string[]}
+ */
+export function composeFamilyPostgresExecArgv(psqlArgs) {
+  const root = resolveCarelinkAuthRoot();
+  assertCarelinkAuthRoot(root);
+
+  const service = process.env.E2E_FAMILY_POSTGRES_SERVICE?.trim() || 'family-postgres';
+  const args = ['compose'];
+  for (const file of COMPOSE_FILES) {
+    args.push('-f', path.join(root, file));
+  }
+  args.push('exec', '-T', service, ...psqlArgs);
+  return args;
+}

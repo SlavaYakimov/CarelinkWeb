@@ -1,6 +1,7 @@
 'use server';
 
 import { redirect } from 'next/navigation';
+import { rethrowNextNavigation } from '@/server/actions/rethrow-navigation';
 import { GatewayError } from '@/server/gateway/errors';
 import { workspaceSignInRequestDelegatePush } from '@/server/gateway/auth';
 import { finishSignInAfterDeviceVerified } from '@/server/flows/finish-sign-in';
@@ -24,6 +25,7 @@ async function requestKeeperDelegatePushActionImpl(): Promise<{ ok: true } | { e
     await persistSignInFlow(fid, { ...flow, delegatePushSentAt: new Date().toISOString() });
     return { ok: true };
   } catch (err) {
+    rethrowNextNavigation(err);
     if (err instanceof GatewayError) {
       if (err.code === 'RATE_LIMIT') {
         redirect(`/login/too-many?retryAfter=${err.retryAfter ?? 60}`);
