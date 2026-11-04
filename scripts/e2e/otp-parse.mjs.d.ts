@@ -3,6 +3,7 @@ export function extractEmailCode(line: string): string | null;
 export function extractSmsCode(line: string): string | null;
 export function normalizeOtpDigits(code: string): string;
 export function smsNeedles(to: string): string[];
+export function maskMatchesEmail(emailMask: string, to: string): boolean;
 export function lineMatchesRecipient(line: string, channel: 'email' | 'sms', to: string): boolean;
 export function findOtpInLogs(
   logs: string,

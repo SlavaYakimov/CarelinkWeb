@@ -14,8 +14,9 @@ export function jsonLogPayload(line) {
   if (!line.includes('mock email sent') && !line.includes('mock SMS sent')) {
     return null;
   }
-  const pipeIdx = line.indexOf('|');
-  const jsonText = pipeIdx === -1 ? line.trim() : line.slice(pipeIdx + 1).trim();
+  const braceIdx = line.indexOf('{');
+  const jsonText =
+    braceIdx !== -1 ? line.slice(braceIdx).trim() : line.slice(line.lastIndexOf('|') + 1).trim();
   try {
     const payload = JSON.parse(jsonText);
     return typeof payload === 'object' && payload !== null ? payload : null;
@@ -127,7 +128,47 @@ function maskMatchesPhoneDigits(phoneMask, toDigits) {
   return normalized.endsWith(suffix) && normalized.startsWith(prefix);
 }
 
-function maskMatchesEmail(emailMask, to) {
+/**
+ * Visible (non-*) prefix of a masked email segment; empty if none.
+ * @param {string} segment
+ */
+function maskVisiblePrefix(segment) {
+  const stars = segment.indexOf('*');
+  if (stars === -1) return segment;
+  return segment.slice(0, stars);
+}
+
+/**
+ * Whether a single domain label matches a mask label (`e***`, `example`, …).
+ * @param {string} toLabel
+ * @param {string} maskLabel
+ */
+function maskLabelMatches(toLabel, maskLabel) {
+  if (!maskLabel.includes('*')) {
+    return toLabel === maskLabel;
+  }
+  const prefix = maskVisiblePrefix(maskLabel);
+  if (!prefix) return false;
+  return toLabel.startsWith(prefix);
+}
+
+/**
+ * Matches CarelinkAuth mock `email_mask` to a full recipient address.
+ *
+ * Supports legacy masks with a full domain (`e2e***@example.com`) and newer
+ * masks where the domain label is also redacted (`e***@e***.com` → first
+ * character of local part, first label, and TLD; `***` is wildcard).
+ *
+ * Limitation: when the domain label is masked, distinct addresses such as
+ * `e2e@example.com` and `e2e@email.com` produce the same mask. Parser
+ * cannot disambiguate without a full address in the log — `findOtpInLogs`
+ * returns the newest matching line (see skipPriorMatches for older OTPs).
+ *
+ * @param {string} emailMask
+ * @param {string} to
+ * @returns {boolean}
+ */
+export function maskMatchesEmail(emailMask, to) {
   const at = emailMask.indexOf('@');
   if (at === -1) return false;
   const maskLocal = emailMask.slice(0, at);
@@ -137,10 +178,23 @@ function maskMatchesEmail(emailMask, to) {
   if (toAt === -1) return false;
   const toLocal = toLower.slice(0, toAt);
   const toDomain = toLower.slice(toAt + 1);
-  if (maskDomain !== toDomain) return false;
-  const visiblePrefix = maskLocal.replace(/\*/g, '');
-  if (!visiblePrefix) return false;
-  return toLocal.startsWith(visiblePrefix);
+
+  if (!maskLabelMatches(toLocal, maskLocal)) return false;
+
+  if (!maskDomain.includes('*')) {
+    return toDomain === maskDomain;
+  }
+
+  const maskLabels = maskDomain.split('.');
+  const toLabels = toDomain.split('.');
+  if (maskLabels.length !== toLabels.length || maskLabels.length < 2) {
+    return false;
+  }
+
+  for (let i = 0; i < maskLabels.length; i += 1) {
+    if (!maskLabelMatches(toLabels[i], maskLabels[i])) return false;
+  }
+  return true;
 }
 
 export function lineMatchesRecipient(line, channel, to) {

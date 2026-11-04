@@ -3,6 +3,9 @@ import {
   extractEmailCode,
   extractSmsCode,
   findOtpInLogs,
+  jsonLogPayload,
+  lineMatchesRecipient,
+  maskMatchesEmail,
   normalizeOtpDigits,
 } from '../../scripts/e2e/otp-parse.mjs';
 
@@ -12,6 +15,8 @@ describe('otp-parse', () => {
       'info | mock email sent | {"to":"e2e@example.com","otp_code":"482916","body":"Code: 482-916"}';
     expect(extractEmailCode(line)).toBe('482916');
     expect(normalizeOtpDigits('482-916')).toBe('482916');
+    expect(jsonLogPayload(line)?.email_mask).toBeUndefined();
+    expect(jsonLogPayload(line)?.otp_code).toBe('482916');
   });
 
   it('extracts email code from plain Code line', () => {
@@ -67,5 +72,42 @@ describe('otp-parse', () => {
     expect(findOtpInLogs(logs, { channel: 'sms', to: '9001234567', skipPriorMatches: 1 })).toBe(
       '111111',
     );
+  });
+
+  describe('maskMatchesEmail', () => {
+    it('matches legacy mask with full domain', () => {
+      expect(maskMatchesEmail('e2e***@example.com', 'e2e+tag@example.com')).toBe(true);
+      expect(maskMatchesEmail('e2e***@example.com', 'e2e@example.com')).toBe(true);
+    });
+
+    it('matches new mask with redacted domain label', () => {
+      expect(maskMatchesEmail('e***@e***.com', 'e2e+flow@example.com')).toBe(true);
+      expect(maskMatchesEmail('e***@e***.com', 'e2e@example.com')).toBe(true);
+    });
+
+    it('rejects non-matching local or domain', () => {
+      expect(maskMatchesEmail('e***@e***.com', 'alice@example.com')).toBe(false);
+      expect(maskMatchesEmail('e***@e***.com', 'e2e@other.org')).toBe(false);
+      expect(maskMatchesEmail('e2e***@example.com', 'e2e@other.com')).toBe(false);
+    });
+  });
+
+  it('findOtpInLogs matches email via email_mask and prefers newest entry', () => {
+    const older =
+      'info | mock email sent | {"email_mask":"e***@e***.com","otp_code":"111111","body":"Code: 111-111"}';
+    const newer =
+      'info | mock email sent | {"email_mask":"e***@e***.com","otp_code":"222222","body":"Code: 222-222"}';
+    const logs = [older, newer].join('\n');
+    const to = 'e2e+onboarding@example.com';
+
+    expect(lineMatchesRecipient(newer, 'email', to)).toBe(true);
+    expect(findOtpInLogs(logs, { channel: 'email', to })).toBe('222222');
+    expect(findOtpInLogs(logs, { channel: 'email', to, skipPriorMatches: 1 })).toBe('111111');
+  });
+
+  it('findOtpInLogs ignores email OTP for a different masked recipient', () => {
+    const line =
+      'info | mock email sent | {"email_mask":"a***@a***.com","otp_code":"999999","body":"Code: 999-999"}';
+    expect(findOtpInLogs(line, { channel: 'email', to: 'e2e@example.com' })).toBeNull();
   });
 });
