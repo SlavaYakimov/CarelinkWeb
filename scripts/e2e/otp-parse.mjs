@@ -157,7 +157,7 @@ function localPartMatchesEmailMask(maskLocal, toLocal) {
   const prefixMatch = maskLocal.match(/^([^*]+)\*+$/);
   if (prefixMatch) {
     const prefix = prefixMatch[1];
-    return toLocal.startsWith(prefix) && toLocal.length > prefix.length;
+    return toLocal.startsWith(prefix) && toLocal.length >= prefix.length;
   }
 
   return false;
@@ -194,7 +194,7 @@ function domainPartMatchesEmailMask(maskDomain, toDomain) {
   const labelPrefixMatch = maskLabel.match(/^([^*]+)\*+$/);
   if (labelPrefixMatch) {
     const prefix = labelPrefixMatch[1];
-    return toLabel.startsWith(prefix) && toLabel.length > prefix.length;
+    return toLabel.startsWith(prefix) && toLabel.length >= prefix.length;
   }
 
   return false;
