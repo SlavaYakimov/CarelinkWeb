@@ -9,7 +9,7 @@ type SessionCtx = GatewayRequestContext & {
 };
 
 type CreateBody = components['schemas']['CreateStickyNoteRequest'];
-type NoteView = components['schemas']['StickyNoteView'];
+type StickyNote = components['schemas']['StickyNote'];
 type ListResponse = components['schemas']['StickyNoteListResponse'];
 type WidgetResponse = components['schemas']['StickyNoteWidgetResponse'];
 
@@ -17,8 +17,8 @@ function familyPath(familyId: string, suffix: string): string {
   return `/v1/families/${familyId}${suffix}`;
 }
 
-export async function createStickyNote(body: CreateBody, ctx: SessionCtx): Promise<NoteView> {
-  return gatewayFetch<NoteView>(
+export async function createStickyNote(body: CreateBody, ctx: SessionCtx): Promise<StickyNote> {
+  return gatewayFetch<StickyNote>(
     { method: 'POST', path: familyPath(ctx.familyId, '/sticky-notes'), body },
     ctx,
   );
@@ -26,10 +26,11 @@ export async function createStickyNote(body: CreateBody, ctx: SessionCtx): Promi
 
 export async function listStickyNotes(
   ctx: SessionCtx,
-  query: { limit?: number } = {},
+  query: { limit?: number; cursor?: string } = {},
 ): Promise<ListResponse> {
   const params = new URLSearchParams();
-  if (query.limit) params.set('limit', String(query.limit));
+  if (query.limit != null) params.set('limit', String(query.limit));
+  if (query.cursor) params.set('cursor', query.cursor);
   const qs = params.toString();
   const path = qs
     ? `${familyPath(ctx.familyId, '/sticky-notes')}?${qs}`
@@ -44,8 +45,8 @@ export async function getStickyNoteWidget(ctx: SessionCtx): Promise<WidgetRespon
   );
 }
 
-export async function markStickyNoteRead(ctx: SessionCtx, noteId: string): Promise<NoteView> {
-  return gatewayFetch<NoteView>(
+export async function markStickyNoteRead(ctx: SessionCtx, noteId: string): Promise<StickyNote> {
+  return gatewayFetch<StickyNote>(
     { method: 'PATCH', path: familyPath(ctx.familyId, `/sticky-notes/${noteId}/read`) },
     ctx,
   );

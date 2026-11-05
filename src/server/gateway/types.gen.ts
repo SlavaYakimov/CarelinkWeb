@@ -2039,91 +2039,96 @@ export interface components {
             joinedAt?: string;
             locked?: boolean;
         };
-        StickyNoteEnvelope: {
+        StickyNoteContentEnvelope: {
+            /** @enum {integer} */
+            v: 1;
             /** @enum {string} */
-            format: "aes-256-gcm-hkdf-sha256-v1";
-            /** @description base64url (ciphertext + GCM tag) */
-            ciphertext: string;
-            /** @description base64url 12-byte GCM nonce */
-            iv: string;
-            /** @description base64url HKDF salt */
-            salt: string;
-            /** @description optional base64url additional authenticated data */
-            aad?: string;
+            alg: "AES-256-GCM";
+            /** @enum {string} */
+            kdf: "HKDF-SHA256";
+            kid: string;
+            /** @description Standard base64 encoding of 12-byte GCM nonce */
+            nonce: string;
+        } & {
+            [key: string]: unknown;
         };
         CreateStickyNoteRequest: {
             /** Format: uuid */
-            recipientUserId: string;
-            /** Format: uuid */
             clientNoteId: string;
-            envelope: components["schemas"]["StickyNoteEnvelope"];
-            /** @description Plaintext length before encryption (widget limit; verify upstream OpenAPI) */
-            plaintextCharCount: number;
-        };
-        StickyNoteView: {
             /** Format: uuid */
-            noteId: string;
+            recipientUserId: string;
+            /** @enum {string} */
+            contentType: "text" | "doodle";
+            /** @description Standard base64 (AES-GCM ciphertext + tag) */
+            contentCiphertext: string;
+            contentEnvelope: components["schemas"]["StickyNoteContentEnvelope"];
+        };
+        StickyNote: {
+            /** Format: uuid */
+            id: string;
             /** Format: uuid */
             familyId: string;
             /** Format: uuid */
             senderUserId: string;
-            senderDisplayName?: string;
             /** Format: uuid */
             recipientUserId: string;
-            envelope: components["schemas"]["StickyNoteEnvelope"];
             /** Format: uuid */
-            clientNoteId?: string;
+            clientNoteId: string;
+            /** @enum {string} */
+            contentType: "text" | "doodle";
+            contentCiphertext: string;
+            contentEnvelope: components["schemas"]["StickyNoteContentEnvelope"];
             /** Format: date-time */
             createdAt: string;
             /** Format: date-time */
             readAt?: string;
-            isRead: boolean;
         };
         StickyNoteListResponse: {
-            items: components["schemas"]["StickyNoteView"][];
+            items: components["schemas"]["StickyNote"][];
+            nextCursor?: string;
+            hasMore: boolean;
         };
         StickyNoteWidgetResponse: {
-            note?: components["schemas"]["StickyNoteView"];
+            note?: components["schemas"]["StickyNote"];
         };
         CreateMemberLabelsRequest: {
             targetUserIds: string[];
             labelText: string;
         };
-        MemberLabelView: {
+        MemberLabel: {
             /** Format: uuid */
-            labelId: string;
+            id: string;
             /** Format: uuid */
             batchId: string;
             /** Format: uuid */
-            fromUserId: string;
-            fromDisplayName?: string;
+            familyId: string;
             /** Format: uuid */
             targetUserId: string;
             labelText: string;
+            /** Format: uuid */
+            setByUserId: string;
             /** Format: date-time */
             createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
         };
         MemberLabelListResponse: {
-            items: components["schemas"]["MemberLabelView"][];
+            items: components["schemas"]["MemberLabel"][];
         };
         MemberLabelBatchResponse: {
             /** Format: uuid */
             batchId: string;
-            items: components["schemas"]["MemberLabelView"][];
+            items: components["schemas"]["MemberLabel"][];
         };
-        MemberLabelBatchFailure: {
+        MemberLabelBadRequestBody: {
             /** @enum {string} */
-            code: "MEMBER_LABEL_BATCH_FAILED";
+            code: "BAD_REQUEST";
             message?: string;
-            /**
-             * Format: uuid
-             * @description Present when the server allocated a batch id before rollback
-             */
-            batchId?: string;
             rejectedTargets: {
                 /** Format: uuid */
                 userId: string;
-                reason: string;
+                /** @enum {string} */
+                reason: "not_member" | "child_role" | "restricted_role" | "label_exists" | "max_labels";
             }[];
         };
     };
@@ -2175,13 +2180,13 @@ export interface components {
                 "application/json": components["schemas"]["ErrorResponse"];
             };
         };
-        /** @description Batch rolled back; lists problematic target ids */
-        MemberLabelBatchError: {
+        /** @description Batch validation failed; lists rejected targets */
+        MemberLabelBadRequest: {
             headers: {
                 [name: string]: unknown;
             };
             content: {
-                "application/json": components["schemas"]["MemberLabelBatchFailure"];
+                "application/json": components["schemas"]["MemberLabelBadRequestBody"];
             };
         };
     };
@@ -4010,7 +4015,7 @@ export interface operations {
     listMemberLabels: {
         parameters: {
             query?: {
-                target_user_id?: string;
+                targetUserId?: string;
             };
             header?: never;
             path: {
@@ -4056,7 +4061,7 @@ export interface operations {
                     "application/json": components["schemas"]["MemberLabelBatchResponse"];
                 };
             };
-            400: components["responses"]["MemberLabelBatchError"];
+            400: components["responses"]["MemberLabelBadRequest"];
             403: components["responses"]["Error"];
         };
     };
@@ -4134,6 +4139,7 @@ export interface operations {
         parameters: {
             query?: {
                 limit?: number;
+                cursor?: string;
             };
             header?: never;
             path: {
@@ -4171,16 +4177,27 @@ export interface operations {
             };
         };
         responses: {
-            /** @description Created or existing (idempotent) */
+            /** @description Idempotent replay (same clientNoteId and payload) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StickyNote"];
+                };
+            };
+            /** @description Created */
             201: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["StickyNoteView"];
+                    "application/json": components["schemas"]["StickyNote"];
                 };
             };
+            400: components["responses"]["Error"];
             403: components["responses"]["Error"];
+            409: components["responses"]["Error"];
             429: components["responses"]["RateLimit"];
             503: components["responses"]["ServiceUnavailable"];
         };
@@ -4250,7 +4267,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["StickyNoteView"];
+                    "application/json": components["schemas"]["StickyNote"];
                 };
             };
             403: components["responses"]["Error"];

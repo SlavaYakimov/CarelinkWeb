@@ -38,7 +38,11 @@ export default async function StickyNotesPage({ params }: PageProps) {
         </p>
       </div>
 
-      <StickyNoteWidgetCard familyId={familyId} note={widget?.note ?? null} />
+      <StickyNoteWidgetCard
+        familyId={familyId}
+        note={widget?.note ?? null}
+        members={members}
+      />
 
       <section className="rounded-xl border border-border bg-card p-6 shadow-card">
         <h2 className="text-lg font-semibold">Отправить</h2>

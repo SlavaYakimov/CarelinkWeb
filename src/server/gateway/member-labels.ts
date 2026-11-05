@@ -15,7 +15,7 @@ type SessionCtx = GatewayRequestContext & {
 type CreateBody = components['schemas']['CreateMemberLabelsRequest'];
 type BatchResponse = components['schemas']['MemberLabelBatchResponse'];
 type ListResponse = components['schemas']['MemberLabelListResponse'];
-type BatchFailure = components['schemas']['MemberLabelBatchFailure'];
+type BadRequestBody = components['schemas']['MemberLabelBadRequestBody'];
 
 function familyPath(familyId: string, suffix: string): string {
   return `/v1/families/${familyId}${suffix}`;
@@ -37,7 +37,7 @@ export async function listMemberLabels(
   query: { targetUserId?: string } = {},
 ): Promise<ListResponse> {
   const params = new URLSearchParams();
-  if (query.targetUserId) params.set('target_user_id', query.targetUserId);
+  if (query.targetUserId) params.set('targetUserId', query.targetUserId);
   const qs = params.toString();
   const path = qs
     ? `${familyPath(ctx.familyId, '/member-labels')}?${qs}`
@@ -56,8 +56,8 @@ export async function createMemberLabels(
     );
   } catch (err) {
     if (err instanceof MemberLabelBatchError) throw err;
-    if (err instanceof GatewayError && err.code === 'MEMBER_LABEL_BATCH_FAILED' && err.body) {
-      throw new MemberLabelBatchError(err.body as BatchFailure);
+    if (err instanceof GatewayError && err.code === 'BAD_REQUEST' && err.body) {
+      throw new MemberLabelBatchError(err.body as BadRequestBody);
     }
     throw err;
   }

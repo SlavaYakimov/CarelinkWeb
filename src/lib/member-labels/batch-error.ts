@@ -1,15 +1,13 @@
 import type { components } from '@/server/gateway/types.gen';
 
-type BatchFailure = components['schemas']['MemberLabelBatchFailure'];
+type BadRequestBody = components['schemas']['MemberLabelBadRequestBody'];
 
 export class MemberLabelBatchError extends Error {
-  readonly rejectedTargets: BatchFailure['rejectedTargets'];
-  readonly batchId?: string;
+  readonly rejectedTargets: BadRequestBody['rejectedTargets'];
 
-  constructor(payload: BatchFailure) {
+  constructor(payload: BadRequestBody) {
     super(payload.message ?? payload.code);
     this.name = 'MemberLabelBatchError';
     this.rejectedTargets = payload.rejectedTargets;
-    this.batchId = payload.batchId;
   }
 }

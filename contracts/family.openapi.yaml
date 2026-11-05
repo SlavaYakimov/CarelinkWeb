@@ -463,6 +463,10 @@ paths:
             minimum: 1
             maximum: 50
             default: 20
+        - name: cursor
+          in: query
+          schema:
+            type: string
       responses:
         '200':
           description: Notes
@@ -496,12 +500,22 @@ paths:
               $ref: '#/components/schemas/CreateStickyNoteRequest'
       responses:
         '201':
-          description: Created or existing (idempotent)
+          description: Created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StickyNoteView'
+                $ref: '#/components/schemas/StickyNote'
+        '200':
+          description: Idempotent replay (same clientNoteId and payload)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StickyNote'
+        '400':
+          $ref: '#/components/responses/Error'
         '403':
+          $ref: '#/components/responses/Error'
+        '409':
           $ref: '#/components/responses/Error'
         '429':
           $ref: '#/components/responses/RateLimit'
@@ -560,7 +574,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StickyNoteView'
+                $ref: '#/components/schemas/StickyNote'
         '403':
           $ref: '#/components/responses/Error'
         '404':
@@ -608,7 +622,7 @@ paths:
           schema:
             type: string
             format: uuid
-        - name: target_user_id
+        - name: targetUserId
           in: query
           schema:
             type: string
@@ -650,7 +664,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/MemberLabelBatchResponse'
         '400':
-          $ref: '#/components/responses/MemberLabelBatchError'
+          $ref: '#/components/responses/MemberLabelBadRequest'
         '403':
           $ref: '#/components/responses/Error'
   /families/{familyId}/member-labels/{labelId}:
@@ -746,12 +760,12 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
-    MemberLabelBatchError:
-      description: Batch rolled back; lists problematic target ids
+    MemberLabelBadRequest:
+      description: Batch validation failed; lists rejected targets
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/MemberLabelBatchFailure'
+            $ref: '#/components/schemas/MemberLabelBadRequestBody'
     Unauthorized:
       description: Unauthorized
       content:
@@ -1088,63 +1102,73 @@ components:
           format: date-time
         locked:
           type: boolean
-    StickyNoteEnvelope:
+    StickyNoteContentEnvelope:
       type: object
       required:
-        - format
-        - ciphertext
-        - iv
-        - salt
+        - v
+        - alg
+        - kdf
+        - kid
+        - nonce
       properties:
-        format:
+        v:
+          type: integer
+          enum:
+            - 1
+        alg:
           type: string
           enum:
-            - aes-256-gcm-hkdf-sha256-v1
-        ciphertext:
+            - AES-256-GCM
+        kdf:
           type: string
-          description: base64url (ciphertext + GCM tag)
-        iv:
+          enum:
+            - HKDF-SHA256
+        kid:
           type: string
-          description: base64url 12-byte GCM nonce
-        salt:
+          minLength: 1
+        nonce:
           type: string
-          description: base64url HKDF salt
-        aad:
-          type: string
-          description: optional base64url additional authenticated data
+          description: Standard base64 encoding of 12-byte GCM nonce
+      additionalProperties: true
     CreateStickyNoteRequest:
       type: object
       required:
-        - recipientUserId
         - clientNoteId
-        - envelope
-        - plaintextCharCount
+        - recipientUserId
+        - contentType
+        - contentCiphertext
+        - contentEnvelope
       properties:
-        recipientUserId:
-          type: string
-          format: uuid
         clientNoteId:
           type: string
           format: uuid
-        envelope:
-          $ref: '#/components/schemas/StickyNoteEnvelope'
-        plaintextCharCount:
-          type: integer
-          minimum: 1
-          maximum: 500
-          description: Plaintext length before encryption (widget limit; verify upstream OpenAPI)
-    StickyNoteView:
+        recipientUserId:
+          type: string
+          format: uuid
+        contentType:
+          type: string
+          enum:
+            - text
+            - doodle
+        contentCiphertext:
+          type: string
+          description: Standard base64 (AES-GCM ciphertext + tag)
+        contentEnvelope:
+          $ref: '#/components/schemas/StickyNoteContentEnvelope'
+    StickyNote:
       type: object
       required:
-        - noteId
+        - id
         - familyId
         - senderUserId
         - recipientUserId
-        - envelope
+        - clientNoteId
+        - contentType
+        - contentCiphertext
+        - contentEnvelope
         - createdAt
-        - isRead
       properties:
-        noteId:
+        id:
           type: string
           format: uuid
         familyId:
@@ -1153,38 +1177,46 @@ components:
         senderUserId:
           type: string
           format: uuid
-        senderDisplayName:
-          type: string
         recipientUserId:
           type: string
           format: uuid
-        envelope:
-          $ref: '#/components/schemas/StickyNoteEnvelope'
         clientNoteId:
           type: string
           format: uuid
+        contentType:
+          type: string
+          enum:
+            - text
+            - doodle
+        contentCiphertext:
+          type: string
+        contentEnvelope:
+          $ref: '#/components/schemas/StickyNoteContentEnvelope'
         createdAt:
           type: string
           format: date-time
         readAt:
           type: string
           format: date-time
-        isRead:
-          type: boolean
     StickyNoteListResponse:
       type: object
       required:
         - items
+        - hasMore
       properties:
         items:
           type: array
           items:
-            $ref: '#/components/schemas/StickyNoteView'
+            $ref: '#/components/schemas/StickyNote'
+        nextCursor:
+          type: string
+        hasMore:
+          type: boolean
     StickyNoteWidgetResponse:
       type: object
       properties:
         note:
-          $ref: '#/components/schemas/StickyNoteView'
+          $ref: '#/components/schemas/StickyNote'
           nullable: true
     CreateMemberLabelsRequest:
       type: object
@@ -1203,33 +1235,39 @@ components:
           type: string
           minLength: 1
           maxLength: 24
-    MemberLabelView:
+    MemberLabel:
       type: object
       required:
-        - labelId
+        - id
         - batchId
-        - fromUserId
+        - familyId
         - targetUserId
         - labelText
+        - setByUserId
         - createdAt
+        - updatedAt
       properties:
-        labelId:
+        id:
           type: string
           format: uuid
         batchId:
           type: string
           format: uuid
-        fromUserId:
+        familyId:
           type: string
           format: uuid
-        fromDisplayName:
-          type: string
         targetUserId:
           type: string
           format: uuid
         labelText:
           type: string
+        setByUserId:
+          type: string
+          format: uuid
         createdAt:
+          type: string
+          format: date-time
+        updatedAt:
           type: string
           format: date-time
     MemberLabelListResponse:
@@ -1240,7 +1278,7 @@ components:
         items:
           type: array
           items:
-            $ref: '#/components/schemas/MemberLabelView'
+            $ref: '#/components/schemas/MemberLabel'
     MemberLabelBatchResponse:
       type: object
       required:
@@ -1253,8 +1291,8 @@ components:
         items:
           type: array
           items:
-            $ref: '#/components/schemas/MemberLabelView'
-    MemberLabelBatchFailure:
+            $ref: '#/components/schemas/MemberLabel'
+    MemberLabelBadRequestBody:
       type: object
       required:
         - code
@@ -1263,13 +1301,9 @@ components:
         code:
           type: string
           enum:
-            - MEMBER_LABEL_BATCH_FAILED
+            - BAD_REQUEST
         message:
           type: string
-        batchId:
-          type: string
-          format: uuid
-          description: Present when the server allocated a batch id before rollback
         rejectedTargets:
           type: array
           items:
@@ -1283,3 +1317,9 @@ components:
                 format: uuid
               reason:
                 type: string
+                enum:
+                  - not_member
+                  - child_role
+                  - restricted_role
+                  - label_exists
+                  - max_labels

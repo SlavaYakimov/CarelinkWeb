@@ -9,18 +9,18 @@ type SessionCtx = {
   session: { userId: string };
 };
 
-type LabelView = components['schemas']['MemberLabelView'];
+type MemberLabel = components['schemas']['MemberLabel'];
 type BatchResponse = components['schemas']['MemberLabelBatchResponse'];
 type CreateBody = components['schemas']['CreateMemberLabelsRequest'];
-type BatchFailure = components['schemas']['MemberLabelBatchFailure'];
+type BadRequestBody = components['schemas']['MemberLabelBadRequestBody'];
 
-const store = new Map<string, LabelView[]>();
+const store = new Map<string, MemberLabel[]>();
 
 function key(familyId: string): string {
   return familyId;
 }
 
-function countForTarget(items: LabelView[], targetUserId: string): number {
+function countForTarget(items: MemberLabel[], targetUserId: string): number {
   return items.filter((l) => l.targetUserId === targetUserId).length;
 }
 
@@ -37,37 +37,39 @@ export async function memberLabelsMockGateway<T>(
     !path.includes('/member-labels/')
   ) {
     const url = new URL(path, 'https://mock.local');
-    const target = url.searchParams.get('target_user_id');
+    const target = url.searchParams.get('targetUserId');
     const items = target ? bucket.filter((l) => l.targetUserId === target) : [...bucket];
     return { items } as T;
   }
 
   if (init.method === 'POST' && path.endsWith('/member-labels')) {
     const body = init.body as CreateBody;
-    const rejectedTargets: BatchFailure['rejectedTargets'] = [];
+    const rejectedTargets: BadRequestBody['rejectedTargets'] = [];
     for (const targetUserId of body.targetUserIds) {
       if (countForTarget(bucket, targetUserId) >= MEMBER_LABEL_MAX_ACTIVE_PER_USER) {
-        rejectedTargets.push({ userId: targetUserId, reason: 'MEMBER_LABEL_LIMIT' });
+        rejectedTargets.push({ userId: targetUserId, reason: 'max_labels' });
       }
     }
     if (rejectedTargets.length > 0) {
-      const payload: BatchFailure = {
-        code: 'MEMBER_LABEL_BATCH_FAILED',
+      const payload: BadRequestBody = {
+        code: 'BAD_REQUEST',
         rejectedTargets,
-        batchId: randomUUID(),
+        message: 'batch rejected',
       };
       const { MemberLabelBatchError } = await import('@/lib/member-labels/batch-error');
       throw new MemberLabelBatchError(payload);
     }
     const batchId = randomUUID();
-    const created: LabelView[] = body.targetUserIds.map((targetUserId) => ({
-      labelId: randomUUID(),
+    const now = new Date().toISOString();
+    const created: MemberLabel[] = body.targetUserIds.map((targetUserId) => ({
+      id: randomUUID(),
       batchId,
-      fromUserId: ctx.session.userId,
-      fromDisplayName: 'Вы',
+      familyId: ctx.familyId,
       targetUserId,
       labelText: body.labelText,
-      createdAt: new Date().toISOString(),
+      setByUserId: ctx.session.userId,
+      createdAt: now,
+      updatedAt: now,
     }));
     bucket.push(...created);
     store.set(key(ctx.familyId), bucket);
@@ -76,7 +78,7 @@ export async function memberLabelsMockGateway<T>(
 
   if (init.method === 'DELETE' && path.includes('/member-labels/')) {
     const labelId = path.split('/').pop()!;
-    const next = bucket.filter((l) => l.labelId !== labelId);
+    const next = bucket.filter((l) => l.id !== labelId);
     store.set(key(ctx.familyId), next);
     return undefined as T;
   }

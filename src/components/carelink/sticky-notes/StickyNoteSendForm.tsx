@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { encryptStickyNotePlaintext } from '@/lib/sticky-notes/envelope-crypto';
 import { STICKY_NOTE_FAMILY_KEY_MESSAGE } from '@/lib/sticky-notes/errors';
-import { STICKY_NOTE_MAX_PLAINTEXT_CHARS } from '@/lib/sticky-notes/constants';
+import { STICKY_NOTE_UI_MAX_PLAINTEXT_CHARS } from '@/lib/sticky-notes/constants';
 import { sendStickyNoteFormSchema } from '@/lib/sticky-notes/schemas';
 import { sendStickyNoteAction, type SendStickyNoteState } from '@/server/actions/sticky-notes';
 import type { FamilyMemberView } from '@/server/data/family-members';
@@ -28,7 +28,7 @@ export function StickyNoteSendForm({ familyId, members, currentUserId }: StickyN
   const [plaintext, setPlaintext] = React.useState('');
   const [clientNoteId] = React.useState(() => crypto.randomUUID());
   const [localError, setLocalError] = React.useState<string | null>(null);
-  const [envelopeJson, setEnvelopeJson] = React.useState('');
+  const [submitting, setSubmitting] = React.useState(false);
 
   const recipients = members.filter((m) => m.userId !== currentUserId);
 
@@ -41,7 +41,6 @@ export function StickyNoteSendForm({ familyId, members, currentUserId }: StickyN
   React.useEffect(() => {
     if (state.ok) {
       setPlaintext('');
-      setEnvelopeJson('');
     }
   }, [state.ok]);
 
@@ -58,18 +57,24 @@ export function StickyNoteSendForm({ familyId, members, currentUserId }: StickyN
       setLocalError(parsed.error.errors[0]?.message ?? 'Проверьте поля');
       return;
     }
+    setSubmitting(true);
     try {
-      const envelope = await encryptStickyNotePlaintext({
+      const encrypted = await encryptStickyNotePlaintext({
         familyId,
         plaintext: parsed.data.plaintext,
       });
-      setEnvelopeJson(JSON.stringify(envelope));
-      const fd = new FormData(event.currentTarget);
-      fd.set('envelope', JSON.stringify(envelope));
-      fd.set('plaintextCharCount', String(parsed.data.plaintext.length));
+      const fd = new FormData();
+      fd.set('familyId', familyId);
+      fd.set('recipientUserId', recipientUserId);
+      fd.set('clientNoteId', clientNoteId);
+      fd.set('contentType', encrypted.contentType);
+      fd.set('contentCiphertext', encrypted.contentCiphertext);
+      fd.set('contentEnvelope', JSON.stringify(encrypted.contentEnvelope));
       formAction(fd);
     } catch {
       setLocalError(STICKY_NOTE_FAMILY_KEY_MESSAGE);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -81,12 +86,10 @@ export function StickyNoteSendForm({ familyId, members, currentUserId }: StickyN
     );
   }
 
+  const busy = pending || submitting;
+
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <input type="hidden" name="familyId" value={familyId} />
-      <input type="hidden" name="clientNoteId" value={clientNoteId} />
-      <input type="hidden" name="envelope" value={envelopeJson} readOnly />
-
       <div className="space-y-2">
         <Label htmlFor="sticky-recipient">Кому</Label>
         <select
@@ -114,14 +117,14 @@ export function StickyNoteSendForm({ familyId, members, currentUserId }: StickyN
         <div className="flex items-baseline justify-between gap-2">
           <Label htmlFor="sticky-text">Текст записки</Label>
           <span className="text-xs text-muted-foreground">
-            {plaintext.length}/{STICKY_NOTE_MAX_PLAINTEXT_CHARS}
+            {plaintext.length}/{STICKY_NOTE_UI_MAX_PLAINTEXT_CHARS}
           </span>
         </div>
         <textarea
           id="sticky-text"
           name="plaintext"
           rows={5}
-          maxLength={STICKY_NOTE_MAX_PLAINTEXT_CHARS}
+          maxLength={STICKY_NOTE_UI_MAX_PLAINTEXT_CHARS}
           value={plaintext}
           onChange={(e) => setPlaintext(e.target.value)}
           className={cn(
@@ -138,7 +141,7 @@ export function StickyNoteSendForm({ familyId, members, currentUserId }: StickyN
       {localError ? <FormAlert message={localError} /> : null}
       {state.formError ? <FormAlert message={state.formError} /> : null}
 
-      <SubmitButton pending={pending} disabled={pending || !plaintext.trim()}>
+      <SubmitButton pending={busy} disabled={busy || !plaintext.trim()}>
         Отправить записку
       </SubmitButton>
     </form>

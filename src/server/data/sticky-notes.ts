@@ -5,11 +5,11 @@ import { getStickyNoteWidget } from '@/server/gateway/sticky-notes';
 import { getSession } from '@/server/session/get-session';
 import type { components } from '@/server/gateway/types.gen';
 
-export type StickyNoteView = components['schemas']['StickyNoteView'];
+export type StickyNote = components['schemas']['StickyNote'];
 
 export async function fetchStickyNoteWidget(
   familyId: string,
-): Promise<{ note: StickyNoteView | null } | null> {
+): Promise<{ note: StickyNote | null } | null> {
   const sessionCtx = await getSession();
   if (!sessionCtx?.session.families[familyId]) return null;
   const { clientIp, deviceId } = await gatewayActionContext();

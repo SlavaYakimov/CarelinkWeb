@@ -61,7 +61,7 @@ export const assignMemberLabelsAction = withServerAction(
       rethrowNextNavigation(err);
       if (err instanceof MemberLabelBatchError) {
         return {
-          formError: getMemberLabelErrorMessage('MEMBER_LABEL_BATCH_FAILED'),
+          formError: getMemberLabelErrorMessage('BAD_REQUEST'),
           batchFailures: err.rejectedTargets,
         };
       }

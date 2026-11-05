@@ -20,7 +20,7 @@ import {
 import type { FamilyMemberView } from '@/server/data/family-members';
 import type { components } from '@/server/gateway/types.gen';
 
-type MemberLabelView = components['schemas']['MemberLabelView'];
+type MemberLabel = components['schemas']['MemberLabel'];
 
 const assignInitial: AssignMemberLabelsState = {};
 const deleteInitial: MemberLabelDeleteState = {};
@@ -28,7 +28,7 @@ const deleteInitial: MemberLabelDeleteState = {};
 export type MemberLabelsPanelProps = {
   familyId: string;
   members: FamilyMemberView[];
-  labels: MemberLabelView[];
+  labels: MemberLabel[];
   currentUserId: string;
 };
 
@@ -48,7 +48,7 @@ export function MemberLabelsPanel({
   const [selectionError, setSelectionError] = React.useState<string | null>(null);
 
   const labelsByTarget = React.useMemo(() => {
-    const map = new Map<string, MemberLabelView[]>();
+    const map = new Map<string, MemberLabel[]>();
     for (const label of labels) {
       const list = map.get(label.targetUserId) ?? [];
       list.push(label);
@@ -141,9 +141,9 @@ export function MemberLabelsPanel({
                   {memberLabels.length > 0 ? (
                     <div className="mt-1 flex flex-wrap gap-1">
                       {memberLabels.map((label) => (
-                        <form key={label.labelId} action={deleteAction} className="inline-flex">
+                        <form key={label.id} action={deleteAction} className="inline-flex">
                           <input type="hidden" name="familyId" value={familyId} />
-                          <input type="hidden" name="labelId" value={label.labelId} />
+                          <input type="hidden" name="labelId" value={label.id} />
                           <button
                             type="submit"
                             className="inline-flex items-center gap-1 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"

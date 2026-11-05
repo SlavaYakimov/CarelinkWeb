@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import {
-  decryptStickyNoteEnvelope,
+  decryptStickyNoteContent,
   encryptStickyNotePlaintext,
 } from '@/lib/sticky-notes/envelope-crypto';
 import {
@@ -23,8 +23,12 @@ describe('sticky-note envelope crypto', () => {
 
   it('round-trips unicode plaintext without mutation', async () => {
     const plaintext = 'Привет,\n\tмир!  🌿';
-    const envelope = await encryptStickyNotePlaintext({ familyId, plaintext });
-    const decoded = await decryptStickyNoteEnvelope({ familyId, envelope });
+    const encrypted = await encryptStickyNotePlaintext({ familyId, plaintext });
+    const decoded = await decryptStickyNoteContent({
+      familyId,
+      contentCiphertext: encrypted.contentCiphertext,
+      contentEnvelope: encrypted.contentEnvelope,
+    });
     expect(decoded).toBe(plaintext);
   });
 

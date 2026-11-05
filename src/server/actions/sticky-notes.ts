@@ -3,7 +3,7 @@
 import { randomUUID } from 'node:crypto';
 import { redirect } from 'next/navigation';
 import { getStickyNoteErrorMessage } from '@/lib/sticky-notes/errors';
-import { sendStickyNotePayloadSchema } from '@/lib/sticky-notes/schemas';
+import { assertStickyNoteRequestSize, sendStickyNotePayloadSchema } from '@/lib/sticky-notes/schemas';
 import { zodFieldErrors } from '@/lib/forms/to-form-state';
 import { gatewayActionContext } from '@/server/actions/request-context';
 import { rethrowNextNavigation } from '@/server/actions/rethrow-navigation';
@@ -42,25 +42,33 @@ export const sendStickyNoteAction = withServerAction(
       const familyId = String(formData.get('familyId') ?? '');
       const recipientUserId = String(formData.get('recipientUserId') ?? '');
       const clientNoteId = String(formData.get('clientNoteId') ?? '') || randomUUID();
-      const envelopeRaw = String(formData.get('envelope') ?? '');
-      const plaintextCharCount = Number(formData.get('plaintextCharCount') ?? 0);
+      const contentType = String(formData.get('contentType') ?? 'text');
+      const contentCiphertext = String(formData.get('contentCiphertext') ?? '');
+      const contentEnvelopeRaw = String(formData.get('contentEnvelope') ?? '');
 
-      let envelope: unknown;
+      let contentEnvelope: unknown;
       try {
-        envelope = JSON.parse(envelopeRaw);
+        contentEnvelope = JSON.parse(contentEnvelopeRaw);
       } catch {
-        return { formError: getStickyNoteErrorMessage('INVALID_ARGUMENT') };
+        return { formError: getStickyNoteErrorMessage('BAD_REQUEST') };
       }
 
       const parsed = sendStickyNotePayloadSchema.safeParse({
         familyId,
         recipientUserId,
         clientNoteId,
-        envelope,
-        plaintextCharCount,
+        contentType,
+        contentCiphertext,
+        contentEnvelope,
       });
       if (!parsed.success) {
         return { fieldErrors: zodFieldErrors(parsed.error.flatten().fieldErrors) };
+      }
+
+      try {
+        assertStickyNoteRequestSize(parsed.data);
+      } catch {
+        return { formError: getStickyNoteErrorMessage('BAD_REQUEST') };
       }
 
       const ctx = await requireFamilySession(parsed.data.familyId);
@@ -68,8 +76,9 @@ export const sendStickyNoteAction = withServerAction(
         {
           recipientUserId: parsed.data.recipientUserId,
           clientNoteId: parsed.data.clientNoteId,
-          envelope: parsed.data.envelope,
-          plaintextCharCount: parsed.data.plaintextCharCount,
+          contentType: parsed.data.contentType,
+          contentCiphertext: parsed.data.contentCiphertext,
+          contentEnvelope: parsed.data.contentEnvelope,
         },
         ctx,
       );

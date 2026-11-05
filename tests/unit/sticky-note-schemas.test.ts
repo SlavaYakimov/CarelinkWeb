@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { sendStickyNoteFormSchema } from '@/lib/sticky-notes/schemas';
-import { STICKY_NOTE_MAX_PLAINTEXT_CHARS } from '@/lib/sticky-notes/constants';
+import { STICKY_NOTE_UI_MAX_PLAINTEXT_CHARS } from '@/lib/sticky-notes/constants';
 
 describe('sticky-note schemas', () => {
   it('rejects empty and over-limit plaintext', () => {
@@ -13,7 +13,7 @@ describe('sticky-note schemas', () => {
     expect(
       sendStickyNoteFormSchema.safeParse({
         ...base,
-        plaintext: 'a'.repeat(STICKY_NOTE_MAX_PLAINTEXT_CHARS + 1),
+        plaintext: 'a'.repeat(STICKY_NOTE_UI_MAX_PLAINTEXT_CHARS + 1),
       }).success,
     ).toBe(false);
   });
