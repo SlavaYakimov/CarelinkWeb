@@ -1,5 +1,6 @@
 import 'server-only';
 import { gatewayFetch, type GatewayRequestContext } from '@/server/gateway/client';
+import { GatewayError } from '@/server/gateway/errors';
 import { MemberLabelBatchError } from '@/lib/member-labels/batch-error';
 import type { components } from '@/server/gateway/types.gen';
 
@@ -55,8 +56,9 @@ export async function createMemberLabels(
     );
   } catch (err) {
     if (err instanceof MemberLabelBatchError) throw err;
-    const batch = (err as { batchFailure?: BatchFailure }).batchFailure;
-    if (batch) throw new MemberLabelBatchError(batch);
+    if (err instanceof GatewayError && err.code === 'MEMBER_LABEL_BATCH_FAILED' && err.body) {
+      throw new MemberLabelBatchError(err.body as BatchFailure);
+    }
     throw err;
   }
 }

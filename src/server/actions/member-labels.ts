@@ -15,7 +15,7 @@ import { withServerAction } from '@/server/session/with-session-handler';
 export type AssignMemberLabelsState = {
   formError?: string;
   fieldErrors?: Record<string, string>;
-  batchFailures?: { targetUserId: string; reason: string }[];
+  batchFailures?: { userId: string; reason: string }[];
   ok?: boolean;
 };
 
@@ -62,7 +62,7 @@ export const assignMemberLabelsAction = withServerAction(
       if (err instanceof MemberLabelBatchError) {
         return {
           formError: getMemberLabelErrorMessage('MEMBER_LABEL_BATCH_FAILED'),
-          batchFailures: err.failures,
+          batchFailures: err.rejectedTargets,
         };
       }
       if (err instanceof GatewayError) {

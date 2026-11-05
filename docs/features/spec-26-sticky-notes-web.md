@@ -26,7 +26,7 @@
 | Модуль                                    | Роль                                         |
 | ----------------------------------------- | -------------------------------------------- |
 | `src/server/gateway/sticky-notes.ts`      | REST sticky-notes (контракт PR #368)         |
-| `src/server/gateway/member-labels.ts`     | REST member-labels (черновик; mock в тестах) |
+| `src/server/gateway/member-labels.ts`     | REST member-labels (CarelinkAuth #369; mock только при `MEMBER_LABELS_MOCK=1`) |
 | `src/server/gateway/family-members.ts`    | `GET …/members` (BE-12, для UI)              |
 | `src/server/actions/sticky-notes.ts`      | create / mark read / delete                  |
 | `src/server/actions/member-labels.ts`     | create batch / delete                        |
@@ -52,5 +52,6 @@
 ## ❓ Открытые вопросы
 
 1. **SN-OQ-1** — протокол выдачи семейного content-ключа (HKDF input / rotation). Сейчас `stubFamilyContentKeyProvider` → UI «ключ семьи ещё не настроен».
-2. Точное `maxPlaintextChars` и имена полей envelope — сверить с CarelinkAuth после доступа к PR #368.
+2. Точное `maxPlaintextChars`, лимиты `ciphertext` и enum `ErrorResponse` (в т.ч. `RESTRICTED_SESSION`) — сверить с CarelinkAuth PR #368 после доступа к репо.
+3. Batch rollback 400: `rejectedTargets[{ userId, reason }]` — выровнено с CarelinkAuth PR #369.
 3. Member-labels DELETE path и коды отката batch — сверить с PR меток поверх #368.

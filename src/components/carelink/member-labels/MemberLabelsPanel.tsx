@@ -188,8 +188,8 @@ export function MemberLabelsPanel({
           {assignState.batchFailures?.length ? (
             <ul className="text-sm text-destructive" role="alert">
               {assignState.batchFailures.map((f) => (
-                <li key={f.targetUserId}>
-                  {f.targetUserId}: {f.reason}
+                <li key={f.userId}>
+                  {f.userId}: {f.reason}
                 </li>
               ))}
             </ul>

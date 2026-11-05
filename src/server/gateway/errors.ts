@@ -15,6 +15,8 @@ export class GatewayError extends Error {
   readonly status: number;
   readonly retryAfter?: number;
   readonly traceId?: string;
+  /** Parsed error JSON body (batch failures, etc.) — not logged downstream. */
+  readonly body?: unknown;
 
   constructor(params: {
     code: string;
@@ -22,6 +24,7 @@ export class GatewayError extends Error {
     retryAfter?: number;
     traceId?: string;
     message?: string;
+    body?: unknown;
   }) {
     super(params.message ?? params.code);
     this.name = 'GatewayError';
@@ -29,6 +32,7 @@ export class GatewayError extends Error {
     this.status = params.status;
     this.retryAfter = params.retryAfter;
     this.traceId = params.traceId;
+    this.body = params.body;
   }
 }
 
@@ -60,11 +64,14 @@ export function normalizeGatewayError(
   const parsed = (typeof body === 'object' && body !== null ? body : {}) as ErrorBody;
 
   if (typeof parsed.code === 'string') {
+    const message = typeof parsed.message === 'string' ? parsed.message : undefined;
     return new GatewayError({
       code: parsed.code,
       status,
       retryAfter,
       traceId,
+      message,
+      body: body,
     });
   }
 

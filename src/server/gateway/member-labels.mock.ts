@@ -44,14 +44,18 @@ export async function memberLabelsMockGateway<T>(
 
   if (init.method === 'POST' && path.endsWith('/member-labels')) {
     const body = init.body as CreateBody;
-    const failures: BatchFailure['failures'] = [];
+    const rejectedTargets: BatchFailure['rejectedTargets'] = [];
     for (const targetUserId of body.targetUserIds) {
       if (countForTarget(bucket, targetUserId) >= MEMBER_LABEL_MAX_ACTIVE_PER_USER) {
-        failures.push({ targetUserId, reason: 'MEMBER_LABEL_LIMIT' });
+        rejectedTargets.push({ userId: targetUserId, reason: 'MEMBER_LABEL_LIMIT' });
       }
     }
-    if (failures.length > 0) {
-      const payload: BatchFailure = { code: 'MEMBER_LABEL_BATCH_FAILED', failures };
+    if (rejectedTargets.length > 0) {
+      const payload: BatchFailure = {
+        code: 'MEMBER_LABEL_BATCH_FAILED',
+        rejectedTargets,
+        batchId: randomUUID(),
+      };
       const { MemberLabelBatchError } = await import('@/lib/member-labels/batch-error');
       throw new MemberLabelBatchError(payload);
     }

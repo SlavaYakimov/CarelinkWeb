@@ -2115,9 +2115,14 @@ export interface components {
             /** @enum {string} */
             code: "MEMBER_LABEL_BATCH_FAILED";
             message?: string;
-            failures: {
+            /**
+             * Format: uuid
+             * @description Present when the server allocated a batch id before rollback
+             */
+            batchId?: string;
+            rejectedTargets: {
                 /** Format: uuid */
-                targetUserId: string;
+                userId: string;
                 reason: string;
             }[];
         };

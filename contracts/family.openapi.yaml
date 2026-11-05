@@ -16,7 +16,7 @@ tags:
   - name: sticky-notes
     description: SPEC-26 love sticky notes (E2EE envelope on client)
   - name: member-labels
-    description: SPEC-26 member labels (draft until BE PR on #368)
+    description: SPEC-26 member labels (CarelinkAuth PR #369)
   - name: family-members
     description: Family roster (BE-12)
 paths:
@@ -1258,7 +1258,7 @@ components:
       type: object
       required:
         - code
-        - failures
+        - rejectedTargets
       properties:
         code:
           type: string
@@ -1266,15 +1266,19 @@ components:
             - MEMBER_LABEL_BATCH_FAILED
         message:
           type: string
-        failures:
+        batchId:
+          type: string
+          format: uuid
+          description: Present when the server allocated a batch id before rollback
+        rejectedTargets:
           type: array
           items:
             type: object
             required:
-              - targetUserId
+              - userId
               - reason
             properties:
-              targetUserId:
+              userId:
                 type: string
                 format: uuid
               reason:

@@ -18,6 +18,6 @@ export function getMemberLabelErrorMessage(code: string): string {
 }
 
 export type MemberLabelBatchFailureItem = {
-  targetUserId: string;
+  userId: string;
   reason: string;
 };
