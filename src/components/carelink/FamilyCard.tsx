@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { Users } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { FamilyListItem } from '@/server/data/user-families';
@@ -30,9 +31,12 @@ export function FamilyCard({ family }: { family: FamilyListItem }) {
             {family.pulseLabel}
           </p>
         ) : null}
-        <span className="inline-block text-sm font-medium text-primary opacity-50" title="Скоро">
+        <Link
+          href={`/families/${family.id}`}
+          className="inline-block text-sm font-medium text-primary hover:underline"
+        >
           Открыть семью
-        </span>
+        </Link>
       </CardContent>
     </Card>
   );

@@ -1112,6 +1112,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/families/{familyId}/member-labels": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List active member labels */
+        get: operations["listMemberLabels"];
+        put?: never;
+        /** Assign same label text to up to 10 members in one transaction */
+        post: operations["createMemberLabels"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/families/{familyId}/member-labels/{labelId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove one label */
+        delete: operations["deleteMemberLabel"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/families/{familyId}/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List family members (participant) */
+        get: operations["listFamilyMembers"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/families/{familyId}/role-templates": {
         parameters: {
             query?: never;
@@ -1127,6 +1179,75 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/families/{familyId}/sticky-notes": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List sticky notes for current user (inbox / sent) */
+        get: operations["listStickyNotes"];
+        put?: never;
+        /** Send encrypted sticky note (idempotent via clientNoteId) */
+        post: operations["createStickyNote"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/families/{familyId}/sticky-notes/widget": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Latest unread or highlighted note for widget surface */
+        get: operations["getStickyNoteWidget"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/families/{familyId}/sticky-notes/{noteId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete or hide note for current user */
+        delete: operations["deleteStickyNote"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/families/{familyId}/sticky-notes/{noteId}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Mark note as read by recipient */
+        patch: operations["markStickyNoteRead"];
         trace?: never;
     };
     "/healthz": {
@@ -1904,6 +2025,102 @@ export interface components {
             available: boolean;
             slug: string;
         };
+        FamilyMemberListResponse: {
+            items: components["schemas"]["FamilyMemberView"][];
+        };
+        FamilyMemberView: {
+            /** Format: uuid */
+            userId: string;
+            displayName: string;
+            /** Format: uri */
+            avatarUrl?: string;
+            role: string;
+            /** Format: date-time */
+            joinedAt?: string;
+            locked?: boolean;
+        };
+        StickyNoteEnvelope: {
+            /** @enum {string} */
+            format: "aes-256-gcm-hkdf-sha256-v1";
+            /** @description base64url (ciphertext + GCM tag) */
+            ciphertext: string;
+            /** @description base64url 12-byte GCM nonce */
+            iv: string;
+            /** @description base64url HKDF salt */
+            salt: string;
+            /** @description optional base64url additional authenticated data */
+            aad?: string;
+        };
+        CreateStickyNoteRequest: {
+            /** Format: uuid */
+            recipientUserId: string;
+            /** Format: uuid */
+            clientNoteId: string;
+            envelope: components["schemas"]["StickyNoteEnvelope"];
+            /** @description Plaintext length before encryption (widget limit; verify upstream OpenAPI) */
+            plaintextCharCount: number;
+        };
+        StickyNoteView: {
+            /** Format: uuid */
+            noteId: string;
+            /** Format: uuid */
+            familyId: string;
+            /** Format: uuid */
+            senderUserId: string;
+            senderDisplayName?: string;
+            /** Format: uuid */
+            recipientUserId: string;
+            envelope: components["schemas"]["StickyNoteEnvelope"];
+            /** Format: uuid */
+            clientNoteId?: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            readAt?: string;
+            isRead: boolean;
+        };
+        StickyNoteListResponse: {
+            items: components["schemas"]["StickyNoteView"][];
+        };
+        StickyNoteWidgetResponse: {
+            note?: components["schemas"]["StickyNoteView"];
+        };
+        CreateMemberLabelsRequest: {
+            targetUserIds: string[];
+            labelText: string;
+        };
+        MemberLabelView: {
+            /** Format: uuid */
+            labelId: string;
+            /** Format: uuid */
+            batchId: string;
+            /** Format: uuid */
+            fromUserId: string;
+            fromDisplayName?: string;
+            /** Format: uuid */
+            targetUserId: string;
+            labelText: string;
+            /** Format: date-time */
+            createdAt: string;
+        };
+        MemberLabelListResponse: {
+            items: components["schemas"]["MemberLabelView"][];
+        };
+        MemberLabelBatchResponse: {
+            /** Format: uuid */
+            batchId: string;
+            items: components["schemas"]["MemberLabelView"][];
+        };
+        MemberLabelBatchFailure: {
+            /** @enum {string} */
+            code: "MEMBER_LABEL_BATCH_FAILED";
+            message?: string;
+            failures: {
+                /** Format: uuid */
+                targetUserId: string;
+                reason: string;
+            }[];
+        };
     };
     responses: {
         /** @description Error */
@@ -1942,6 +2159,24 @@ export interface components {
             };
             content: {
                 "application/json": components["schemas"]["ErrorResponse"];
+            };
+        };
+        /** @description Temporary outage */
+        ServiceUnavailable: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ErrorResponse"];
+            };
+        };
+        /** @description Batch rolled back; lists problematic target ids */
+        MemberLabelBatchError: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["MemberLabelBatchFailure"];
             };
         };
     };
@@ -3767,6 +4002,106 @@ export interface operations {
             409: components["responses"]["Error"];
         };
     };
+    listMemberLabels: {
+        parameters: {
+            query?: {
+                target_user_id?: string;
+            };
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Labels */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberLabelListResponse"];
+                };
+            };
+            403: components["responses"]["Error"];
+        };
+    };
+    createMemberLabels: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateMemberLabelsRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MemberLabelBatchResponse"];
+                };
+            };
+            400: components["responses"]["MemberLabelBatchError"];
+            403: components["responses"]["Error"];
+        };
+    };
+    deleteMemberLabel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+                labelId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+        };
+    };
+    listFamilyMembers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Members */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyMemberListResponse"];
+                };
+            };
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+        };
+    };
     listFamilyRoleTemplates: {
         parameters: {
             query?: never;
@@ -3787,6 +4122,133 @@ export interface operations {
                     "application/json": components["schemas"]["RoleTemplateListResponse"];
                 };
             };
+            404: components["responses"]["Error"];
+        };
+    };
+    listStickyNotes: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Notes */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StickyNoteListResponse"];
+                };
+            };
+            403: components["responses"]["Error"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    createStickyNote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateStickyNoteRequest"];
+            };
+        };
+        responses: {
+            /** @description Created or existing (idempotent) */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StickyNoteView"];
+                };
+            };
+            403: components["responses"]["Error"];
+            429: components["responses"]["RateLimit"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    getStickyNoteWidget: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Widget payload */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StickyNoteWidgetResponse"];
+                };
+            };
+            403: components["responses"]["Error"];
+            503: components["responses"]["ServiceUnavailable"];
+        };
+    };
+    deleteStickyNote: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+                noteId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            403: components["responses"]["Error"];
+            404: components["responses"]["Error"];
+        };
+    };
+    markStickyNoteRead: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                familyId: string;
+                noteId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StickyNoteView"];
+                };
+            };
+            403: components["responses"]["Error"];
             404: components["responses"]["Error"];
         };
     };

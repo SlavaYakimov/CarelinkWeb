@@ -13,6 +13,12 @@ tags:
     description: Member invites by email (family keeper + invitee)
   - name: family-join
     description: QR join links and requests
+  - name: sticky-notes
+    description: SPEC-26 love sticky notes (E2EE envelope on client)
+  - name: member-labels
+    description: SPEC-26 member labels (draft until BE PR on #368)
+  - name: family-members
+    description: Family roster (BE-12)
 paths:
   /families/{familyId}/role-templates:
     get:
@@ -409,6 +415,272 @@ paths:
           $ref: '#/components/responses/Error'
         '404':
           $ref: '#/components/responses/Error'
+  /families/{familyId}/members:
+    get:
+      tags:
+        - family-members
+      operationId: listFamilyMembers
+      summary: List family members (participant)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: familyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Members
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FamilyMemberListResponse'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+  /families/{familyId}/sticky-notes:
+    get:
+      tags:
+        - sticky-notes
+      operationId: listStickyNotes
+      summary: List sticky notes for current user (inbox / sent)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: familyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+      responses:
+        '200':
+          description: Notes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StickyNoteListResponse'
+        '403':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+    post:
+      tags:
+        - sticky-notes
+      operationId: createStickyNote
+      summary: Send encrypted sticky note (idempotent via clientNoteId)
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: familyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateStickyNoteRequest'
+      responses:
+        '201':
+          description: Created or existing (idempotent)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StickyNoteView'
+        '403':
+          $ref: '#/components/responses/Error'
+        '429':
+          $ref: '#/components/responses/RateLimit'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /families/{familyId}/sticky-notes/widget:
+    get:
+      tags:
+        - sticky-notes
+      operationId: getStickyNoteWidget
+      summary: Latest unread or highlighted note for widget surface
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: familyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Widget payload
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StickyNoteWidgetResponse'
+        '403':
+          $ref: '#/components/responses/Error'
+        '503':
+          $ref: '#/components/responses/ServiceUnavailable'
+  /families/{familyId}/sticky-notes/{noteId}/read:
+    patch:
+      tags:
+        - sticky-notes
+      operationId: markStickyNoteRead
+      summary: Mark note as read by recipient
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: familyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: noteId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StickyNoteView'
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+  /families/{familyId}/sticky-notes/{noteId}:
+    delete:
+      tags:
+        - sticky-notes
+      operationId: deleteStickyNote
+      summary: Delete or hide note for current user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: familyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: noteId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Deleted
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
+  /families/{familyId}/member-labels:
+    get:
+      tags:
+        - member-labels
+      operationId: listMemberLabels
+      summary: List active member labels
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: familyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: target_user_id
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Labels
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemberLabelListResponse'
+        '403':
+          $ref: '#/components/responses/Error'
+    post:
+      tags:
+        - member-labels
+      operationId: createMemberLabels
+      summary: Assign same label text to up to 10 members in one transaction
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: familyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateMemberLabelsRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MemberLabelBatchResponse'
+        '400':
+          $ref: '#/components/responses/MemberLabelBatchError'
+        '403':
+          $ref: '#/components/responses/Error'
+  /families/{familyId}/member-labels/{labelId}:
+    delete:
+      tags:
+        - member-labels
+      operationId: deleteMemberLabel
+      summary: Remove one label
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: familyId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: labelId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Deleted
+        '403':
+          $ref: '#/components/responses/Error'
+        '404':
+          $ref: '#/components/responses/Error'
   /families/{familyId}/join-requests:
     get:
       tags:
@@ -468,6 +740,18 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/ErrorResponse'
+    ServiceUnavailable:
+      description: Temporary outage
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    MemberLabelBatchError:
+      description: Batch rolled back; lists problematic target ids
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/MemberLabelBatchFailure'
     Unauthorized:
       description: Unauthorized
       content:
@@ -773,3 +1057,225 @@ components:
           type: boolean
         slug:
           type: string
+    FamilyMemberListResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/FamilyMemberView'
+    FamilyMemberView:
+      type: object
+      required:
+        - userId
+        - displayName
+        - role
+      properties:
+        userId:
+          type: string
+          format: uuid
+        displayName:
+          type: string
+        avatarUrl:
+          type: string
+          format: uri
+        role:
+          type: string
+        joinedAt:
+          type: string
+          format: date-time
+        locked:
+          type: boolean
+    StickyNoteEnvelope:
+      type: object
+      required:
+        - format
+        - ciphertext
+        - iv
+        - salt
+      properties:
+        format:
+          type: string
+          enum:
+            - aes-256-gcm-hkdf-sha256-v1
+        ciphertext:
+          type: string
+          description: base64url (ciphertext + GCM tag)
+        iv:
+          type: string
+          description: base64url 12-byte GCM nonce
+        salt:
+          type: string
+          description: base64url HKDF salt
+        aad:
+          type: string
+          description: optional base64url additional authenticated data
+    CreateStickyNoteRequest:
+      type: object
+      required:
+        - recipientUserId
+        - clientNoteId
+        - envelope
+        - plaintextCharCount
+      properties:
+        recipientUserId:
+          type: string
+          format: uuid
+        clientNoteId:
+          type: string
+          format: uuid
+        envelope:
+          $ref: '#/components/schemas/StickyNoteEnvelope'
+        plaintextCharCount:
+          type: integer
+          minimum: 1
+          maximum: 500
+          description: Plaintext length before encryption (widget limit; verify upstream OpenAPI)
+    StickyNoteView:
+      type: object
+      required:
+        - noteId
+        - familyId
+        - senderUserId
+        - recipientUserId
+        - envelope
+        - createdAt
+        - isRead
+      properties:
+        noteId:
+          type: string
+          format: uuid
+        familyId:
+          type: string
+          format: uuid
+        senderUserId:
+          type: string
+          format: uuid
+        senderDisplayName:
+          type: string
+        recipientUserId:
+          type: string
+          format: uuid
+        envelope:
+          $ref: '#/components/schemas/StickyNoteEnvelope'
+        clientNoteId:
+          type: string
+          format: uuid
+        createdAt:
+          type: string
+          format: date-time
+        readAt:
+          type: string
+          format: date-time
+        isRead:
+          type: boolean
+    StickyNoteListResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/StickyNoteView'
+    StickyNoteWidgetResponse:
+      type: object
+      properties:
+        note:
+          $ref: '#/components/schemas/StickyNoteView'
+          nullable: true
+    CreateMemberLabelsRequest:
+      type: object
+      required:
+        - targetUserIds
+        - labelText
+      properties:
+        targetUserIds:
+          type: array
+          minItems: 1
+          maxItems: 10
+          items:
+            type: string
+            format: uuid
+        labelText:
+          type: string
+          minLength: 1
+          maxLength: 24
+    MemberLabelView:
+      type: object
+      required:
+        - labelId
+        - batchId
+        - fromUserId
+        - targetUserId
+        - labelText
+        - createdAt
+      properties:
+        labelId:
+          type: string
+          format: uuid
+        batchId:
+          type: string
+          format: uuid
+        fromUserId:
+          type: string
+          format: uuid
+        fromDisplayName:
+          type: string
+        targetUserId:
+          type: string
+          format: uuid
+        labelText:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+    MemberLabelListResponse:
+      type: object
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MemberLabelView'
+    MemberLabelBatchResponse:
+      type: object
+      required:
+        - batchId
+        - items
+      properties:
+        batchId:
+          type: string
+          format: uuid
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/MemberLabelView'
+    MemberLabelBatchFailure:
+      type: object
+      required:
+        - code
+        - failures
+      properties:
+        code:
+          type: string
+          enum:
+            - MEMBER_LABEL_BATCH_FAILED
+        message:
+          type: string
+        failures:
+          type: array
+          items:
+            type: object
+            required:
+              - targetUserId
+              - reason
+            properties:
+              targetUserId:
+                type: string
+                format: uuid
+              reason:
+                type: string

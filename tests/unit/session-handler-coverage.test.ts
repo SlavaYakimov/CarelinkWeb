@@ -17,6 +17,8 @@ const ACTION_FILES = [
   'verify-phone.ts',
   'invites.ts',
   'join.ts',
+  'sticky-notes.ts',
+  'member-labels.ts',
 ];
 
 const ROUTE_HANDLERS: Array<{ path: string; exempt?: boolean }> = [
