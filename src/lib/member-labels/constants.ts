@@ -1,0 +1,3 @@
+export const MEMBER_LABEL_MAX_TEXT = 24;
+export const MEMBER_LABEL_MAX_TARGETS = 10;
+export const MEMBER_LABEL_MAX_ACTIVE_PER_USER = 5;
